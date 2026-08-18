@@ -19,6 +19,7 @@ Run directly to (re)build data/parking.db:
     python generate_data.py
 """
 
+import os
 import sqlite3
 import random
 import string
@@ -204,6 +205,8 @@ def holiday_multiplier(ts, holidays):
 # ---------------------------------------------------------------------------
 
 def main():
+    if os.path.dirname(DB_PATH):
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 

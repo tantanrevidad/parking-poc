@@ -26,10 +26,10 @@ STATUS_LABELS = {
 }
 
 STATUS_COLORS = {
-    FREE: "#2ecc71",                 # green
-    OCCUPIED_UNPAID: "#e74c3c",      # red
-    OCCUPIED_PENDING_MATCH: "#e67e22",  # orange
-    OCCUPIED_LIKELY_VACATING: "#f1c40f",  # amber/yellow
+    FREE: "#10B981",                 # Emerald green
+    OCCUPIED_UNPAID: "#F43F5E",      # Rose red
+    OCCUPIED_PENDING_MATCH: "#F59E0B",  # Amber / orange
+    OCCUPIED_LIKELY_VACATING: "#06B6D4",  # Cyan
 }
 
 VALID_TRANSITIONS = {

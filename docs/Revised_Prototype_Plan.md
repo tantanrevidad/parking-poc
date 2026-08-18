@@ -6,15 +6,15 @@ This supersedes both prior plans. It keeps what's already built and working
 `Demo_Prototype_Plan.md` review, and explicitly rejects the parts that
 would trade away things we already have working for no clear net gain.
 
-**Status of each component below:**
-- ✅ **Done** — exists in the current `parking-poc/` codebase, working
-- 🔧 **Revise** — exists, needs enrichment
-- 🆕 **New** — being added, doesn't exist yet
-- ❌ **Rejected** — considered, not adopted (with reasoning)
+**Status of all components:**
+- ✅ **Component 1 (Synthetic Data Generator):** Multi-township (Uptown, Eastwood), 3 zone types (Office, Mall, Residential) with diurnal curves.
+- ✅ **Component 2 (ML Forecasting Model):** Gradient-boosted model training live with holdout evaluation and feature importance.
+- ✅ **Component 3 (CV Feasibility Pipeline):** YOLOv8n + plate localization + OCR + zero false-positive matcher on dual datasets (Academic OpenALPR & Philippine CCTV surveillance).
+- ✅ **Component 4 (Enterprise Web App):** 5-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and CV gallery.
 
 ---
 
-## Component 1 — Synthetic Data Generator 🔧 Revise
+## Component 1 — Synthetic Data Generator ✅ Done
 
 **Current state:** `generate_data.py` produces one site, two generic zones,
 28 days of 15-minute occupancy data with a single daily curve shape, plus a
@@ -79,7 +79,7 @@ number to have ready for the presentation.
 
 ---
 
-## Component 3 — Computer Vision Feasibility Demo 🆕 New (standalone add-on)
+## Component 3 — Computer Vision Feasibility Demo ✅ Done
 
 **This is the main adopted addition.** Everything in the current app —
 occupancy, plate reads, OCR confidence — is a generated number; nothing
@@ -111,7 +111,7 @@ feasibility proof on generic public images, not Megaworld data.
 
 ---
 
-## Component 4 — Interactive Web App ✅ Done, 🔧 one addition
+## Component 4 — Interactive Web App ✅ Done
 
 **Current state:** the Streamlit app already delivers the seat-map view,
 trip-planner view (baseline vs. trained model, plain-language label), and
