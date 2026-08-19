@@ -833,61 +833,79 @@ with tab5:
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab6:
-    st.markdown("<div class='section-title'>Multi-Angle Parking Space Occupancy & Car Detection</div>", unsafe_allow_html=True)
-    st.markdown(
-        "<div class='section-desc'>Enterprise computer vision engine executing a <strong>5-phase occupancy detection algorithm</strong> "
-        "(ROI Calibration → YOLOv8n Inference → IoA Spatial Overlap → Temporal Debouncing → JSON Payload Generation) "
-        "across surveillance feeds from <code>car_dataset/</code>.</div>",
-        unsafe_allow_html=True,
-    )
+    # Modern Hero Header
+    header_col1, header_col2 = st.columns([4, 1])
+    with header_col1:
+        st.markdown("<div class='section-title' style='margin-bottom:2px;'>Parking Space Occupancy Detection</div>", unsafe_allow_html=True)
+        st.markdown("<div style='color:#94A3B8; font-size:0.9rem; margin-bottom:12px;'>Real-time computer vision inference engine monitoring individual bay occupancy via overhead CCTV feeds.</div>", unsafe_allow_html=True)
+    with header_col2:
+        st.markdown(
+            "<div style='text-align:right; padding-top:4px;'>"
+            "<span style='background:#064E3B; color:#34D399; border:1px solid #059669; padding:4px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;'>"
+            "● LIVE INFERENCE</span></div>",
+            unsafe_allow_html=True,
+        )
 
     available_angles = pd_engine.list_available_camera_angles()
 
     if not available_angles:
-        st.warning("No camera feeds or images found in `car_dataset/`. Please ensure the folder contains test images.")
+        st.warning("No camera feeds found in `car_dataset/`.")
     else:
-        ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([3, 2, 2, 2])
+        # Compact Primary Control Strip
+        ctrl_col1, ctrl_col2 = st.columns([3, 2])
 
         with ctrl_col1:
             angle_options = [a["filename"] for a in available_angles]
             angle_choice = st.selectbox(
-                "Select Surveillance Camera Feed / Perspective Angle",
+                "Surveillance Camera Feed",
                 options=angle_options,
                 format_func=lambda fn: next((a["display_name"] for a in available_angles if a["filename"] == fn), fn),
                 key="cam_angle_select",
+                label_visibility="collapsed",
             )
 
         with ctrl_col2:
-            conf_val = st.slider(
-                "YOLO Vehicle Conf (τ_conf)",
-                min_value=0.15,
-                max_value=0.85,
-                value=0.25,
-                step=0.05,
-                help="Minimum confidence threshold for vehicle bounding box detection",
+            view_mode = st.segmented_control(
+                "View Mode",
+                options=["🟢/🔴 Overlay", "🔲 Side-by-Side", "📷 Raw Feed", "📦 API Payload"],
+                default="🟢/🔴 Overlay",
+                label_visibility="collapsed",
+                key="studio_view_mode",
             )
 
-        with ctrl_col3:
-            ioa_val = st.slider(
-                "IoA Overlap Ratio (τ_ioa)",
-                min_value=0.10,
-                max_value=0.60,
-                value=0.30,
-                step=0.05,
-                help="Occupancy ratio = Area(Slot ∩ Car) / Area(Slot) required to mark slot as Occupied",
-            )
-
-        with ctrl_col4:
-            enable_low_light = st.checkbox(
-                "🌙 Low-Light CLAHE Boost",
-                value=True,
-                help="Adaptive histogram equalization to detect dark/black SUVs, pickups, and shadowed vehicles",
-            )
-            enable_smoothing = st.checkbox(
-                "⏱️ Temporal Smoothing",
-                value=True,
-                help="Applies sliding-window state debouncing across consecutive time-series frames",
-            )
+        # Expandable Fine-Tuning Parameters (Keeps UI clean by default)
+        with st.expander("⚙️ Detection Parameters & AI Filters", expanded=False):
+            pcol1, pcol2, pcol3, pcol4 = st.columns(4)
+            with pcol1:
+                conf_val = st.slider(
+                    "YOLO Conf Threshold (τ_conf)",
+                    min_value=0.15,
+                    max_value=0.85,
+                    value=0.25,
+                    step=0.05,
+                    help="Minimum confidence threshold for vehicle detections",
+                )
+            with pcol2:
+                ioa_val = st.slider(
+                    "IoA Occupancy Threshold (τ_ioa)",
+                    min_value=0.10,
+                    max_value=0.60,
+                    value=0.30,
+                    step=0.05,
+                    help="Overlap ratio required to classify bay as Occupied",
+                )
+            with pcol3:
+                enable_low_light = st.toggle(
+                    "🌙 Low-Light Boost",
+                    value=True,
+                    help="Adaptive CLAHE contrast enhancement for dark SUVs, pickups, and shaded areas",
+                )
+            with pcol4:
+                enable_smoothing = st.toggle(
+                    "⏱️ Temporal Smoothing",
+                    value=True,
+                    help="Sliding-window debouncing across consecutive frames to prevent state flickering",
+                )
 
         selected_meta = next(a for a in available_angles if a["filename"] == angle_choice)
         raw_bgr = cv2.imread(selected_meta["path"])
@@ -910,103 +928,101 @@ with tab6:
             annotated_bgr = detection_out["annotated_image"]
             json_payload = detection_out["json_payload"]
 
-            # Convert BGR to RGB for Streamlit display
             annotated_rgb = cv2.cvtColor(annotated_bgr, cv2.COLOR_BGR2RGB)
             raw_rgb = cv2.cvtColor(raw_bgr, cv2.COLOR_BGR2RGB)
 
-            # System Status Banner
-            calib_info = f"{raw_bgr.shape[1]}x{raw_bgr.shape[0]}"
-            borderline_info = f" · ⚠️ {summary['borderline_count']} Borderline" if summary.get("borderline_count", 0) > 0 else ""
-            st.info(
-                f"**Algorithm Architecture:** 5-Phase Dual-Calibrated ROI-IoA Pipeline · "
-                f"**Camera Calibration:** `{angle_choice}` ({calib_info}) · "
-                f"**Total Monitored Spaces:** {summary['total_bays']} Bays · "
-                f"**YOLO Vehicles Detected:** {summary['detected_vehicles']}{borderline_info}"
-            )
+            # Modern Metric KPI Strip
+            occ_pct = summary["occupancy_rate"] * 100.0
+            kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
-            # Metric Cards Row
-            m1, m2, m3, m4, m5 = st.columns(5)
-            with m1:
+            with kpi1:
                 st.markdown(
-                    f"<div class='metric-card'><div class='metric-label'>Total Spaces</div>"
-                    f"<div class='metric-value'>{summary['total_bays']}</div>"
-                    f"<div class='metric-sub'>Calibrated Trapezoids</div></div>",
+                    f"<div class='metric-card' style='border-left:3px solid #34D399;'>"
+                    f"<div class='metric-label'>Available Bays</div>"
+                    f"<div class='metric-value' style='color:#34D399;'>{summary['vacant_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Free</span></div>"
+                    f"<div class='metric-sub'>🟢 Ready for Parking</div></div>",
                     unsafe_allow_html=True,
                 )
-            with m2:
+            with kpi2:
                 st.markdown(
-                    f"<div class='metric-card'><div class='metric-label'>Vacant Slots</div>"
-                    f"<div class='metric-value' style='color:#34D399;'>{summary['vacant_count']}</div>"
-                    f"<div class='metric-sub'>🟢 Available to Park</div></div>",
+                    f"<div class='metric-card' style='border-left:3px solid #F43F5E;'>"
+                    f"<div class='metric-label'>Occupied Bays</div>"
+                    f"<div class='metric-value' style='color:#F43F5E;'>{summary['occupied_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Filled</span></div>"
+                    f"<div class='metric-sub'>🔴 Active Vehicles Parked</div></div>",
                     unsafe_allow_html=True,
                 )
-            with m3:
+            with kpi3:
                 st.markdown(
-                    f"<div class='metric-card'><div class='metric-label'>Occupied Slots</div>"
-                    f"<div class='metric-value' style='color:#F43F5E;'>{summary['occupied_count']}</div>"
-                    f"<div class='metric-sub'>🔴 Car Parked Inside</div></div>",
+                    f"<div class='metric-card' style='border-left:3px solid #38BDF8;'>"
+                    f"<div class='metric-label'>Occupancy Saturation</div>"
+                    f"<div class='metric-value' style='color:#38BDF8;'>{occ_pct:.1f}%</div>"
+                    f"<div class='metric-sub'>Capacity Utilization</div></div>",
                     unsafe_allow_html=True,
                 )
-            with m4:
-                occ_pct = summary["occupancy_rate"] * 100.0
+            with kpi4:
                 st.markdown(
-                    f"<div class='metric-card'><div class='metric-label'>Occupancy Rate</div>"
-                    f"<div class='metric-value'>{occ_pct:.1f}%</div>"
-                    f"<div class='metric-sub'>Lot Saturation</div></div>",
-                    unsafe_allow_html=True,
-                )
-            with m5:
-                st.markdown(
-                    f"<div class='metric-card'><div class='metric-label'>Vehicles Tracked</div>"
-                    f"<div class='metric-value' style='color:#38BDF8;'>{summary['detected_vehicles']}</div>"
-                    f"<div class='metric-sub'>YOLOv8 Objects</div></div>",
+                    f"<div class='metric-card' style='border-left:3px solid #A855F7;'>"
+                    f"<div class='metric-label'>Vehicles Detected</div>"
+                    f"<div class='metric-value' style='color:#C084FC;'>{summary['detected_vehicles']}</div>"
+                    f"<div class='metric-sub'>YOLOv8n Objects</div></div>",
                     unsafe_allow_html=True,
                 )
 
-            st.caption(f"**Feed Details:** {selected_meta['display_name']} · {selected_meta['description']}")
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
-            # Visual Feeds
-            feed_tab1, feed_tab2, feed_tab3 = st.tabs([
-                "🟢/🔴 Annotated Vacancy Overlay",
-                "📷 Raw Surveillance Feed",
-                "📦 Phase 5 Standard JSON Payload",
-            ])
-
-            with feed_tab1:
+            # Main Visual Studio
+            if view_mode == "🟢/🔴 Overlay":
                 st.image(
                     annotated_rgb,
-                    caption=f"Real-Time Space Occupancy Detection: {summary['vacant_count']} Free / {summary['occupied_count']} Occupied (Capacity: {summary['total_bays']})",
+                    caption=f"Real-Time Space Detection · {selected_meta['display_name']} ({summary['vacant_count']} Free / {summary['occupied_count']} Occupied)",
                     width="stretch",
                 )
-            with feed_tab2:
+            elif view_mode == "🔲 Side-by-Side":
+                side_col1, side_col2 = st.columns(2)
+                with side_col1:
+                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#94A3B8; margin-bottom:4px;'>📷 RAW SURVEILLANCE FEED</div>", unsafe_allow_html=True)
+                    st.image(raw_rgb, width="stretch")
+                with side_col2:
+                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#38BDF8; margin-bottom:4px;'>🟢/🔴 AI OCCUPANCY INFERENCE</div>", unsafe_allow_html=True)
+                    st.image(annotated_rgb, width="stretch")
+            elif view_mode == "📷 Raw Feed":
                 st.image(
                     raw_rgb,
-                    caption=f"Raw Camera Input Frame: {selected_meta['filename']} ({calib_info})",
+                    caption=f"Raw Camera Stream: {selected_meta['filename']} ({raw_bgr.shape[1]}×{raw_bgr.shape[0]})",
                     width="stretch",
                 )
-            with feed_tab3:
-                st.markdown("**Phase 5: Standardized JSON Output Payload for Downstream Consumption**")
+            elif view_mode == "📦 API Payload":
+                st.markdown("<div style='font-weight:600; font-size:0.9rem; color:#38BDF8; margin-bottom:6px;'>Phase 5: Standardized JSON Telemetry Payload</div>", unsafe_allow_html=True)
                 st.json(json_payload)
 
-            st.markdown("<hr class='subtle'/>", unsafe_allow_html=True)
+            st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
-            # Slot-by-Slot Telemetry & Algorithm Deep Dive
-            col_table, col_algo = st.columns([1, 1])
+            # Interactive Quick-Glance Bay Status Pills
+            st.markdown("<div style='font-weight:600; font-size:0.95rem; color:#F8FAFC; margin-bottom:8px;'>🅿️ Live Bay Status Grid</div>", unsafe_allow_html=True)
+            
+            pills_cols = st.columns(min(len(bay_records), 6))
+            for idx, b in enumerate(bay_records[:6]):
+                is_occ = b["status"] == "occupied"
+                badge_bg = "rgba(244, 63, 94, 0.15)" if is_occ else "rgba(52, 211, 153, 0.15)"
+                badge_border = "#F43F5E" if is_occ else "#34D399"
+                badge_color = "#FDA4AF" if is_occ else "#6EE7B7"
+                badge_icon = "🔴 OCCUPIED" if is_occ else "🟢 VACANT"
+                with pills_cols[idx % len(pills_cols)]:
+                    st.markdown(
+                        f"<div style='background:{badge_bg}; border:1px solid {badge_border}; border-radius:8px; padding:8px 10px; text-align:center; margin-bottom:6px;'>"
+                        f"<div style='font-weight:700; font-size:0.85rem; color:#F8FAFC;'>{b['slot_id']}</div>"
+                        f"<div style='font-size:0.75rem; font-weight:600; color:{badge_color}; margin-top:2px;'>{badge_icon}</div>"
+                        f"<div style='font-size:0.68rem; color:#94A3B8;'>IoA: {b['occupancy_ratio']*100:.0f}%</div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
 
-            with col_table:
-                st.markdown("<div class='section-title'>Slot-by-Slot Telemetry</div>", unsafe_allow_html=True)
-                table_filter = st.radio(
-                    "Filter Slots",
-                    options=["All Slots", "🟢 Vacant Only", "🔴 Occupied Only", "⚠️ Borderline / Low Conf"],
-                    horizontal=True,
-                    label_visibility="collapsed",
-                    key="bay_table_filter",
-                )
+            # Expandable Detailed Telemetry & Algorithm Cards (Uncluttered)
+            tab_tel, tab_algo = st.tabs(["📊 Detailed Bay Telemetry Table", "ℹ️ 5-Phase Algorithm Specification"])
 
+            with tab_tel:
                 df_bays = pd.DataFrame(bay_records)
-                if df_bays.empty:
-                    st.info("No slots configured for this camera feed.")
-                else:
+                if not df_bays.empty:
                     if "low_confidence_flag" not in df_bays.columns:
                         df_bays["low_confidence_flag"] = False
                     if "status" not in df_bays.columns:
@@ -1018,41 +1034,23 @@ with tab6:
                     if "matched_vehicle_class" not in df_bays.columns:
                         df_bays["matched_vehicle_class"] = None
 
-                    if "🟢 Vacant Only" in table_filter:
-                        df_bays = df_bays[df_bays["status"] == "vacant"]
-                    elif "🔴 Occupied Only" in table_filter:
-                        df_bays = df_bays[df_bays["status"] == "occupied"]
-                    elif "⚠️ Borderline" in table_filter:
-                        df_bays = df_bays[df_bays["low_confidence_flag"] == True]
-
                     df_bays["status_badge"] = df_bays["status"].apply(lambda s: "🔴 Occupied" if s == "occupied" else "🟢 Vacant")
                     df_bays["ioa_pct"] = df_bays["occupancy_ratio"].apply(lambda r: f"{r*100:.1f}%")
                     df_bays["conf_pct"] = df_bays["confidence"].apply(lambda c: f"{c*100:.1f}%")
                     df_bays["veh_type"] = df_bays["matched_vehicle_class"].fillna("—")
-                    df_bays["quality"] = df_bays["low_confidence_flag"].apply(lambda b: "⚠️ Borderline (±5%)" if b else "✅ High Conf")
+                    df_bays["quality"] = df_bays["low_confidence_flag"].apply(lambda b: "⚠️ Borderline" if b else "✅ High Conf")
 
                     display_df = df_bays[["slot_id", "slot_name", "zone", "status_badge", "ioa_pct", "conf_pct", "veh_type", "quality"]].copy()
                     display_df.columns = ["Slot ID", "Bay Name", "Zone", "Status", "IoA Overlap", "Confidence", "Vehicle Class", "Quality Flag"]
                     st.dataframe(display_df, width="stretch", hide_index=True)
 
-            with col_algo:
-                st.markdown("<div class='section-title'>5-Phase Occupancy Detection Algorithm</div>", unsafe_allow_html=True)
+            with tab_algo:
                 st.markdown("""
-                <div style="background:#1E293B; border:1px solid #334155; border-radius:10px; padding:16px; font-size:0.84rem; line-height:1.6; color:#CBD5E1;">
-                    <strong style="color:#38BDF8;">Phase 1: Data Preparation & Dual Native ROI Calibration</strong><br/>
-                    True perspective trapezoids calibrated against <code>empty lot.jpg</code> (1372×768 master reference) and native surveillance video frames (457×192). Resolution scaling runs automatically for any input dimension.<br/><br/>
-                    <strong style="color:#38BDF8;">Phase 2: Model Setup & Inference Pipeline</strong><br/>
-                    Lightweight <strong>YOLOv8n</strong> convolutional detector processes the camera frame, filtering for relevant COCO vehicle classes (<code>car</code>, <code>truck</code>, <code>bus</code>, <code>motorcycle</code>) above confidence threshold <code>τ_conf</code>.<br/><br/>
-                    <strong style="color:#38BDF8;">Phase 3: Spatial Logic & Occupancy Calculation (IoA + Ground-Contact)</strong><br/>
-                    Computes Intersection over Area (IoA) with tire ground-contact reinforcement:
-                    <div style="background:#0F172A; padding:6px 12px; border-radius:6px; margin:6px 0; font-family:monospace; color:#F8FAFC;">
-                        Occupancy Ratio = Area(Slot Polygon ∩ Vehicle Box) / Area(Slot Polygon)<br/>
-                        If Vehicle Ground Point (cx, y2) ∈ Slot Polygon & IoA ≥ 0.12 → Effective IoA = max(IoA, 0.50)
-                    </div>
-                    If <code>Occupancy Ratio ≥ τ_ioa</code> → <span style="color:#F43F5E; font-weight:700;">Occupied (🔴)</span>; otherwise → <span style="color:#34D399; font-weight:700;">Vacant (🟢)</span>. Borderline cases (|IoA - τ_ioa| ≤ 0.05) receive a review flag.<br/><br/>
-                    <strong style="color:#38BDF8;">Phase 4: Temporal Filtering & Edge-Case Handling</strong><br/>
-                    Sliding-window state debouncing (5-frame history, ≥60% consensus) prevents flickering from transient vehicle traversal or headlight glare.<br/><br/>
-                    <strong style="color:#38BDF8;">Phase 5: Output Structuring & Telemetry JSON</strong><br/>
-                    Formats live telemetry into enterprise JSON payloads with low-confidence flags ready for downstream API consumption, real-time signage, or database logging.
+                <div style="background:#1E293B; border:1px solid #334155; border-radius:8px; padding:14px; font-size:0.84rem; line-height:1.6; color:#CBD5E1;">
+                    <strong style="color:#38BDF8;">Phase 1: Dual Native ROI Calibration</strong> — Perspective trapezoids mapped from <code>slots_config.json</code> with proportional scaling.<br/>
+                    <strong style="color:#38BDF8;">Phase 2: Adaptive Low-Light Inference</strong> — Dual-exposure YOLOv8n inference with CLAHE contrast enhancement for dark SUVs & shadows.<br/>
+                    <strong style="color:#38BDF8;">Phase 3: Spatial IoA & Centroid Containment</strong> — Checks point-in-polygon containment, vehicle coverage ratio (≥35%), and IoA overlap.<br/>
+                    <strong style="color:#38BDF8;">Phase 4: Temporal Debouncing</strong> — 5-frame rolling memory with ≥60% majority consensus eliminates flickering.<br/>
+                    <strong style="color:#38BDF8;">Phase 5: Structured JSON Telemetry</strong> — Clean API payloads for driver mobile apps and automated LED entrance signage.
                 </div>
                 """, unsafe_allow_html=True)
