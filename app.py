@@ -524,6 +524,106 @@ live_df = simulate.simulate_current_state(
 
 
 # ---------------------------------------------------------------------------
+# Database Inspector Dialog & Query Helper
+# ---------------------------------------------------------------------------
+
+def fetch_slot_db_records(slot_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        slot_info = pd.read_sql("""
+            SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level, z.zone_type, st.name AS site_name, z.capacity
+            FROM slots s
+            JOIN zones z ON s.zone_id = z.zone_id
+            JOIN sites st ON z.site_id = st.site_id
+            WHERE s.slot_id = ?
+        """, conn, params=(slot_id,))
+
+        state_info = pd.read_sql("""
+            SELECT slot_id, status, updated_at
+            FROM current_state
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        ticket_info = pd.read_sql("""
+            SELECT ticket_id, plate, entry_time, payment_settled_at, slot_id
+            FROM ticketing_records
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        plate_info = pd.read_sql("""
+            SELECT read_id, slot_id, raw_ocr_text, char_confidences, true_plate
+            FROM plate_reads
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        return slot_info, state_info, ticket_info, plate_info
+    finally:
+        conn.close()
+
+
+@st.dialog("Parking Bay Database Record", width="large")
+def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
+    slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(slot_id)
+
+    st.markdown(f"### Parking Stall `{slot_code}` (Database Row)")
+    st.caption(f"Direct SQLite table inspection from `data/parking.db` for Slot ID `{slot_id}`")
+
+    tab_merged, tab_state, tab_ticket, tab_alpr, tab_sql = st.tabs([
+        "Live Merged State",
+        "current_state Table",
+        "ticketing_records Table",
+        "plate_reads Table",
+        "Raw SQL Query",
+    ])
+
+    with tab_merged:
+        st.markdown("**Simulated Live Row (Memory & Database Combined):**")
+        df_live = pd.DataFrame([live_row_dict])
+        st.dataframe(df_live, hide_index=True, width="stretch")
+
+    with tab_state:
+        st.markdown("**`current_state` SQLite Table Record:**")
+        if not state_info.empty:
+            st.dataframe(state_info, hide_index=True, width="stretch")
+        else:
+            st.info("No record found in `current_state` table.")
+
+    with tab_ticket:
+        st.markdown("**`ticketing_records` SQLite Table Record:**")
+        if not ticket_info.empty:
+            st.dataframe(ticket_info, hide_index=True, width="stretch")
+        else:
+            st.info("Bay is currently vacant — no active ticketing record on file.")
+
+    with tab_alpr:
+        st.markdown("**`plate_reads` SQLite Table Record:**")
+        if not plate_info.empty:
+            st.dataframe(plate_info, hide_index=True, width="stretch")
+        else:
+            st.info("No optical plate capture associated with this bay.")
+
+    with tab_sql:
+        st.markdown("**Underlying SQLite Query Executed:**")
+        sql_query = f"""SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level,
+       cs.status, cs.updated_at,
+       tr.ticket_id, tr.plate, tr.entry_time, tr.payment_settled_at,
+       pr.raw_ocr_text, pr.true_plate
+FROM slots s
+LEFT JOIN zones z ON s.zone_id = z.zone_id
+LEFT JOIN current_state cs ON s.slot_id = cs.slot_id
+LEFT JOIN ticketing_records tr ON s.slot_id = tr.slot_id
+LEFT JOIN plate_reads pr ON s.slot_id = pr.slot_id
+WHERE s.slot_id = {slot_id};"""
+        st.code(sql_query, language="sql")
+
+
+if "selected_slot_id" not in st.session_state:
+    st.session_state.selected_slot_id = None
+if "selected_slot_code" not in st.session_state:
+    st.session_state.selected_slot_code = None
+
+
+# ---------------------------------------------------------------------------
 # Tabs
 # ---------------------------------------------------------------------------
 
@@ -621,100 +721,6 @@ with tab1:
         )
 
     st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
-
-# ---------------------------------------------------------------------------
-# Database Inspector Dialog & Query Helper
-# ---------------------------------------------------------------------------
-
-def fetch_slot_db_records(slot_id: int):
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        slot_info = pd.read_sql("""
-            SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level, z.zone_type, st.name AS site_name, z.capacity
-            FROM slots s
-            JOIN zones z ON s.zone_id = z.zone_id
-            JOIN sites st ON z.site_id = st.site_id
-            WHERE s.slot_id = ?
-        """, conn, params=(slot_id,))
-
-        state_info = pd.read_sql("""
-            SELECT slot_id, status, updated_at
-            FROM current_state
-            WHERE slot_id = ?
-        """, conn, params=(slot_id,))
-
-        ticket_info = pd.read_sql("""
-            SELECT ticket_id, plate, entry_time, payment_settled_at, slot_id
-            FROM ticketing_records
-            WHERE slot_id = ?
-        """, conn, params=(slot_id,))
-
-        plate_info = pd.read_sql("""
-            SELECT read_id, slot_id, raw_ocr_text, char_confidences, true_plate
-            FROM plate_reads
-            WHERE slot_id = ?
-        """, conn, params=(slot_id,))
-
-        return slot_info, state_info, ticket_info, plate_info
-    finally:
-        conn.close()
-
-
-@st.dialog("Parking Bay Database Record", width="large")
-def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
-    slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(slot_id)
-
-    st.markdown(f"### Parking Stall `{slot_code}` (Database Row)")
-    st.caption(f"Direct SQLite table inspection from `data/parking.db` for Slot ID `{slot_id}`")
-
-    tab_merged, tab_state, tab_ticket, tab_alpr, tab_sql = st.tabs([
-        "Live Merged State",
-        "current_state Table",
-        "ticketing_records Table",
-        "plate_reads Table",
-        "Raw SQL Query",
-    ])
-
-    with tab_merged:
-        st.markdown("**Simulated Live Row (Memory & Database Combined):**")
-        df_live = pd.DataFrame([live_row_dict])
-        st.dataframe(df_live, hide_index=True, width="stretch")
-
-    with tab_state:
-        st.markdown("**`current_state` SQLite Table Record:**")
-        if not state_info.empty:
-            st.dataframe(state_info, hide_index=True, width="stretch")
-        else:
-            st.info("No record found in `current_state` table.")
-
-    with tab_ticket:
-        st.markdown("**`ticketing_records` SQLite Table Record:**")
-        if not ticket_info.empty:
-            st.dataframe(ticket_info, hide_index=True, width="stretch")
-        else:
-            st.info("Bay is currently vacant — no active ticketing record on file.")
-
-    with tab_alpr:
-        st.markdown("**`plate_reads` SQLite Table Record:**")
-        if not plate_info.empty:
-            st.dataframe(plate_info, hide_index=True, width="stretch")
-        else:
-            st.info("No optical plate capture associated with this bay.")
-
-    with tab_sql:
-        st.markdown("**Underlying SQLite Query Executed:**")
-        sql_query = f"""SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level,
-       cs.status, cs.updated_at,
-       tr.ticket_id, tr.plate, tr.entry_time, tr.payment_settled_at,
-       pr.raw_ocr_text, pr.true_plate
-FROM slots s
-LEFT JOIN zones z ON s.zone_id = z.zone_id
-LEFT JOIN current_state cs ON s.slot_id = cs.slot_id
-LEFT JOIN ticketing_records tr ON s.slot_id = tr.slot_id
-LEFT JOIN plate_reads pr ON s.slot_id = pr.slot_id
-WHERE s.slot_id = {slot_id};"""
-        st.code(sql_query, language="sql")
-
 
     # ── Legend Strip ──
     st.markdown(f"""
