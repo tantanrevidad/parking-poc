@@ -335,21 +335,127 @@ section[data-testid="stSidebar"] {{
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }}
 
-/* ── Direct Solid-Color Parking Stall Buttons ── */
-.zone-card div[data-testid="stButton"] button {{
+/* ── Direct Solid-Color Parking Stall Buttons (Guaranteed Column Targeting) ── */
+div[data-testid="column"]:has(.slot-free) button,
+div[data-testid="stColumn"]:has(.slot-free) button,
+div:has(> .slot-free) + div[data-testid="stButton"] button,
+button[aria-label*="OPEN"] {{
+    background-color: #10B981 !important;
+    background: #10B981 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #059669 !important;
     border-radius: 7px !important;
     font-weight: 800 !important;
     font-size: 0.8rem !important;
-    letter-spacing: 0.04em !important;
     min-height: 52px !important;
     padding: 6px 2px !important;
     white-space: pre-line !important;
     line-height: 1.25 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
-    border: 1px solid rgba(0, 0, 0, 0.25) !important;
-    width: 100% !important;
 }}
+div[data-testid="column"]:has(.slot-free) button p,
+div[data-testid="stColumn"]:has(.slot-free) button p,
+button[aria-label*="OPEN"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+}}
+
+div[data-testid="column"]:has(.slot-occupied) button,
+div[data-testid="stColumn"]:has(.slot-occupied) button,
+div:has(> .slot-occupied) + div[data-testid="stButton"] button,
+button[aria-label*="BUSY"] {{
+    background-color: #E11D48 !important;
+    background: #E11D48 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #BE123C !important;
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    min-height: 52px !important;
+    padding: 6px 2px !important;
+    white-space: pre-line !important;
+    line-height: 1.25 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+}}
+div[data-testid="column"]:has(.slot-occupied) button p,
+div[data-testid="stColumn"]:has(.slot-occupied) button p,
+button[aria-label*="BUSY"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+}}
+
+div[data-testid="column"]:has(.slot-pending) button,
+div[data-testid="stColumn"]:has(.slot-pending) button,
+div:has(> .slot-pending) + div[data-testid="stButton"] button,
+button[aria-label*="MATCH"] {{
+    background-color: #F59E0B !important;
+    background: #F59E0B !important;
+    color: #1E293B !important;
+    border: 1px solid #D97706 !important;
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    min-height: 52px !important;
+    padding: 6px 2px !important;
+    white-space: pre-line !important;
+    line-height: 1.25 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+}}
+div[data-testid="column"]:has(.slot-pending) button p,
+div[data-testid="stColumn"]:has(.slot-pending) button p,
+button[aria-label*="MATCH"] p {{
+    color: #1E293B !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+}}
+
+div[data-testid="column"]:has(.slot-vacating) button,
+div[data-testid="stColumn"]:has(.slot-vacating) button,
+div:has(> .slot-vacating) + div[data-testid="stButton"] button,
+button[aria-label*="LEAVING"] {{
+    background-color: #0284C7 !important;
+    background: #0284C7 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #0369A1 !important;
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    min-height: 52px !important;
+    padding: 6px 2px !important;
+    white-space: pre-line !important;
+    line-height: 1.25 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+}}
+div[data-testid="column"]:has(.slot-vacating) button p,
+div[data-testid="stColumn"]:has(.slot-vacating) button p,
+button[aria-label*="LEAVING"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+}}
+
 .zone-card div[data-testid="stButton"] button:hover {{
     filter: brightness(1.15) !important;
     transform: translateY(-2px) !important;
@@ -358,65 +464,8 @@ section[data-testid="stSidebar"] {{
 .zone-card div[data-testid="stButton"] button:active {{
     transform: translateY(0px) !important;
 }}
-
-/* Available / Free -> Solid Emerald Green */
-.zone-card button[aria-label*="OPEN"],
-button[aria-label*="OPEN"] {{
-    background-color: #10B981 !important;
-    background: #10B981 !important;
-    color: #FFFFFF !important;
-    border-color: #059669 !important;
-}}
-.zone-card button[aria-label*="OPEN"] p,
-button[aria-label*="OPEN"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.78rem !important;
-}}
-
-/* Occupied / Unpaid -> Solid Crimson Red */
-.zone-card button[aria-label*="BUSY"],
-button[aria-label*="BUSY"] {{
-    background-color: #E11D48 !important;
-    background: #E11D48 !important;
-    color: #FFFFFF !important;
-    border-color: #BE123C !important;
-}}
-.zone-card button[aria-label*="BUSY"] p,
-button[aria-label*="BUSY"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.78rem !important;
-}}
-
-/* Occupied / Pending Match -> Solid Amber Gold */
-.zone-card button[aria-label*="MATCH"],
-button[aria-label*="MATCH"] {{
-    background-color: #F59E0B !important;
-    background: #F59E0B !important;
-    color: #1E293B !important;
-    border-color: #D97706 !important;
-}}
-.zone-card button[aria-label*="MATCH"] p,
-button[aria-label*="MATCH"] p {{
-    color: #1E293B !important;
-    font-weight: 800 !important;
-    font-size: 0.78rem !important;
-}}
-
-/* Occupied / Vacating -> Solid Electric Blue */
-.zone-card button[aria-label*="LEAVING"],
-button[aria-label*="LEAVING"] {{
-    background-color: #0284C7 !important;
-    background: #0284C7 !important;
-    color: #FFFFFF !important;
-    border-color: #0369A1 !important;
-}}
-.zone-card button[aria-label*="LEAVING"] p,
-button[aria-label*="LEAVING"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.78rem !important;
+.slot-marker {{
+    display: none !important;
 }}
 
 /* ── Drive Aisle Separator ── */
@@ -956,13 +1005,20 @@ with tab1:
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
+                            marker_class = "slot-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
+                            marker_class = "slot-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
+                            marker_class = "slot-pending"
                             ind_text = "MATCH"
                         else:
+                            marker_class = "slot-vacating"
                             ind_text = "LEAVING"
+
+                        # Slot status marker for guaranteed CSS :has column targeting
+                        st.markdown(f"<span class='slot-marker {marker_class}'></span>", unsafe_allow_html=True)
 
                         # Direct Solid-Color Clickable Parking Stall Block
                         if st.button(
