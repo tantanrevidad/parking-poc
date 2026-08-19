@@ -401,7 +401,7 @@ with brand_col:
     st.markdown("""
     <div class="app-brand">
         <div>
-            <h1>🅿️ Megaworld Smart Parking Platform</h1>
+            <h1>Megaworld Smart Parking Platform</h1>
             <p>Predictive availability, computer vision space detection, and confidence-weighted plate matching.</p>
         </div>
     </div>
@@ -420,12 +420,12 @@ with ctrl_col:
     with t_col2:
         theme_val = st.segmented_control(
             "Theme",
-            options=["🌙 Dark", "☀️ Light"],
-            default="🌙 Dark" if st.session_state.theme_mode == "dark" else "☀️ Light",
+            options=["Dark", "Light"],
+            default="Dark" if st.session_state.theme_mode == "dark" else "Light",
             label_visibility="collapsed",
             key="theme_toggle_ctrl",
         )
-        st.session_state.theme_mode = "dark" if "Dark" in theme_val else "light"
+        st.session_state.theme_mode = "dark" if theme_val == "Dark" else "light"
 
 # Inject dynamic CSS based on active theme
 st.markdown(get_theme_css(st.session_state.theme_mode), unsafe_allow_html=True)
@@ -436,11 +436,11 @@ st.markdown(get_theme_css(st.session_state.theme_mode), unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    st.markdown("#### 🏢 Platform Overview")
+    st.markdown("#### Platform Overview")
     st.markdown(f"**{len(sites_df)}** Townships · **{len(zones_df)}** Zones · **{len(slots_df)}** Slots")
     st.markdown(f"**{len(history_df):,}** Historical ML Datapoints")
     st.markdown("---")
-    if st.button("🔄 Regenerate Synthetic Data"):
+    if st.button("Regenerate Synthetic Data"):
         gd.main()
         st.cache_data.clear()
         st.cache_resource.clear()
@@ -494,19 +494,19 @@ with tab1:
     # ── Time Simulation Controls Row ──
     shift_col1, shift_col2, shift_col3, shift_col4, shift_col5 = st.columns([1, 1, 1.5, 1.5, 3])
     with shift_col1:
-        if st.button("⏩ +15m", key="tab1_btn_15m", use_container_width=True):
+        if st.button("+15m", key="tab1_btn_15m", use_container_width=True):
             st.session_state.sim_time += timedelta(minutes=15)
             st.rerun()
     with shift_col2:
-        if st.button("⏩ +1h", key="tab1_btn_1h", use_container_width=True):
+        if st.button("+1h", key="tab1_btn_1h", use_container_width=True):
             st.session_state.sim_time += timedelta(hours=1)
             st.rerun()
     with shift_col3:
-        if st.button("⏪ -15m", key="tab1_btn_minus_15m", use_container_width=True):
+        if st.button("-15m", key="tab1_btn_minus_15m", use_container_width=True):
             st.session_state.sim_time -= timedelta(minutes=15)
             st.rerun()
     with shift_col4:
-        if st.button("🔄 Reset (6:30 PM)", key="tab1_btn_reset", use_container_width=True):
+        if st.button("Reset (6:30 PM)", key="tab1_btn_reset", use_container_width=True):
             st.session_state.sim_time = datetime.now().replace(hour=18, minute=30, second=0, microsecond=0)
             st.rerun()
 
@@ -533,7 +533,7 @@ with tab1:
             f"<div class='metric-card' style='border-left:3px solid #34D399;'>"
             f"<div class='metric-label'>Available Slots</div>"
             f"<div class='metric-value' style='color:#34D399;'>{vacant_slots_count}</div>"
-            f"<div class='metric-sub'>🟢 Ready for Drivers</div></div>",
+            f"<div class='metric-sub'>Ready for Drivers</div></div>",
             unsafe_allow_html=True,
         )
     with kpi_col3:
@@ -541,7 +541,7 @@ with tab1:
             f"<div class='metric-card' style='border-left:3px solid #F43F5E;'>"
             f"<div class='metric-label'>Occupied Slots</div>"
             f"<div class='metric-value' style='color:#F43F5E;'>{occupied_slots_count}</div>"
-            f"<div class='metric-sub'>🔴 Active Parking</div></div>",
+            f"<div class='metric-sub'>Active Parking</div></div>",
             unsafe_allow_html=True,
         )
     with kpi_col4:
@@ -560,10 +560,10 @@ with tab1:
     st.markdown(f"""
     <div class="legend-strip">
         <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-right:6px;">Status Key:</span>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> 🟢 Available / Free</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_UNPAID]};"></div> 🔴 Occupied</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_PENDING_MATCH]};"></div> 🟡 Pending Plate Match</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> 🔵 Likely Vacating</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> Available</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_UNPAID]};"></div> Occupied</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_PENDING_MATCH]};"></div> Pending Match</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> Vacating</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -576,7 +576,7 @@ with tab1:
 
         st.markdown(
             f"<div style='font-size:1.15rem; font-weight:800; color:var(--text-primary); margin:20px 0 12px 0; letter-spacing:-0.02em;'>"
-            f"📍 {site['name']}</div>",
+            f"{site['name']}</div>",
             unsafe_allow_html=True,
         )
 
@@ -585,14 +585,14 @@ with tab1:
             n_free = (zone_slots.status == sm.FREE).sum()
             total = len(zone_slots)
             tag_class = f"zone-tag-{z.zone_type}" if z.zone_type in ("office", "mall", "residential") else ""
-            type_icon = "🏢 Office" if z.zone_type == "office" else ("🛒 Mall" if z.zone_type == "mall" else "🏠 Residential")
+            type_label = "Office" if z.zone_type == "office" else ("Mall" if z.zone_type == "mall" else "Residential")
 
             st.markdown(f"""
             <div class="zone-card">
                 <div class="zone-header">
                     <div>
                         <span class="zone-name">{z.label} — {z.level}</span>
-                        <span class="zone-tag {tag_class}">{type_icon}</span>
+                        <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
                     <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free</div>
                 </div>
@@ -833,7 +833,7 @@ with tab5:
 
     dataset_choice = st.radio(
         "Select Dataset",
-        options=["🇵🇭 Philippine Parking Lot Dataset (Metro Manila)", "🌍 Academic ALPR Benchmark (OpenALPR)"],
+        options=["Philippine Parking Lot Dataset (Metro Manila)", "Academic ALPR Benchmark (OpenALPR)"],
         horizontal=True,
         label_visibility="collapsed"
     )
@@ -880,7 +880,7 @@ with tab5:
         st.markdown("<hr class='subtle'/>", unsafe_allow_html=True)
 
         for i, result in enumerate(cv_results):
-            match_tag = "✅ exact match" if result["exact_match"] else f"acc={result['char_accuracy']:.2f}"
+            match_tag = "[MATCH] exact match" if result["exact_match"] else f"acc={result['char_accuracy']:.2f}"
             st.markdown(
                 f"<div class='section-title'>{result['source']} — {match_tag}</div>",
                 unsafe_allow_html=True,
@@ -950,14 +950,14 @@ with tab6:
         with ctrl_col2:
             view_mode = st.segmented_control(
                 "View Mode",
-                options=["🟢/🔴 Overlay", "🔲 Side-by-Side", "📷 Raw Feed", "📦 API Payload"],
-                default="🟢/🔴 Overlay",
+                options=["Overlay", "Side-by-Side", "Raw Feed", "API Payload"],
+                default="Overlay",
                 label_visibility="collapsed",
                 key="studio_view_mode",
             )
 
         # Expandable Fine-Tuning Parameters (Keeps UI clean by default)
-        with st.expander("⚙️ Detection Parameters & AI Filters", expanded=False):
+        with st.expander("Detection Parameters & AI Filters", expanded=False):
             pcol1, pcol2, pcol3, pcol4 = st.columns(4)
             with pcol1:
                 conf_val = st.slider(
@@ -979,13 +979,13 @@ with tab6:
                 )
             with pcol3:
                 enable_low_light = st.toggle(
-                    "🌙 Low-Light Boost",
+                    "Low-Light Boost",
                     value=True,
                     help="Adaptive CLAHE contrast enhancement for dark SUVs, pickups, and shaded areas",
                 )
             with pcol4:
                 enable_smoothing = st.toggle(
-                    "⏱️ Temporal Smoothing",
+                    "Temporal Smoothing",
                     value=True,
                     help="Sliding-window debouncing across consecutive frames to prevent state flickering",
                 )
@@ -1023,7 +1023,7 @@ with tab6:
                     f"<div class='metric-card' style='border-left:3px solid #34D399;'>"
                     f"<div class='metric-label'>Available Bays</div>"
                     f"<div class='metric-value' style='color:#34D399;'>{summary['vacant_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Free</span></div>"
-                    f"<div class='metric-sub'>🟢 Ready for Parking</div></div>",
+                    f"<div class='metric-sub'>Ready for Parking</div></div>",
                     unsafe_allow_html=True,
                 )
             with kpi2:
@@ -1031,7 +1031,7 @@ with tab6:
                     f"<div class='metric-card' style='border-left:3px solid #F43F5E;'>"
                     f"<div class='metric-label'>Occupied Bays</div>"
                     f"<div class='metric-value' style='color:#F43F5E;'>{summary['occupied_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Filled</span></div>"
-                    f"<div class='metric-sub'>🔴 Active Vehicles Parked</div></div>",
+                    f"<div class='metric-sub'>Active Vehicles Parked</div></div>",
                     unsafe_allow_html=True,
                 )
             with kpi3:
@@ -1054,34 +1054,34 @@ with tab6:
             st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
             # Main Visual Studio
-            if view_mode == "🟢/🔴 Overlay":
+            if view_mode == "Overlay":
                 st.image(
                     annotated_rgb,
                     caption=f"Real-Time Space Detection · {selected_meta['display_name']} ({summary['vacant_count']} Free / {summary['occupied_count']} Occupied)",
                     width="stretch",
                 )
-            elif view_mode == "🔲 Side-by-Side":
+            elif view_mode == "Side-by-Side":
                 side_col1, side_col2 = st.columns(2)
                 with side_col1:
-                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#94A3B8; margin-bottom:4px;'>📷 RAW SURVEILLANCE FEED</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#94A3B8; margin-bottom:4px;'>RAW SURVEILLANCE FEED</div>", unsafe_allow_html=True)
                     st.image(raw_rgb, width="stretch")
                 with side_col2:
-                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#38BDF8; margin-bottom:4px;'>🟢/🔴 AI OCCUPANCY INFERENCE</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#38BDF8; margin-bottom:4px;'>AI OCCUPANCY INFERENCE</div>", unsafe_allow_html=True)
                     st.image(annotated_rgb, width="stretch")
-            elif view_mode == "📷 Raw Feed":
+            elif view_mode == "Raw Feed":
                 st.image(
                     raw_rgb,
                     caption=f"Raw Camera Stream: {selected_meta['filename']} ({raw_bgr.shape[1]}×{raw_bgr.shape[0]})",
                     width="stretch",
                 )
-            elif view_mode == "📦 API Payload":
+            elif view_mode == "API Payload":
                 st.markdown("<div style='font-weight:600; font-size:0.9rem; color:#38BDF8; margin-bottom:6px;'>Phase 5: Standardized JSON Telemetry Payload</div>", unsafe_allow_html=True)
                 st.json(json_payload)
 
             st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
             # Interactive Quick-Glance Bay Status Pills
-            st.markdown("<div style='font-weight:600; font-size:0.95rem; color:#F8FAFC; margin-bottom:8px;'>🅿️ Live Bay Status Grid</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-weight:600; font-size:0.95rem; color:#F8FAFC; margin-bottom:8px;'>Live Bay Status Grid</div>", unsafe_allow_html=True)
             
             pills_cols = st.columns(min(len(bay_records), 6))
             for idx, b in enumerate(bay_records[:6]):
@@ -1089,19 +1089,19 @@ with tab6:
                 badge_bg = "rgba(244, 63, 94, 0.15)" if is_occ else "rgba(52, 211, 153, 0.15)"
                 badge_border = "#F43F5E" if is_occ else "#34D399"
                 badge_color = "#FDA4AF" if is_occ else "#6EE7B7"
-                badge_icon = "🔴 OCCUPIED" if is_occ else "🟢 VACANT"
+                badge_text = "OCCUPIED" if is_occ else "VACANT"
                 with pills_cols[idx % len(pills_cols)]:
                     st.markdown(
                         f"<div style='background:{badge_bg}; border:1px solid {badge_border}; border-radius:8px; padding:8px 10px; text-align:center; margin-bottom:6px;'>"
                         f"<div style='font-weight:700; font-size:0.85rem; color:#F8FAFC;'>{b['slot_id']}</div>"
-                        f"<div style='font-size:0.75rem; font-weight:600; color:{badge_color}; margin-top:2px;'>{badge_icon}</div>"
+                        f"<div style='font-size:0.75rem; font-weight:600; color:{badge_color}; margin-top:2px;'>{badge_text}</div>"
                         f"<div style='font-size:0.68rem; color:#94A3B8;'>IoA: {b['occupancy_ratio']*100:.0f}%</div>"
                         f"</div>",
                         unsafe_allow_html=True,
                     )
 
             # Expandable Detailed Telemetry & Algorithm Cards (Uncluttered)
-            tab_tel, tab_algo = st.tabs(["📊 Detailed Bay Telemetry Table", "ℹ️ 5-Phase Algorithm Specification"])
+            tab_tel, tab_algo = st.tabs(["Detailed Bay Telemetry Table", "5-Phase Algorithm Specification"])
 
             with tab_tel:
                 df_bays = pd.DataFrame(bay_records)
@@ -1117,11 +1117,11 @@ with tab6:
                     if "matched_vehicle_class" not in df_bays.columns:
                         df_bays["matched_vehicle_class"] = None
 
-                    df_bays["status_badge"] = df_bays["status"].apply(lambda s: "🔴 Occupied" if s == "occupied" else "🟢 Vacant")
+                    df_bays["status_badge"] = df_bays["status"].apply(lambda s: "Occupied" if s == "occupied" else "Vacant")
                     df_bays["ioa_pct"] = df_bays["occupancy_ratio"].apply(lambda r: f"{r*100:.1f}%")
                     df_bays["conf_pct"] = df_bays["confidence"].apply(lambda c: f"{c*100:.1f}%")
                     df_bays["veh_type"] = df_bays["matched_vehicle_class"].fillna("—")
-                    df_bays["quality"] = df_bays["low_confidence_flag"].apply(lambda b: "⚠️ Borderline" if b else "✅ High Conf")
+                    df_bays["quality"] = df_bays["low_confidence_flag"].apply(lambda b: "Borderline" if b else "High Conf")
 
                     display_df = df_bays[["slot_id", "slot_name", "zone", "status_badge", "ioa_pct", "conf_pct", "veh_type", "quality"]].copy()
                     display_df.columns = ["Slot ID", "Bay Name", "Zone", "Status", "IoA Overlap", "Confidence", "Vehicle Class", "Quality Flag"]
