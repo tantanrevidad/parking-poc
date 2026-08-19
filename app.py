@@ -319,9 +319,9 @@ section[data-testid="stSidebar"] {{
 .bay-stall-vacating .bay-indicator {{ color: #E0F2FE !important; }}
 
 .bay-code {{
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
     line-height: 1.1;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }}
@@ -329,10 +329,35 @@ section[data-testid="stSidebar"] {{
     font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     margin-top: 3px;
     opacity: 0.95;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}}
+
+/* ── Compact Inspect Button in Zone Cards ── */
+.zone-card div[data-testid="stButton"] button {{
+    border-radius: 5px !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    min-height: 22px !important;
+    height: 22px !important;
+    padding: 0 4px !important;
+    line-height: 20px !important;
+    margin-top: -4px !important;
+    margin-bottom: 6px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-card) !important;
+    color: var(--text-secondary) !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    transition: all 0.12s ease !important;
+}}
+.zone-card div[data-testid="stButton"] button:hover {{
+    border-color: #38BDF8 !important;
+    color: var(--text-primary) !important;
+    background: var(--bg-card-hover) !important;
+    transform: translateY(-1px) !important;
 }}
 
 /* ── Drive Aisle Separator ── */
@@ -814,62 +839,6 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Inject Solid Color CSS for Parking Bay Buttons with High Specificity
-    btn_css_rules = []
-    for _, r in live_df.iterrows():
-        bg = sm.STATUS_COLORS[r.status]
-        fg = "#1E293B" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
-        btn_css_rules.append(f"""
-        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"],
-        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"],
-        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"],
-        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"],
-        button[aria-label*="{r.slot_code}"] {{
-            background-color: {bg} !important;
-            background: {bg} !important;
-            color: {fg} !important;
-            border: 1px solid rgba(0, 0, 0, 0.25) !important;
-            font-weight: 800 !important;
-            font-size: 0.78rem !important;
-            border-radius: 7px !important;
-            min-height: 44px !important;
-            padding: 4px 2px !important;
-            letter-spacing: 0.03em !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
-        }}
-        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"] p,
-        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"] p,
-        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"] p,
-        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"] p,
-        button[aria-label*="{r.slot_code}"] p {{
-            color: {fg} !important;
-            font-weight: 800 !important;
-            font-size: 0.78rem !important;
-            letter-spacing: 0.03em !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            text-align: center !important;
-            line-height: 1.2 !important;
-        }}
-        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:hover,
-        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:hover,
-        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"]:hover,
-        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"]:hover,
-        button[aria-label*="{r.slot_code}"]:hover {{
-            background-color: {bg} !important;
-            background: {bg} !important;
-            filter: brightness(1.15) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
-        }}
-        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:active,
-        button[aria-label*="{r.slot_code}"]:active {{
-            transform: translateY(0px) !important;
-        }}
-        """)
-    st.markdown(f"<style>{''.join(btn_css_rules)}</style>", unsafe_allow_html=True)
-
     # ── Render Township & Zone Seat-Map Sections ──
     for _, site in sites_df.iterrows():
         if site.site_id not in active_site_ids:
@@ -901,7 +870,7 @@ with tab1:
                         <span class="zone-name">{z.label} — {z.level}</span>
                         <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click Inspect on any bay to view database</span></div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -928,19 +897,31 @@ with tab1:
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
+                            status_class = "bay-stall-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
+                            status_class = "bay-stall-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
+                            status_class = "bay-stall-pending"
                             ind_text = "MATCH"
                         else:
+                            status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        # Clean formatted single-line button text with bullet separator
-                        button_label = f"{row.slot_code} · {ind_text}"
+                        # 100% Solid Color Architectural Parking Block
+                        st.markdown(
+                            f"<div class='bay-stall {status_class}'>"
+                            f"<div class='bay-code'>{row.slot_code}</div>"
+                            f"<div class='bay-indicator'>{ind_text}</div>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+
+                        # Compact Database Row Inspector Trigger
                         if st.button(
-                            button_label,
-                            key=f"bay_slot_btn_{row.slot_id}",
+                            "Inspect",
+                            key=f"bay_insp_btn_{row.slot_id}",
                             help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
                             use_container_width=True,
                         ):
