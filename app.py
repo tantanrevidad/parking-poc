@@ -258,72 +258,52 @@ section[data-testid="stSidebar"] {{
     font-size: 1rem;
 }}
 
-/* ── Realistic Architectural Parking Stalls ── */
-.parking-deck-surface {{
-    background: {card_subtle};
-    border: 1px solid var(--border-subtle);
-    border-radius: 10px;
-    padding: 16px 12px;
-}}
+/* ── Solid Color Architectural Parking Stalls ── */
 .bay-stall {{
-    position: relative;
-    border-left: 3px solid rgba(255, 255, 255, 0.25);
-    border-right: 3px solid rgba(255, 255, 255, 0.25);
-    border-top: 3px solid rgba(255, 255, 255, 0.35);
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
-    border-radius: 4px 4px 0 0;
+    border-radius: 7px;
     padding: 10px 4px 8px 4px;
     text-align: center;
-    margin-bottom: 12px;
-    transition: all 0.15s ease;
-    cursor: default;
+    margin-bottom: 8px;
+    font-weight: 800;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
 }}
 .bay-stall:hover {{
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.1);
 }}
 .bay-stall-free {{
-    background: rgba(16, 185, 129, 0.08);
-    border-left-color: rgba(52, 211, 153, 0.45);
-    border-right-color: rgba(52, 211, 153, 0.45);
-    border-top-color: #34D399;
+    background-color: #10B981 !important;
+    color: #FFFFFF !important;
 }}
 .bay-stall-occupied {{
-    background: rgba(244, 63, 94, 0.12);
-    border-left-color: rgba(244, 63, 94, 0.45);
-    border-right-color: rgba(244, 63, 94, 0.45);
-    border-top-color: #F43F5E;
+    background-color: #E11D48 !important;
+    color: #FFFFFF !important;
 }}
 .bay-stall-pending {{
-    background: rgba(245, 158, 11, 0.12);
-    border-left-color: rgba(245, 158, 11, 0.45);
-    border-right-color: rgba(245, 158, 11, 0.45);
-    border-top-color: #FBBF24;
+    background-color: #F59E0B !important;
+    color: #1E293B !important;
 }}
 .bay-stall-vacating {{
-    background: rgba(14, 165, 233, 0.12);
-    border-left-color: rgba(14, 165, 233, 0.45);
-    border-right-color: rgba(14, 165, 233, 0.45);
-    border-top-color: #38BDF8;
+    background-color: #0284C7 !important;
+    color: #FFFFFF !important;
 }}
 .bay-code {{
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--text-primary);
-    font-family: 'Inter', monospace;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
 }}
 .bay-indicator {{
-    font-size: 0.62rem;
+    font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     margin-top: 3px;
+    opacity: 0.95;
 }}
-.bay-indicator-free {{ color: #34D399; }}
-.bay-indicator-occupied {{ color: #FDA4AF; }}
-.bay-indicator-pending {{ color: #FDE68A; }}
-.bay-indicator-vacating {{ color: #7DD3FC; }}
 
 /* ── Drive Aisle Separator ── */
 .drive-aisle {{
@@ -805,7 +785,7 @@ WHERE s.slot_id = {slot_id};"""
                         <span class="zone-name">{z.label} — {z.level}</span>
                         <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free</div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -832,23 +812,42 @@ WHERE s.slot_id = {slot_id};"""
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
+                            status_class = "bay-stall-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
+                            status_class = "bay-stall-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
+                            status_class = "bay-stall-pending"
                             ind_text = "MATCH"
                         else:
+                            status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        if st.button(
-                            f"{row.slot_code}\n{ind_text}",
-                            key=f"slot_btn_{row.slot_id}",
-                            help=f"Click to inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
-                            use_container_width=True,
-                        ):
-                            st.session_state.selected_slot_id = int(row.slot_id)
-                            st.session_state.selected_slot_code = str(row.slot_code)
-                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
+                        st.markdown(
+                            f"<div class='bay-stall {status_class}'>"
+                            f"<div class='bay-code'>{row.slot_code}</div>"
+                            f"<div class='bay-indicator'>{ind_text}</div>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+
+            # Zone-Level Database Row Inspector Tool
+            with st.expander(f"Inspect SQLite Database Row for {z.label} Bays", expanded=False):
+                col_sel, col_btn = st.columns([3, 1])
+                with col_sel:
+                    picked_code = st.selectbox(
+                        "Select Bay to Inspect",
+                        options=zone_slots["slot_code"].tolist(),
+                        key=f"zone_select_slot_{z.zone_id}",
+                    )
+                with col_btn:
+                    st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+                    if st.button("Open DB Record", key=f"zone_btn_open_{z.zone_id}", use_container_width=True):
+                        picked_row = zone_slots[zone_slots.slot_code == picked_code].iloc[0]
+                        st.session_state.selected_slot_id = int(picked_row.slot_id)
+                        st.session_state.selected_slot_code = str(picked_row.slot_code)
+                        inspect_slot_dialog(int(picked_row.slot_id), str(picked_row.slot_code), picked_row.to_dict())
 
             st.markdown("</div>", unsafe_allow_html=True)
 
