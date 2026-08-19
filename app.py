@@ -58,6 +58,7 @@ def get_theme_css(theme_mode: str = "dark") -> str:
     card_subtle = "#14161C" if is_dark else "#F1F5F9"
     tab_bg = "#16181F" if is_dark else "#E2E8F0"
     tab_active_bg = "#2563EB" if is_dark else "#2563EB"
+    tab_text_color = "#94A3B8" if is_dark else "#000000"
 
     return f"""
 <style>
@@ -139,13 +140,12 @@ section[data-testid="stSidebar"] {{
 
 /* ── Top Bar Brand ── */
 .app-brand {{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0 12px 0;
+    padding: 6px 0 16px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 18px;
 }}
 .app-brand h1 {{
-    font-size: 1.25rem;
+    font-size: 1.55rem;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0;
@@ -176,9 +176,9 @@ section[data-testid="stSidebar"] {{
 .stTabs [data-baseweb="tab"] {{
     height: 40px !important;
     border-radius: 8px !important;
-    color: var(--text-secondary) !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    color: {tab_text_color} !important;
+    font-weight: 800 !important;
+    font-size: 0.86rem !important;
     border: none !important;
     padding: 0px 18px !important;
     background-color: transparent !important;
@@ -188,18 +188,18 @@ section[data-testid="stSidebar"] {{
     justify-content: center !important;
 }}
 .stTabs [data-baseweb="tab"] p {{
-    color: var(--text-secondary) !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    color: {tab_text_color} !important;
+    font-weight: 800 !important;
+    font-size: 0.86rem !important;
     margin: 0 !important;
     transition: color 0.15s ease !important;
 }}
 .stTabs [data-baseweb="tab"]:hover {{
     background-color: var(--bg-card-hover) !important;
-    color: var(--text-primary) !important;
+    color: {tab_text_color} !important;
 }}
 .stTabs [data-baseweb="tab"]:hover p {{
-    color: var(--text-primary) !important;
+    color: {tab_text_color} !important;
 }}
 .stTabs [aria-selected="true"] {{
     background-color: {tab_active_bg} !important;
