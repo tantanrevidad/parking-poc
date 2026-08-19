@@ -259,75 +259,80 @@ section[data-testid="stSidebar"] {{
     font-size: 1rem;
 }}
 
-/* ── Solid Color Architectural Parking Stall Buttons ── */
-.slot-container {{
-    width: 100%;
+/* ── Solid Color Architectural Parking Stalls ── */
+.bay-stall {{
+    border-radius: 7px;
+    padding: 10px 4px 8px 4px;
+    text-align: center;
     margin-bottom: 8px;
+    font-weight: 800;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    cursor: pointer;
+    user-select: none;
+    display: block;
 }}
-.slot-container div[data-testid="stButton"] button {{
-    border-radius: 7px !important;
-    font-weight: 800 !important;
-    font-size: 0.78rem !important;
-    letter-spacing: 0.02em !important;
-    min-height: 48px !important;
-    padding: 6px 2px !important;
-    border: 1px solid rgba(0, 0, 0, 0.25) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
-    white-space: pre-line !important;
-    line-height: 1.15 !important;
+.bay-stall:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.12);
 }}
-.slot-container div[data-testid="stButton"] button:hover {{
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
-    filter: brightness(1.14) !important;
-}}
-.slot-container div[data-testid="stButton"] button:active {{
-    transform: translateY(0px) !important;
+.bay-stall:active {{
+    transform: translateY(0px);
 }}
 
-.slot-container.bay-stall-free div[data-testid="stButton"] button {{
+.bay-stall-free {{
     background-color: #10B981 !important;
     background: #10B981 !important;
     color: #FFFFFF !important;
-    border-color: #059669 !important;
+    border: 1px solid #059669 !important;
 }}
-.slot-container.bay-stall-free div[data-testid="stButton"] button p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-}}
+.bay-stall-free .bay-code {{ color: #FFFFFF !important; }}
+.bay-stall-free .bay-indicator {{ color: #ECFDF5 !important; }}
 
-.slot-container.bay-stall-occupied div[data-testid="stButton"] button {{
+.bay-stall-occupied {{
     background-color: #E11D48 !important;
     background: #E11D48 !important;
     color: #FFFFFF !important;
-    border-color: #BE123C !important;
+    border: 1px solid #BE123C !important;
 }}
-.slot-container.bay-stall-occupied div[data-testid="stButton"] button p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-}}
+.bay-stall-occupied .bay-code {{ color: #FFFFFF !important; }}
+.bay-stall-occupied .bay-indicator {{ color: #FFE4E6 !important; }}
 
-.slot-container.bay-stall-pending div[data-testid="stButton"] button {{
+.bay-stall-pending {{
     background-color: #F59E0B !important;
     background: #F59E0B !important;
     color: #1E293B !important;
-    border-color: #D97706 !important;
+    border: 1px solid #D97706 !important;
 }}
-.slot-container.bay-stall-pending div[data-testid="stButton"] button p {{
-    color: #1E293B !important;
-    font-weight: 800 !important;
-}}
+.bay-stall-pending .bay-code {{ color: #1E293B !important; }}
+.bay-stall-pending .bay-indicator {{ color: #451A03 !important; }}
 
-.slot-container.bay-stall-vacating div[data-testid="stButton"] button {{
+.bay-stall-vacating {{
     background-color: #0284C7 !important;
     background: #0284C7 !important;
     color: #FFFFFF !important;
-    border-color: #0369A1 !important;
+    border: 1px solid #0369A1 !important;
 }}
-.slot-container.bay-stall-vacating div[data-testid="stButton"] button p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
+.bay-stall-vacating .bay-code {{ color: #FFFFFF !important; }}
+.bay-stall-vacating .bay-indicator {{ color: #E0F2FE !important; }}
+
+.bay-code {{
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}}
+.bay-indicator {{
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 3px;
+    opacity: 0.95;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }}
 
 /* ── Drive Aisle Separator ── */
@@ -698,6 +703,18 @@ if "selected_slot_id" not in st.session_state:
 if "selected_slot_code" not in st.session_state:
     st.session_state.selected_slot_code = None
 
+# Handle interactive parking stall click via URL query parameter
+if "slot_inspect" in st.query_params:
+    try:
+        inspect_id = int(st.query_params["slot_inspect"])
+        st.session_state.selected_slot_id = inspect_id
+        match_slot = live_df[live_df.slot_id == inspect_id]
+        if not match_slot.empty:
+            st.session_state.selected_slot_code = str(match_slot.iloc[0]["slot_code"])
+            inspect_slot_dialog(inspect_id, str(match_slot.iloc[0]["slot_code"]), match_slot.iloc[0].to_dict())
+    except Exception:
+        pass
+
 
 # ---------------------------------------------------------------------------
 # Tabs
@@ -809,33 +826,6 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Inject Solid Color CSS for Parking Bay Buttons
-    btn_css_rules = []
-    for _, r in live_df.iterrows():
-        bg = sm.STATUS_COLORS[r.status]
-        fg = "#0F172A" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
-        btn_css_rules.append(f"""
-        button[aria-label*="{r.slot_code}"] {{
-            background-color: {bg} !important;
-            color: {fg} !important;
-            border: 1px solid rgba(0, 0, 0, 0.35) !important;
-            font-weight: 800 !important;
-            font-size: 0.78rem !important;
-            border-radius: 6px !important;
-            padding: 6px 2px !important;
-            min-height: 48px !important;
-            line-height: 1.15 !important;
-            transition: transform 0.12s ease, box-shadow 0.12s ease !important;
-        }}
-        button[aria-label*="{r.slot_code}"]:hover {{
-            background-color: {bg} !important;
-            filter: brightness(1.12) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
-        }}
-        """)
-    st.markdown(f"<style>{''.join(btn_css_rules)}</style>", unsafe_allow_html=True)
-
     # ── Render Township & Zone Seat-Map Sections ──
     for _, site in sites_df.iterrows():
         if site.site_id not in active_site_ids:
@@ -867,7 +857,7 @@ with tab1:
                         <span class="zone-name">{z.label} — {z.level}</span>
                         <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free</div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -906,17 +896,15 @@ with tab1:
                             status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        st.markdown(f"<div class='slot-container {status_class}'>", unsafe_allow_html=True)
-                        if st.button(
-                            f"{row.slot_code}\n{ind_text}",
-                            key=f"slot_btn_{row.slot_id}",
-                            help=f"Click to inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
-                            use_container_width=True,
-                        ):
-                            st.session_state.selected_slot_id = int(row.slot_id)
-                            st.session_state.selected_slot_code = str(row.slot_code)
-                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
-                        st.markdown("</div>", unsafe_allow_html=True)
+                        st.markdown(
+                            f"<a href='?slot_inspect={row.slot_id}' target='_self' style='text-decoration:none; display:block;'>"
+                            f"<div class='bay-stall {status_class}' title='Click to inspect SQLite row for {row.slot_code}'>"
+                            f"<div class='bay-code'>{row.slot_code}</div>"
+                            f"<div class='bay-indicator'>{ind_text}</div>"
+                            f"</div>"
+                            f"</a>",
+                            unsafe_allow_html=True,
+                        )
 
             # Zone-Level Database Row Inspector Tool
             with st.expander(f"Inspect SQLite Database Row for {z.label} Bays", expanded=False):
