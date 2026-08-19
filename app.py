@@ -642,16 +642,137 @@ with tab1:
 
     st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
+# ---------------------------------------------------------------------------
+# Database Inspector Dialog & Query Helper
+# ---------------------------------------------------------------------------
+
+def fetch_slot_db_records(slot_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        slot_info = pd.read_sql("""
+            SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level, z.zone_type, st.name AS site_name, z.capacity
+            FROM slots s
+            JOIN zones z ON s.zone_id = z.zone_id
+            JOIN sites st ON z.site_id = st.site_id
+            WHERE s.slot_id = ?
+        """, conn, params=(slot_id,))
+
+        state_info = pd.read_sql("""
+            SELECT slot_id, status, updated_at
+            FROM current_state
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        ticket_info = pd.read_sql("""
+            SELECT ticket_id, plate, entry_time, payment_settled_at, slot_id
+            FROM ticketing_records
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        plate_info = pd.read_sql("""
+            SELECT read_id, slot_id, raw_ocr_text, char_confidences, true_plate
+            FROM plate_reads
+            WHERE slot_id = ?
+        """, conn, params=(slot_id,))
+
+        return slot_info, state_info, ticket_info, plate_info
+    finally:
+        conn.close()
+
+
+@st.dialog("Parking Bay Database Record", width="large")
+def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
+    slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(slot_id)
+
+    st.markdown(f"### Parking Stall `{slot_code}` (Database Row)")
+    st.caption(f"Direct SQLite table inspection from `data/parking.db` for Slot ID `{slot_id}`")
+
+    tab_merged, tab_state, tab_ticket, tab_alpr, tab_sql = st.tabs([
+        "Live Merged State",
+        "current_state Table",
+        "ticketing_records Table",
+        "plate_reads Table",
+        "Raw SQL Query",
+    ])
+
+    with tab_merged:
+        st.markdown("**Simulated Live Row (Memory & Database Combined):**")
+        df_live = pd.DataFrame([live_row_dict])
+        st.dataframe(df_live, hide_index=True, width="stretch")
+
+    with tab_state:
+        st.markdown("**`current_state` SQLite Table Record:**")
+        if not state_info.empty:
+            st.dataframe(state_info, hide_index=True, width="stretch")
+        else:
+            st.info("No record found in `current_state` table.")
+
+    with tab_ticket:
+        st.markdown("**`ticketing_records` SQLite Table Record:**")
+        if not ticket_info.empty:
+            st.dataframe(ticket_info, hide_index=True, width="stretch")
+        else:
+            st.info("Bay is currently vacant — no active ticketing record on file.")
+
+    with tab_alpr:
+        st.markdown("**`plate_reads` SQLite Table Record:**")
+        if not plate_info.empty:
+            st.dataframe(plate_info, hide_index=True, width="stretch")
+        else:
+            st.info("No optical plate capture associated with this bay.")
+
+    with tab_sql:
+        st.markdown("**Underlying SQLite Query Executed:**")
+        sql_query = f"""SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level,
+       cs.status, cs.updated_at,
+       tr.ticket_id, tr.plate, tr.entry_time, tr.payment_settled_at,
+       pr.raw_ocr_text, pr.true_plate
+FROM slots s
+LEFT JOIN zones z ON s.zone_id = z.zone_id
+LEFT JOIN current_state cs ON s.slot_id = cs.slot_id
+LEFT JOIN ticketing_records tr ON s.slot_id = tr.slot_id
+LEFT JOIN plate_reads pr ON s.slot_id = pr.slot_id
+WHERE s.slot_id = {slot_id};"""
+        st.code(sql_query, language="sql")
+
+
     # ── Legend Strip ──
     st.markdown(f"""
     <div class="legend-strip">
-        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-right:6px;">Status Key:</span>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> Available</div>
+        <span style="font-size:0.85rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-right:6px;">Status Key:</span>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> Available (Free)</div>
         <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_UNPAID]};"></div> Occupied</div>
         <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_PENDING_MATCH]};"></div> Pending Match</div>
         <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> Vacating</div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Inject Solid Color CSS for Parking Bay Buttons
+    btn_css_rules = []
+    for _, r in live_df.iterrows():
+        bg = sm.STATUS_COLORS[r.status]
+        fg = "#0F172A" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
+        btn_css_rules.append(f"""
+        button[aria-label*="{r.slot_code}"] {{
+            background-color: {bg} !important;
+            color: {fg} !important;
+            border: 1px solid rgba(0, 0, 0, 0.35) !important;
+            font-weight: 800 !important;
+            font-size: 0.78rem !important;
+            border-radius: 6px !important;
+            padding: 6px 2px !important;
+            min-height: 48px !important;
+            line-height: 1.15 !important;
+            transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+        }}
+        button[aria-label*="{r.slot_code}"]:hover {{
+            background-color: {bg} !important;
+            filter: brightness(1.12) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
+        }}
+        """)
+    st.markdown(f"<style>{''.join(btn_css_rules)}</style>", unsafe_allow_html=True)
 
     # ── Render Township & Zone Seat-Map Sections ──
     for _, site in sites_df.iterrows():
@@ -684,7 +805,7 @@ with tab1:
                         <span class="zone-name">{z.label} — {z.level}</span>
                         <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free</div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -695,8 +816,6 @@ with tab1:
             for r_idx in range(num_rows):
                 row_slice = zone_slots.iloc[r_idx * row_size : (r_idx + 1) * row_size]
                 lane_char = chr(65 + r_idx)
-                start_code = row_slice.iloc[0]["slot_code"]
-                end_code = row_slice.iloc[-1]["slot_code"]
 
                 # Render Drive Aisle separator between facing parking rows
                 if r_idx > 0:
@@ -713,31 +832,64 @@ with tab1:
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
-                            status_class = "bay-stall-free"
-                            ind_class = "bay-indicator-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
-                            status_class = "bay-stall-occupied"
-                            ind_class = "bay-indicator-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
-                            status_class = "bay-stall-pending"
-                            ind_class = "bay-indicator-pending"
                             ind_text = "MATCH"
                         else:
-                            status_class = "bay-stall-vacating"
-                            ind_class = "bay-indicator-vacating"
                             ind_text = "LEAVING"
 
-                        st.markdown(
-                            f"<div class='bay-stall {status_class}'>"
-                            f"<div class='bay-code'>{row.slot_code}</div>"
-                            f"<div class='bay-indicator {ind_class}'>{ind_text}</div>"
-                            f"</div>",
-                            unsafe_allow_html=True,
-                        )
+                        if st.button(
+                            f"{row.slot_code}\n{ind_text}",
+                            key=f"slot_btn_{row.slot_id}",
+                            help=f"Click to inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
+                            use_container_width=True,
+                        ):
+                            st.session_state.selected_slot_id = int(row.slot_id)
+                            st.session_state.selected_slot_code = str(row.slot_code)
+                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
 
             st.markdown("</div>", unsafe_allow_html=True)
+
+    # Persistent Bottom Database Row Inspector Tray
+    if st.session_state.selected_slot_id is not None:
+        sel_id = st.session_state.selected_slot_id
+        sel_code = st.session_state.selected_slot_code
+        slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(sel_id)
+
+        st.markdown(f"""
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:18px 20px; margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                    <span style="font-size:1.1rem; font-weight:800; color:var(--text-primary);">Database Row Inspector: Stall {sel_code}</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-left:8px;">(Slot ID: {sel_id})</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        it1, it2, it3, it4 = st.tabs([
+            "current_state Table",
+            "ticketing_records Table",
+            "plate_reads Table",
+            "slots Metadata Table",
+        ])
+        with it1:
+            st.dataframe(state_info, hide_index=True, width="stretch")
+        with it2:
+            if not ticket_info.empty:
+                st.dataframe(ticket_info, hide_index=True, width="stretch")
+            else:
+                st.info("Bay is vacant — no active ticketing record in database.")
+        with it3:
+            if not plate_info.empty:
+                st.dataframe(plate_info, hide_index=True, width="stretch")
+            else:
+                st.info("No optical plate capture record in database.")
+        with it4:
+            st.dataframe(slot_info, hide_index=True, width="stretch")
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
