@@ -212,64 +212,141 @@ section[data-testid="stSidebar"] {{
 .zone-card {{
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }}
 .zone-header {{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
     border-bottom: 1px solid var(--border-subtle);
 }}
 .zone-name {{
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
     color: var(--text-primary);
+    letter-spacing: -0.01em;
 }}
 .zone-tag {{
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-left: 8px;
+    letter-spacing: 0.08em;
+    margin-left: 10px;
     vertical-align: middle;
 }}
-.zone-tag-office   {{ background: rgba(14, 165, 233, 0.15); color: #38BDF8; }}
-.zone-tag-mall     {{ background: rgba(245, 158, 11, 0.15); color: #FBBF24; }}
-.zone-tag-residential {{ background: rgba(16, 185, 129, 0.15); color: #34D399; }}
+.zone-tag-office   {{ background: rgba(14, 165, 233, 0.15); color: #38BDF8; border: 1px solid rgba(14, 165, 233, 0.3); }}
+.zone-tag-mall     {{ background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }}
+.zone-tag-residential {{ background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }}
 
 .zone-avail {{
-    font-size: 0.82rem;
-    font-weight: 500;
+    font-size: 0.88rem;
+    font-weight: 600;
     color: var(--text-secondary);
 }}
 .zone-avail strong {{
     color: var(--text-primary);
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1rem;
 }}
 
-/* ── Slot Grid ── */
-.slot-card {{
-    border-radius: 7px;
-    padding: 10px 4px;
-    text-align: center;
-    margin-bottom: 6px;
-    font-weight: 700;
-    font-size: 0.76rem;
-    letter-spacing: 0.02em;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
+/* ── Realistic Architectural Parking Stalls ── */
+.parking-deck-surface {{
+    background: {card_subtle};
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 16px 12px;
 }}
-.slot-card:hover {{
+.bay-stall {{
+    position: relative;
+    border-left: 3px solid rgba(255, 255, 255, 0.25);
+    border-right: 3px solid rgba(255, 255, 255, 0.25);
+    border-top: 3px solid rgba(255, 255, 255, 0.35);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 4px 4px 0 0;
+    padding: 10px 4px 8px 4px;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: all 0.15s ease;
+    cursor: default;
+}}
+.bay-stall:hover {{
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}}
+.bay-stall-free {{
+    background: rgba(16, 185, 129, 0.08);
+    border-left-color: rgba(52, 211, 153, 0.45);
+    border-right-color: rgba(52, 211, 153, 0.45);
+    border-top-color: #34D399;
+}}
+.bay-stall-occupied {{
+    background: rgba(244, 63, 94, 0.12);
+    border-left-color: rgba(244, 63, 94, 0.45);
+    border-right-color: rgba(244, 63, 94, 0.45);
+    border-top-color: #F43F5E;
+}}
+.bay-stall-pending {{
+    background: rgba(245, 158, 11, 0.12);
+    border-left-color: rgba(245, 158, 11, 0.45);
+    border-right-color: rgba(245, 158, 11, 0.45);
+    border-top-color: #FBBF24;
+}}
+.bay-stall-vacating {{
+    background: rgba(14, 165, 233, 0.12);
+    border-left-color: rgba(14, 165, 233, 0.45);
+    border-right-color: rgba(14, 165, 233, 0.45);
+    border-top-color: #38BDF8;
+}}
+.bay-code {{
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    font-family: 'Inter', monospace;
+}}
+.bay-indicator {{
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 3px;
+}}
+.bay-indicator-free {{ color: #34D399; }}
+.bay-indicator-occupied {{ color: #FDA4AF; }}
+.bay-indicator-pending {{ color: #FDE68A; }}
+.bay-indicator-vacating {{ color: #7DD3FC; }}
+
+/* ── Drive Aisle Separator ── */
+.drive-aisle {{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 0;
+    margin: 4px 0 12px 0;
+}}
+.drive-aisle-line {{
+    flex: 1;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 10px, transparent 10px, transparent 20px);
+}}
+.drive-aisle-label {{
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 2px 10px;
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
 }}
 
 /* ── Modern Metric Cards ── */
@@ -588,12 +665,16 @@ with tab1:
             unsafe_allow_html=True,
         )
 
+        # Order zones sequentially: Mall -> Office -> Residential
+        zone_order_map = {"mall": 0, "office": 1, "residential": 2}
+        site_zones = site_zones.sort_values(by="zone_type", key=lambda s: s.map(zone_order_map))
+
         for _, z in site_zones.iterrows():
-            zone_slots = live_df[live_df.zone_id == z.zone_id].sort_values("slot_code")
+            zone_slots = live_df[live_df.zone_id == z.zone_id].sort_values("slot_code").reset_index(drop=True)
             n_free = (zone_slots.status == sm.FREE).sum()
             total = len(zone_slots)
             tag_class = f"zone-tag-{z.zone_type}" if z.zone_type in ("office", "mall", "residential") else ""
-            type_label = "Office" if z.zone_type == "office" else ("Mall" if z.zone_type == "mall" else "Residential")
+            type_label = "Mall" if z.zone_type == "mall" else ("Office" if z.zone_type == "office" else "Residential")
 
             st.markdown(f"""
             <div class="zone-card">
@@ -606,15 +687,54 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            cols = st.columns(8)
-            for i, (_, row) in enumerate(zone_slots.iterrows()):
-                with cols[i % 8]:
-                    color = sm.STATUS_COLORS[row.status]
-                    text_color = "#0F172A" if row.status in (sm.FREE, sm.OCCUPIED_LIKELY_VACATING, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
+            # Determine column count & rows based on capacity
+            row_size = 12 if total >= 24 else 8
+            num_rows = (total + row_size - 1) // row_size
+
+            for r_idx in range(num_rows):
+                row_slice = zone_slots.iloc[r_idx * row_size : (r_idx + 1) * row_size]
+                lane_char = chr(65 + r_idx)
+                start_code = row_slice.iloc[0]["slot_code"]
+                end_code = row_slice.iloc[-1]["slot_code"]
+
+                # Render Drive Aisle separator between facing parking rows
+                if r_idx > 0:
                     st.markdown(
-                        f"<div class='slot-card' style='background:{color}; color:{text_color};'>{row.slot_code}</div>",
+                        f"<div class='drive-aisle'>"
+                        f"<div class='drive-aisle-line'></div>"
+                        f"<div class='drive-aisle-label'>DRIVE AISLE · LANE {lane_char} ➔</div>"
+                        f"<div class='drive-aisle-line'></div>"
+                        f"</div>",
                         unsafe_allow_html=True,
                     )
+
+                cols = st.columns(row_size)
+                for c_idx, (_, row) in enumerate(row_slice.iterrows()):
+                    with cols[c_idx]:
+                        if row.status == sm.FREE:
+                            status_class = "bay-stall-free"
+                            ind_class = "bay-indicator-free"
+                            ind_text = "OPEN"
+                        elif row.status == sm.OCCUPIED_UNPAID:
+                            status_class = "bay-stall-occupied"
+                            ind_class = "bay-indicator-occupied"
+                            ind_text = "BUSY"
+                        elif row.status == sm.OCCUPIED_PENDING_MATCH:
+                            status_class = "bay-stall-pending"
+                            ind_class = "bay-indicator-pending"
+                            ind_text = "MATCH"
+                        else:
+                            status_class = "bay-stall-vacating"
+                            ind_class = "bay-indicator-vacating"
+                            ind_text = "LEAVING"
+
+                        st.markdown(
+                            f"<div class='bay-stall {status_class}'>"
+                            f"<div class='bay-code'>{row.slot_code}</div>"
+                            f"<div class='bay-indicator {ind_class}'>{ind_text}</div>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
 
             st.markdown("</div>", unsafe_allow_html=True)
 

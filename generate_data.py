@@ -40,14 +40,14 @@ SITES = [
 ]
 
 ZONES = [
-    # Uptown Bonifacio (site_idx=0)
-    {"site_idx": 0, "level": "Basement 1",  "label": "Office Tower",       "zone_type": "office",      "capacity": 24},
-    {"site_idx": 0, "level": "Level 3",     "label": "Mall Wing",          "zone_type": "mall",        "capacity": 20},
-    {"site_idx": 0, "level": "Podium 2",    "label": "Residential Podium", "zone_type": "residential", "capacity": 16},
-    # Eastwood City (site_idx=1)
-    {"site_idx": 1, "level": "Basement 2",  "label": "Office Annex",       "zone_type": "office",      "capacity": 20},
-    {"site_idx": 1, "level": "Level 2",     "label": "Mall Atrium",        "zone_type": "mall",        "capacity": 24},
-    {"site_idx": 1, "level": "Podium 1",    "label": "Residential Tower",  "zone_type": "residential", "capacity": 16},
+    # Uptown Bonifacio (site_idx=0) — Ordered sequentially: Mall -> Office -> Residential
+    {"site_idx": 0, "level": "Ground & Level 1",  "label": "Mall Grand Wing",     "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 0, "level": "Basement 1",         "label": "Office Tower Alpha",  "zone_type": "office",      "capacity": 24},
+    {"site_idx": 0, "level": "Podium 2",           "label": "Residential Deck",    "zone_type": "residential", "capacity": 16},
+    # Eastwood City (site_idx=1) — Ordered sequentially: Mall -> Office -> Residential
+    {"site_idx": 1, "level": "Ground & Level 1",  "label": "Mall Main Plaza",     "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 1, "level": "Basement 2",         "label": "Office Annex Deck",   "zone_type": "office",      "capacity": 24},
+    {"site_idx": 1, "level": "Podium 1",           "label": "Residential Tower",   "zone_type": "residential", "capacity": 16},
 ]
 
 HISTORY_DAYS = 28          # weeks of synthetic historical data
