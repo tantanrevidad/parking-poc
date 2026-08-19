@@ -9,6 +9,7 @@ Run with:  streamlit run app.py
 
 import json
 import os
+import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
