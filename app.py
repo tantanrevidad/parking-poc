@@ -184,26 +184,26 @@ section[data-testid="stSidebar"] {{
 /* ── Legend Strip ── */
 .legend-strip {{
     display: flex;
-    gap: 16px;
-    padding: 10px 14px;
+    gap: 28px;
+    padding: 14px 22px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    margin-bottom: 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
     align-items: center;
     flex-wrap: wrap;
 }}
 .legend-entry {{
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    gap: 9px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
 }}
 .legend-entry .dot {{
-    width: 9px;
-    height: 9px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
     flex-shrink: 0;
 }}
@@ -388,7 +388,7 @@ history_df = load_history_df()
 model, metrics, importance_df, holdout_df, baseline_lookup = get_trained_model(history_df)
 
 if "sim_time" not in st.session_state:
-    st.session_state.sim_time = datetime.now().replace(hour=18, minute=30, second=0, microsecond=0)
+    st.session_state.sim_time = datetime.now()
 
 
 # ---------------------------------------------------------------------------
@@ -491,26 +491,34 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Time Simulation Controls Row ──
-    shift_col1, shift_col2, shift_col3, shift_col4, shift_col5 = st.columns([1, 1, 1.5, 1.5, 3])
-    with shift_col1:
-        if st.button("+15m", key="tab1_btn_15m", use_container_width=True):
-            st.session_state.sim_time += timedelta(minutes=15)
-            st.rerun()
-    with shift_col2:
-        if st.button("+1h", key="tab1_btn_1h", use_container_width=True):
-            st.session_state.sim_time += timedelta(hours=1)
-            st.rerun()
-    with shift_col3:
-        if st.button("-15m", key="tab1_btn_minus_15m", use_container_width=True):
-            st.session_state.sim_time -= timedelta(minutes=15)
-            st.rerun()
-    with shift_col4:
-        if st.button("Reset (6:30 PM)", key="tab1_btn_reset", use_container_width=True):
-            st.session_state.sim_time = datetime.now().replace(hour=18, minute=30, second=0, microsecond=0)
+    # ── Interactive Clock & Calendar Time-Setter Interface ──
+    clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
+    with clock_card_col1:
+        chosen_date = st.date_input(
+            "Calendar Date",
+            value=st.session_state.sim_time.date(),
+            key="tab1_calendar_date_picker",
+        )
+    with clock_card_col2:
+        chosen_time = st.time_input(
+            "Clock Time",
+            value=st.session_state.sim_time.time(),
+            key="tab1_clock_time_picker",
+            step=60,
+        )
+    with clock_card_col3:
+        st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+        if st.button("Sync Live Clock", key="tab1_btn_sync_live", use_container_width=True):
+            st.session_state.sim_time = datetime.now()
             st.rerun()
 
-    st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+    # Sync and update state when calendar date or clock time is manually changed
+    updated_dt = datetime.combine(chosen_date, chosen_time)
+    if updated_dt != st.session_state.sim_time:
+        st.session_state.sim_time = updated_dt
+        st.rerun()
+
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
     # ── Township High-Level KPI Summary ──
     active_slots = live_df[live_df.zone_id.isin(active_zones.zone_id)]
