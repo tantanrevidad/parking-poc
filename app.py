@@ -335,29 +335,88 @@ section[data-testid="stSidebar"] {{
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }}
 
-/* ── Compact Inspect Button in Zone Cards ── */
+/* ── Direct Solid-Color Parking Stall Buttons ── */
 .zone-card div[data-testid="stButton"] button {{
-    border-radius: 5px !important;
-    font-size: 0.65rem !important;
-    font-weight: 700 !important;
-    min-height: 22px !important;
-    height: 22px !important;
-    padding: 0 4px !important;
-    line-height: 20px !important;
-    margin-top: -4px !important;
-    margin-bottom: 6px !important;
-    border: 1px solid var(--border-color) !important;
-    background: var(--bg-card) !important;
-    color: var(--text-secondary) !important;
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
     letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    transition: all 0.12s ease !important;
+    min-height: 52px !important;
+    padding: 6px 2px !important;
+    white-space: pre-line !important;
+    line-height: 1.25 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+    border: 1px solid rgba(0, 0, 0, 0.25) !important;
+    width: 100% !important;
 }}
 .zone-card div[data-testid="stButton"] button:hover {{
-    border-color: #38BDF8 !important;
-    color: var(--text-primary) !important;
-    background: var(--bg-card-hover) !important;
-    transform: translateY(-1px) !important;
+    filter: brightness(1.15) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+}}
+.zone-card div[data-testid="stButton"] button:active {{
+    transform: translateY(0px) !important;
+}}
+
+/* Available / Free -> Solid Emerald Green */
+.zone-card button[aria-label*="OPEN"],
+button[aria-label*="OPEN"] {{
+    background-color: #10B981 !important;
+    background: #10B981 !important;
+    color: #FFFFFF !important;
+    border-color: #059669 !important;
+}}
+.zone-card button[aria-label*="OPEN"] p,
+button[aria-label*="OPEN"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+}}
+
+/* Occupied / Unpaid -> Solid Crimson Red */
+.zone-card button[aria-label*="BUSY"],
+button[aria-label*="BUSY"] {{
+    background-color: #E11D48 !important;
+    background: #E11D48 !important;
+    color: #FFFFFF !important;
+    border-color: #BE123C !important;
+}}
+.zone-card button[aria-label*="BUSY"] p,
+button[aria-label*="BUSY"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+}}
+
+/* Occupied / Pending Match -> Solid Amber Gold */
+.zone-card button[aria-label*="MATCH"],
+button[aria-label*="MATCH"] {{
+    background-color: #F59E0B !important;
+    background: #F59E0B !important;
+    color: #1E293B !important;
+    border-color: #D97706 !important;
+}}
+.zone-card button[aria-label*="MATCH"] p,
+button[aria-label*="MATCH"] p {{
+    color: #1E293B !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+}}
+
+/* Occupied / Vacating -> Solid Electric Blue */
+.zone-card button[aria-label*="LEAVING"],
+button[aria-label*="LEAVING"] {{
+    background-color: #0284C7 !important;
+    background: #0284C7 !important;
+    color: #FFFFFF !important;
+    border-color: #0369A1 !important;
+}}
+.zone-card button[aria-label*="LEAVING"] p,
+button[aria-label*="LEAVING"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
 }}
 
 /* ── Drive Aisle Separator ── */
@@ -870,7 +929,7 @@ with tab1:
                         <span class="zone-name">{z.label} — {z.level}</span>
                         <span class="zone-tag {tag_class}">{type_label}</span>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click Inspect on any bay to view database</span></div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -897,31 +956,18 @@ with tab1:
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
-                            status_class = "bay-stall-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
-                            status_class = "bay-stall-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
-                            status_class = "bay-stall-pending"
                             ind_text = "MATCH"
                         else:
-                            status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        # 100% Solid Color Architectural Parking Block
-                        st.markdown(
-                            f"<div class='bay-stall {status_class}'>"
-                            f"<div class='bay-code'>{row.slot_code}</div>"
-                            f"<div class='bay-indicator'>{ind_text}</div>"
-                            f"</div>",
-                            unsafe_allow_html=True,
-                        )
-
-                        # Compact Database Row Inspector Trigger
+                        # Direct Solid-Color Clickable Parking Stall Block
                         if st.button(
-                            "Inspect",
-                            key=f"bay_insp_btn_{row.slot_id}",
+                            f"{row.slot_code}\n{ind_text}",
+                            key=f"stall_btn_{row.slot_id}",
                             help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
                             use_container_width=True,
                         ):
