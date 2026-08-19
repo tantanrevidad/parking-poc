@@ -37,9 +37,10 @@ cv-demo/ph_matching_results.json
 cv-demo/cctv-temp/
 cv-demo/ph-dataset/
 
-# Local tools, scratch datasets, and temporary files
+# Local tools, scratch files, and debug outputs
 tools/
-car_dataset/
+scratch_*
+debug_output/
 
 # YOLO weights (auto-downloaded by ultralytics on first run)
 yolov8n.pt

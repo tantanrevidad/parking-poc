@@ -118,23 +118,18 @@ trip-planner view (baseline vs. trained model, plain-language label), and
 ML insights view — i.e., all of Demo_Prototype_Plan.md's Steps 4.1, 4.2,
 and the metrics-transparency part of 4.2.
 
-**Adopted addition:** a fifth tab, **"How the System Senses Parking,"**
-displaying Component 3's real annotated images and matching results —
-matching the source plan's Step 4.3 intent, but as a tab in the existing
-app rather than a section of a hand-built static page.
+- ✅ **Component 4 (Enterprise Web App):** 6-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and dual CV galleries.
+- ✅ **Component 5 (Multi-Angle Parking Space Vacancy Detection):** Real-time YOLOv8 vehicle detection + spatial bay IoU classification across `car_dataset/` camera perspectives.
 
-**Rejected: rebuilding as a single static HTML/React artifact.**
-Considered and explicitly not adopted. What it would gain — zero-install,
-opens directly in a browser — is real but smaller than it looks, since
-`pip install -r requirements.txt && streamlit run app.py` is not a
-meaningfully higher bar for a review audience than opening a static file.
-What it would cost is larger and directly cuts against what you asked for
-going into this build: baking predictions into a static JSON lookup means
-giving up the live-trained-model story (real holdout metrics computed on
-the spot, not a frozen snapshot), and hand-building a seat-map grid, tabs,
-and charts in vanilla HTML/JS would be real, non-trivial engineering effort
-to reach rough parity with what Streamlit already provides. Not worth the
-trade.
+---
+
+## Component 5 — Multi-Angle Space Vacancy Detection ✅ Done
+
+**Overview:** Adds computer vision parking space detection across multi-angle surveillance feeds in `car_dataset/`:
+- **Multi-Angle Camera Feeds:** Evaluates 3 distinct CCTV perspectives (North Upper Deck, East Central Lot, South Perimeter) and 12 sequential slot row feeds.
+- **Vehicle Object Detection:** Uses YOLOv8n to locate all cars, SUVs, trucks, and buses.
+- **Spatial Overlap & IoU Classification:** Calculates intersection between designated parking bays and vehicle bounding boxes to classify bays as **VACANT (🟢)** or **OCCUPIED (🔴)**.
+- **Interactive UI Tab:** Tab 6 in `app.py` allows interactive threshold tuning, visual feed toggling, live KPI tracking, and bay-by-bay telemetry.
 
 ---
 
@@ -142,9 +137,9 @@ trade.
 
 - Occupancy/ticketing/predictive data across all sites is **synthetically
   generated** — realistic in shape, not observed fact.
-- The CV demo (Component 3) runs on **real photographs**, but generic
+- The CV demo (Component 3 & Component 5) runs on **real photographs & surveillance feeds**, but generic
   public ones, not actual Megaworld structures or plates — and is
-  **deliberately not wired into** the live app's data, since there's no
+  **deliberately not wired into** the live app's simulated township data, since there's no
   real camera feed to connect to a fictional township.
 - The ML model is **real and trained live** each time the app starts (or
   on-demand via "Regenerate synthetic dataset") — not a frozen export —
@@ -152,23 +147,3 @@ trade.
 - This remains a proof-of-concept for the *idea*, not production
   infrastructure. The full implementation plan's phased roadmap still
   governs the real path to deployment.
-
----
-
-## Revised Build Order
-
-1. **Enrich Component 1** — multi-site, zone-type curves in
-   `generate_data.py`. Everything downstream should keep working unchanged
-   since it already reads zones generically.
-2. **Re-verify Component 2** — confirm the model's improvement-over-baseline
-   number with the richer data; update the Model Insights tab copy if the
-   number moves.
-3. **Build Component 3** — standalone CV demo folder (YOLOv8n detection +
-   Tesseract OCR w/ plate localization + reused `matcher.py`), producing
-   annotated images and a results JSON.
-4. **Add the "How the System Senses Parking" tab** to the existing app,
-   embedding Component 3's output.
-
-Steps 1–2 and Step 3 can happen in either order or in parallel — Component
-3 has no dependency on Components 1/2. Step 4 goes last since it needs real
-output from Step 3 to embed, not a placeholder.

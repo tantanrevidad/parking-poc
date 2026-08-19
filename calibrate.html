@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Parking — Interactive Slot ROI Calibrator</title>
+<style>
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 1.4rem; margin: 0; color: #38bdf8; }
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  button { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+  button:hover { background: #1d4ed8; }
+  button.danger { background: #e11d48; }
+  button.danger:hover { background: #be123c; }
+  button.success { background: #059669; }
+  button.success:hover { background: #047857; }
+  .canvas-container { position: relative; display: inline-block; border: 2px solid #334155; border-radius: 8px; overflow: hidden; background: #000; max-width: 100%; }
+  canvas { display: block; cursor: crosshair; max-width: 100%; height: auto; }
+  .info-bar { margin-top: 8px; font-size: 0.88rem; color: #94a3b8; display: flex; gap: 20px; flex-wrap: wrap; }
+  .json-box { margin-top: 20px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
+  textarea { width: 100%; height: 160px; background: #0f172a; color: #38bdf8; border: 1px solid #334155; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 0.85rem; }
+  .badge { background: #334155; padding: 6px 12px; border-radius: 4px; color: #38bdf8; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🅿️ Parking Slot ROI Interactive Calibrator</h1>
+  <div class="badge" id="slotCount">Slots: 0</div>
+</div>
+
+<div class="toolbar">
+  <button onclick="finishPolygon()" class="success">✓ Close Polygon (Key: C)</button>
+  <button onclick="undoPoint()">↩ Undo Vertex (Key: U)</button>
+  <button onclick="resetCurrent()">✕ Clear In-Progress (Key: R)</button>
+  <button onclick="deleteLastSlot()" class="danger">🗑 Delete Last Slot (Key: D)</button>
+  <button onclick="copyJSON()" class="success">📋 Copy JSON to Clipboard</button>
+</div>
+
+<div class="canvas-container">
+  <canvas id="cv" width="1372" height="768"></canvas>
+</div>
+
+<div class="info-bar">
+  <div><strong>Pixel Coordinates:</strong> <span id="pos">[0, 0]</span></div>
+  <div><strong>In-Progress Vertices:</strong> <span id="vertCount">0</span></div>
+  <div><strong>Instructions:</strong> Click around the 4 corners of each parking space, then click <em>Close Polygon</em> (or press C).</div>
+</div>
+
+<div class="json-box">
+  <h3 style="margin-top:0; color:#38bdf8;">Exported slots_config.json Snippet</h3>
+  <textarea id="jsonOut" readonly></textarea>
+</div>
+
+<script>
+const img = new Image();
+img.src = 'car_dataset/empty%20lot.jpg';
+
+let slots = [
+  {"id": "F-01", "name": "Bay F-01 (Far Left)", "zone": "Front Row", "polygon": [[10, 360], [365, 315], [215, 740], [10, 740]]},
+  {"id": "F-02", "name": "Bay F-02 (Mid-Left)", "zone": "Front Row", "polygon": [[365, 315], [530, 315], [480, 740], [215, 740]]},
+  {"id": "F-03", "name": "Bay F-03 (Center-Left)", "zone": "Front Row", "polygon": [[530, 315], [725, 315], [705, 740], [480, 740]]},
+  {"id": "F-04", "name": "Bay F-04 (Center-Right)", "zone": "Front Row", "polygon": [[725, 315], [970, 315], [1090, 740], [705, 740]]},
+  {"id": "F-05", "name": "Bay F-05 (Far Right)", "zone": "Front Row", "polygon": [[970, 315], [1300, 340], [1365, 740], [1090, 740]]}
+];
+
+let currentPoly = [];
+let mousePos = [0, 0];
+
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+
+img.onload = () => {
+  draw();
+  updateJSON();
+};
+
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.round((e.clientX - rect.left) * scaleX);
+  const y = Math.round((e.clientY - rect.top) * scaleY);
+  mousePos = [x, y];
+  document.getElementById('pos').innerText = `[${x}, ${y}]`;
+  draw();
+});
+
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.round((e.clientX - rect.left) * scaleX);
+  const y = Math.round((e.clientY - rect.top) * scaleY);
+  currentPoly.push([x, y]);
+  document.getElementById('vertCount').innerText = currentPoly.length;
+  draw();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'c' || e.key === 'C') finishPolygon();
+  if (e.key === 'u' || e.key === 'U') undoPoint();
+  if (e.key === 'r' || e.key === 'R') resetCurrent();
+  if (e.key === 'd' || e.key === 'D') deleteLastSlot();
+});
+
+function finishPolygon() {
+  if (currentPoly.length >= 3) {
+    const idNum = slots.length + 1;
+    const slotId = 'F-' + String(idNum).padStart(2, '0');
+    slots.push({
+      id: slotId,
+      name: `Bay ${slotId}`,
+      zone: 'Front Row',
+      polygon: [...currentPoly]
+    });
+    currentPoly = [];
+    document.getElementById('vertCount').innerText = 0;
+    draw();
+    updateJSON();
+  } else {
+    alert('Please click at least 3 points before closing the polygon.');
+  }
+}
+
+function undoPoint() {
+  if (currentPoly.length > 0) {
+    currentPoly.pop();
+    document.getElementById('vertCount').innerText = currentPoly.length;
+    draw();
+  }
+}
+
+function resetCurrent() {
+  currentPoly = [];
+  document.getElementById('vertCount').innerText = 0;
+  draw();
+}
+
+function deleteLastSlot() {
+  if (slots.length > 0) {
+    slots.pop();
+    draw();
+    updateJSON();
+  }
+}
+
+function draw() {
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Draw saved slots
+  slots.forEach((s) => {
+    ctx.beginPath();
+    ctx.moveTo(s.polygon[0][0], s.polygon[0][1]);
+    for (let i = 1; i < s.polygon.length; i++) {
+      ctx.lineTo(s.polygon[i][0], s.polygon[i][1]);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Slot badge
+    const cx = s.polygon.reduce((acc, p) => acc + p[0], 0) / s.polygon.length;
+    const cy = s.polygon.reduce((acc, p) => acc + p[1], 0) / s.polygon.length;
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(cx - 30, cy - 14, 60, 24);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - 30, cy - 14, 60, 24);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(s.id, cx, cy - 2);
+  });
+
+  // Draw in-progress polygon
+  if (currentPoly.length > 0) {
+    ctx.beginPath();
+    ctx.moveTo(currentPoly[0][0], currentPoly[0][1]);
+    for (let i = 1; i < currentPoly.length; i++) {
+      ctx.lineTo(currentPoly[i][0], currentPoly[i][1]);
+    }
+    ctx.lineTo(mousePos[0], mousePos[1]);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    currentPoly.forEach((p, idx) => {
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(idx + 1, p[0] + 8, p[1] - 8);
+    });
+  }
+
+  document.getElementById('slotCount').innerText = `Slots: ${slots.length}`;
+}
+
+function updateJSON() {
+  document.getElementById('jsonOut').value = JSON.stringify(slots, null, 2);
+}
+
+function copyJSON() {
+  const txt = document.getElementById('jsonOut');
+  txt.select();
+  document.execCommand('copy');
+  alert('JSON copied to clipboard! You can paste it directly into slots_config.json');
+}
+</script>
+</body>
+</html>

@@ -395,16 +395,105 @@ flowchart LR
 
 ---
 
+### 9.4 Multi-Angle Parking Space Occupancy & Vehicle Detection Engine (`parking_detector.py`)
+
+In addition to gate-level ALPR, the system incorporates an overhead **Multi-Angle Parking Space Occupancy & Vehicle Detection Engine** (`parking_detector.py`) that monitors multi-angle surveillance feeds from `car_dataset/`.
+
+The engine implements an enterprise **5-Phase Occupancy Detection Algorithm Architecture**:
+
+```mermaid
+flowchart TD
+    subgraph P1["Phase 1: Data Preparation & ROI Calibration"]
+        A[slots_config.json] --> B[Load Static ROI Polygons\nget_slot_rois_for_camera]
+        C[Surveillance Camera Frame] --> D[Frame Ingestion]
+    end
+
+    subgraph P2["Phase 2: Model Setup & Inference Pipeline"]
+        D --> E[YOLOv8n Convolutional Detector\nClasses: car, truck, bus, motorcycle]
+        E --> F[Extract Vehicle BBoxes & Confidence\nFilter Conf >= τ_conf]
+    end
+
+    subgraph P3["Phase 3: Spatial Logic & Occupancy (IoA)"]
+        B --> G[Exact Polygon-Box Intersection\nShapely Poly & Box]
+        F --> G
+        G --> H["Calculate IoA Occupancy Ratio:\nIoA = Area(Slot ∩ Car) / Area(Slot)"]
+        H --> I{Max IoA >= τ_ioa?}
+        I -->|Yes| J[Initial State: Occupied]
+        I -->|No| K[Initial State: Vacant]
+    end
+
+    subgraph P4["Phase 4: Temporal Filtering & Edge Cases"]
+        J --> L[TemporalStateDebouncer\nSliding Window Buffer N=5]
+        K --> L
+        L --> M[Debounced Slot State\nOccupied 🔴 / Vacant 🟢]
+    end
+
+    subgraph P5["Phase 5: Output Structuring"]
+        M --> N[Standardized JSON Payload]
+        M --> O[Streamlit UI Tab 6: Overlays, KPIs, Telemetry & JSON View]
+    end
+```
+
+#### Detailed Phase Breakdown:
+
+1. **Phase 1 — Data Preparation & Dual Native ROI Calibration (`slots_config.json`):**
+   - **Dual Native Calibration Strategy:** To prevent accuracy degradation caused by non-uniform aspect ratio downscaling ($1.78:1$ vs $2.38:1$), `slots_config.json` provides dedicated, hand-verified perspective trapezoids for each native coordinate space:
+     - **Master Reference Calibration (`empty lot.jpg`):** Traced directly onto the $1372 \times 768$ reference frame, mapping the front bays along actual painted double-yellow divider lines and transverse stop lines.
+     - **Time-Series Surveillance Calibration (`row_sequence`):** Traced natively on $457 \times 192$ surveillance frames (`image_1.png` to `image_12.png`).
+     - **Dynamic Resolution Scaling:** Automatically rescales polygon coordinates proportionally $(x \cdot \frac{W_{\text{target}}}{W_{\text{calib}}}, y \cdot \frac{H_{\text{target}}}{H_{\text{calib}}})$ if arbitrary camera feed dimensions are encountered.
+   - **Interactive Calibration Tooling:** Includes a browser-based HTML5 annotator [`calibrate.html`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/calibrate.html) and OpenCV desktop utility [`scripts/calibrate_roi.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/scripts/calibrate_roi.py) for easy click-to-calibrate ROI definitions.
+
+2. **Phase 2 — Model Setup & Adaptive Low-Light Inference Pipeline (`run_vehicle_inference`):**
+   - **Model:** Pre-trained YOLOv8n (Nano) convolutional object detector optimized for real-time CPU/GPU edge execution.
+   - **Class Filtering:** Strict COCO category filtering to vehicle classes: Class 2 (`car`), Class 3 (`motorcycle`), Class 5 (`bus`), Class 7 (`truck`).
+   - **Adaptive Low-Light CLAHE Boost:** Applies Contrast Limited Adaptive Histogram Equalization (`enhance_low_light`) on the $L$-channel in CIELAB color space (`clipLimit=2.5`, `tileGridSize=(8, 8)`), illuminating dark/black vehicles (SUVs, pickups) and shadowed tire wells.
+   - **Dual-Exposure Multi-Pass Inference + NMS:** Combines candidate bounding boxes across raw and CLAHE-enhanced contrast passes, merging duplicates via Non-Maximum Suppression (`iou_thresh=0.55`).
+   - **Confidence Thresholding:** Configurable threshold $\tau_{\text{conf}} \in [0.15, 0.85]$ (default: $0.25$).
+
+3. **Phase 3 — Spatial Logic & Occupancy Calculation (`calculate_ioa_occupancy`):**
+   - **Intersection over Area (IoA) Formulation:**
+     $$\text{Raw IoA} = \frac{\text{Area}(\text{Slot Polygon} \cap \text{Vehicle Box})}{\text{Area}(\text{Slot Polygon})}$$
+   - **Centroid Containment & Coverage Reinforcement Rules:**
+     $$\text{Effective IoA} = \begin{cases} \max(\text{Raw IoA}, 0.60) & \text{if vehicle centroid } (c_x, c_y) \in \text{Slot Polygon} \\ \max(\text{Raw IoA}, 0.55) & \text{if vehicle coverage } \frac{\text{Area}(\text{Slot} \cap \text{Car})}{\text{Area}(\text{Car})} \ge 0.35 \\ \max(\text{Raw IoA}, 0.50) & \text{if tire ground point } (c_x, y_2) \in \text{Slot Polygon} \text{ and } \text{Raw IoA} \ge 0.10 \\ \text{Raw IoA} & \text{otherwise} \end{cases}$$
+   - **Decision Boundary:**
+     $$\text{Status}(\text{Slot}_k) = \begin{cases} \text{Occupied (🔴)} & \text{if } \max_{v \in \mathcal{V}} \text{Effective IoA}(\text{Slot}_k, v) \ge \tau_{\text{ioa}} \\ \text{Vacant (🟢)} & \text{otherwise} \end{cases}$$
+   - **Low-Confidence Quality Flag:** A review flag `low_confidence_flag = True` is triggered whenever $|\text{Effective IoA} - \tau_{\text{ioa}}| \le 0.05$, enabling human-in-the-loop review for edge cases.
+
+4. **Phase 4 — Temporal Filtering & Edge-Case Handling (`TemporalStateDebouncer`):**
+   - **Sliding-Window State Debouncing:** A rolling historical buffer ($N = 5$ frames) tracks sequential slot states across time-series feeds (`image_1.png` to `image_12.png`), requiring a majority confirmation ratio ($\ge 60\%$) to transition states.
+   - **Occlusion Mitigation:** True perspective trapezoids combined with base ground-contact testing eliminate false occupancy triggers caused by vehicle roofs projecting over background bays.
+
+5. **Phase 5 — Output Structuring (`generate_standard_json_payload`):**
+   - Live telemetry is serialized into standardized JSON payloads ready for downstream API ingestion:
+     ```json
+     {
+       "timestamp": "2026-08-19T02:00:00Z",
+       "camera_feed": "empty lot.jpg",
+       "total_spaces": 6,
+       "occupied_count": 0,
+       "vacant_count": 6,
+       "occupancy_rate": 0.0,
+       "borderline_count": 0,
+       "slots": [
+         {"id": "F-01", "name": "Bay F-01", "zone": "Front Row", "status": "vacant", "occupancy_ratio": 0.0, "confidence": 1.0, "vehicle_class": null, "low_confidence_flag": false},
+         {"id": "F-02", "name": "Bay F-02", "zone": "Front Row", "status": "vacant", "occupancy_ratio": 0.0, "confidence": 1.0, "vehicle_class": null, "low_confidence_flag": false}
+       ]
+     }
+     ```
+
+---
+
 ## 10. Enterprise Dashboard UI Architecture (`app.py`)
 
 Built with Streamlit and styled with a custom dark-mode CSS design system (`#0F172A` slate background, `#1E293B` cards, `#38BDF8` cyan accents, Inter typography).
 
-### 5 Dedicated Functional Tabs:
+### 6 Dedicated Functional Tabs:
 1. **Occupancy Map:** Interactive seat-map grid displaying all 120 slots across Uptown Bonifacio and Eastwood City zones (Office, Mall, Residential) with real-time status color coding (`Free`, `Occupied — Unpaid`, `Pending Match`, `Likely Vacating`), vehicle plate details, and live availability counters.
 2. **Availability Forecast:** Interactive trip planner allowing operators and visitors to pick any zone and arrival horizon (0 to 12 hours ahead), displaying the ML forecast, baseline comparison, conservative safety margin, and historical diurnal curve.
 3. **Model Performance:** Model diagnostics dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Holdout Validation Sample Count, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
-5. **CV Demo:** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+6. **Space Detection (CV):** Enterprise parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing the 5-Phase ROI-IoA algorithm with interactive $\tau_{\text{conf}}$ and $\tau_{\text{ioa}}$ sliders, temporal smoothing toggles, live capacity KPIs, annotated/raw/JSON feed tabs, and slot-by-slot telemetry.
 
 ---
 

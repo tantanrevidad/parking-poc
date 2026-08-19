@@ -84,7 +84,8 @@ python cv_demo.py --dataset all
 2. **Availability Forecast:** Interactive trip planner allowing users to pick any zone and arrival horizon (0 to 12 hours ahead) to receive an ML forecast, baseline comparison, conservative safety margin, and historical trend curve.
 3. **Model Performance:** Diagnostic dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings, and match margin confirmation.
-5. **CV Demo:** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot Dataset** and the **OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot Dataset** and the **OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+6. **Space Detection (CV):** Enterprise computer vision parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing a **5-Phase Occupancy Detection Algorithm**: (1) **Dual Native ROI Calibration** from `slots_config.json` with true perspective trapezoids traced on master reference (`empty lot.jpg` @ 1372×768) and native video streams (457×192) with automatic resolution scaling, (2) YOLOv8n vehicle inference with **Adaptive Low-Light CLAHE Boost** and dual-exposure multi-pass NMS for dark vehicles (SUVs, pickups), (3) Intersection over Area (IoA) spatial occupancy calculation with **Centroid Containment** and tire ground-contact reinforcement, (4) temporal sliding-window state debouncing (5-frame history, ≥60% consensus), and (5) standardized JSON output payload generation with real-time 🟢 FREE / 🔴 OCCUPIED slot overlays, capacity KPIs, borderline quality flags, and slot-by-slot telemetry.
 
 ---
 
@@ -102,22 +103,29 @@ python cv_demo.py --dataset all
 parking-poc/
 ├── .streamlit/
 │   └── config.toml               # Custom enterprise dark theme config
-├── cv-demo/                      # Local CV outputs (gitignored)
+├── car_dataset/                  # Multi-angle CCTV & parking row surveillance frames
+├── cv-demo/                      # Local ALPR benchmark outputs (gitignored)
+├── debug_output/                 # Visual regression layers & JSON telemetry outputs
 ├── docs/
 │   ├── Revised_Prototype_Plan.md # Prototype architectural roadmap
 │   ├── SYSTEM_DOCUMENTATION.md   # Comprehensive technical specification
 │   ├── Smart_Parking_Implementation_Plan.pdf
 │   └── Smart_Parking_POC_Technical_Implementation_Plan.pdf
-├── app.py                        # Streamlit Enterprise Dashboard
+├── scripts/
+│   ├── calibrate_roi.py          # Interactive GUI parking slot ROI calibrator
+│   └── debug_overlay.py          # 3-layer visual regression & diagnostic framework
+├── app.py                        # Streamlit Enterprise Dashboard (6 Tabs)
+├── calibrate.html                # Interactive browser-based polygon annotation tool
 ├── cv_demo.py                    # Computer Vision & ALPR evaluation pipeline
 ├── fetch_ph_dataset.py           # CCTV surveillance dataset extractor
 ├── fetch_real_dataset.py         # OpenALPR benchmark dataset downloader
 ├── generate_data.py              # Synthetic database & time-series generator
 ├── matcher.py                    # Confidence-weighted fuzzy matching algorithm
+├── parking_detector.py           # 5-phase space occupancy & vehicle detection engine
 ├── predictor.py                  # ML forecasting engine (HistGradientBoosting)
 ├── requirements.txt              # Project dependencies
 ├── simulate.py                   # Real-time state simulation helper
+├── slots_config.json             # Calibrated slot ROI polygon configurations
 ├── state_machine.py              # Parking slot lifecycle state machine
 └── yolov8n.pt                    # Pre-trained YOLOv8 vehicle detector model
-```matching + graceful status states + CV
-feasibility) actually working.
+```

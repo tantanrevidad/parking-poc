@@ -1,0 +1,69 @@
+{
+  "camera_angles": {
+    "empty lot.jpg": {
+      "name": "📷 Master Reference Feed — Empty Lot Calibration",
+      "resolution": [1372, 768],
+      "description": "Full-resolution parking lot reference calibrated with user-defined perspective trapezoids (6 bays)",
+      "slots": [
+        {"id": "F-01", "name": "Bay F-01", "zone": "Front Row", "polygon": [[163, 289], [266, 291], [8, 510], [8, 404], [157, 291]]},
+        {"id": "F-02", "name": "Bay F-02", "zone": "Front Row", "polygon": [[308, 290], [448, 295], [210, 597], [15, 529], [305, 293]]},
+        {"id": "F-03", "name": "Bay F-03", "zone": "Front Row", "polygon": [[499, 297], [690, 305], [623, 637], [274, 590], [494, 298]]},
+        {"id": "F-04", "name": "Bay F-04", "zone": "Front Row", "polygon": [[735, 309], [925, 321], [1084, 652], [705, 659], [734, 313]]},
+        {"id": "F-05", "name": "Bay F-05", "zone": "Front Row", "polygon": [[985, 335], [1132, 344], [1348, 609], [1129, 643], [984, 337]]},
+        {"id": "F-06", "name": "Bay F-06", "zone": "Front Row", "polygon": [[1174, 345], [1284, 353], [1369, 437], [1370, 586], [1174, 348]]}
+      ]
+    },
+    "row_sequence": {
+      "name": "📷 Time-Series Row Feed (Front Spaces)",
+      "resolution": [457, 192],
+      "description": "Fixed surveillance feed monitoring front space transitions (6 bays)",
+      "slots": [
+        {"id": "F-01", "name": "Bay F-01", "zone": "Front Row", "polygon": [[54, 72], [89, 73], [3, 128], [3, 101], [52, 73]]},
+        {"id": "F-02", "name": "Bay F-02", "zone": "Front Row", "polygon": [[103, 73], [149, 74], [70, 149], [5, 132], [102, 73]]},
+        {"id": "F-03", "name": "Bay F-03", "zone": "Front Row", "polygon": [[166, 74], [230, 76], [208, 159], [91, 148], [165, 75]]},
+        {"id": "F-04", "name": "Bay F-04", "zone": "Front Row", "polygon": [[245, 77], [308, 80], [361, 163], [235, 165], [245, 78]]},
+        {"id": "F-05", "name": "Bay F-05", "zone": "Front Row", "polygon": [[328, 84], [377, 86], [449, 152], [376, 161], [328, 84]]},
+        {"id": "F-06", "name": "Bay F-06", "zone": "Front Row", "polygon": [[391, 86], [428, 88], [456, 109], [457, 147], [391, 87]]}
+      ]
+    },
+    "Screenshot 2026-08-17 142441.png": {
+      "name": "📹 Camera Angle 1 — Upper Deck (Front Spaces)",
+      "resolution": [1161, 651],
+      "description": "High-angle surveillance overview of frontmost parking bays (6 bays)",
+      "slots": [
+        {"id": "P1-01", "name": "Bay F-01", "zone": "Front Row", "polygon": [[15, 270], [190, 270], [190, 620], [15, 620]]},
+        {"id": "P1-02", "name": "Bay F-02", "zone": "Front Row", "polygon": [[190, 270], [410, 270], [410, 620], [190, 620]]},
+        {"id": "P1-03", "name": "Bay F-03", "zone": "Front Row", "polygon": [[430, 200], [640, 200], [640, 440], [430, 440]]},
+        {"id": "P1-04", "name": "Bay F-04", "zone": "Front Row", "polygon": [[640, 270], [840, 270], [840, 620], [640, 620]]},
+        {"id": "P1-05", "name": "Bay F-05", "zone": "Front Row", "polygon": [[840, 270], [1030, 270], [1030, 620], [840, 620]]},
+        {"id": "P1-06", "name": "Bay F-06", "zone": "Front Row", "polygon": [[1030, 270], [1155, 270], [1155, 620], [1030, 620]]}
+      ]
+    },
+    "Screenshot 2026-08-17 142454.png": {
+      "name": "📹 Camera Angle 2 — Central Wide Lot (Front Spaces)",
+      "resolution": [1151, 647],
+      "description": "Wide lot surveillance camera overlooking frontmost parking bays (6 bays)",
+      "slots": [
+        {"id": "P2-01", "name": "Bay F-01", "zone": "Front Row", "polygon": [[10, 270], [210, 270], [210, 620], [10, 620]]},
+        {"id": "P2-02", "name": "Bay F-02", "zone": "Front Row", "polygon": [[210, 270], [430, 270], [430, 620], [210, 620]]},
+        {"id": "P2-03", "name": "Bay F-03", "zone": "Front Row", "polygon": [[430, 270], [650, 270], [650, 620], [430, 620]]},
+        {"id": "P2-04", "name": "Bay F-04", "zone": "Front Row", "polygon": [[650, 270], [870, 270], [870, 620], [650, 620]]},
+        {"id": "P2-05", "name": "Bay F-05", "zone": "Front Row", "polygon": [[870, 270], [1070, 270], [1070, 620], [870, 620]]},
+        {"id": "P2-06", "name": "Bay F-06", "zone": "Front Row", "polygon": [[1070, 270], [1145, 270], [1145, 620], [1070, 620]]}
+      ]
+    },
+    "Screenshot 2026-08-17 142506.png": {
+      "name": "📹 Camera Angle 3 — Angled Perimeter (Front Spaces)",
+      "resolution": [1161, 650],
+      "description": "Diagonal perspective across frontmost parking bays (6 bays)",
+      "slots": [
+        {"id": "P3-01", "name": "Bay F-01", "zone": "Front Row", "polygon": [[15, 270], [200, 270], [200, 620], [15, 620]]},
+        {"id": "P3-02", "name": "Bay F-02", "zone": "Front Row", "polygon": [[200, 270], [420, 270], [420, 620], [200, 620]]},
+        {"id": "P3-03", "name": "Bay F-03", "zone": "Front Row", "polygon": [[420, 270], [630, 270], [630, 620], [420, 620]]},
+        {"id": "P3-04", "name": "Bay F-04", "zone": "Front Row", "polygon": [[630, 270], [850, 270], [850, 620], [630, 620]]},
+        {"id": "P3-05", "name": "Bay F-05", "zone": "Front Row", "polygon": [[850, 270], [1040, 270], [1040, 620], [850, 620]]},
+        {"id": "P3-06", "name": "Bay F-06", "zone": "Front Row", "polygon": [[1040, 270], [1155, 270], [1155, 620], [1040, 620]]}
+      ]
+    }
+  }
+}
