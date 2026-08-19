@@ -107,8 +107,9 @@ parking-poc/
 ├── cv-demo/                      # Local ALPR benchmark outputs (gitignored)
 ├── debug_output/                 # Visual regression layers & JSON telemetry outputs
 ├── docs/
-│   ├── Revised_Prototype_Plan.md # Prototype architectural roadmap
-│   ├── SYSTEM_DOCUMENTATION.md   # Comprehensive technical specification
+│   ├── Revised_Prototype_Plan.md      # Prototype architectural roadmap
+│   ├── SYSTEM_DOCUMENTATION.md        # Comprehensive technical specification
+│   ├── TAB6_SPACE_DETECTION_GUIDE.md  # Beginner-friendly guide to Tab 6 Space Detection
 │   ├── Smart_Parking_Implementation_Plan.pdf
 │   └── Smart_Parking_POC_Technical_Implementation_Plan.pdf
 ├── scripts/
