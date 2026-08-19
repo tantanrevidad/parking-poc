@@ -814,12 +814,16 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Inject Solid Color CSS for Parking Bay Buttons
+    # Inject Solid Color CSS for Parking Bay Buttons with High Specificity
     btn_css_rules = []
     for _, r in live_df.iterrows():
         bg = sm.STATUS_COLORS[r.status]
-        fg = "#0F172A" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
+        fg = "#1E293B" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
         btn_css_rules.append(f"""
+        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"],
+        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"],
+        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"],
+        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"],
         button[aria-label*="{r.slot_code}"] {{
             background-color: {bg} !important;
             background: {bg} !important;
@@ -828,19 +832,30 @@ with tab1:
             font-weight: 800 !important;
             font-size: 0.78rem !important;
             border-radius: 7px !important;
-            min-height: 48px !important;
-            padding: 5px 2px !important;
-            white-space: pre-line !important;
-            line-height: 1.15 !important;
+            min-height: 44px !important;
+            padding: 4px 2px !important;
+            letter-spacing: 0.03em !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
             transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
         }}
+        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"] p,
+        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"] p,
+        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"] p,
+        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"] p,
         button[aria-label*="{r.slot_code}"] p {{
             color: {fg} !important;
             font-weight: 800 !important;
             font-size: 0.78rem !important;
+            letter-spacing: 0.03em !important;
             margin: 0 !important;
+            padding: 0 !important;
+            text-align: center !important;
+            line-height: 1.2 !important;
         }}
+        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:hover,
+        div[data-testid="stColumn"] div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:hover,
+        div[data-testid="stButton"] button[aria-label*="{r.slot_code}"]:hover,
+        button[data-testid="baseButton-secondary"][aria-label*="{r.slot_code}"]:hover,
         button[aria-label*="{r.slot_code}"]:hover {{
             background-color: {bg} !important;
             background: {bg} !important;
@@ -848,6 +863,7 @@ with tab1:
             transform: translateY(-2px) !important;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
         }}
+        .stApp div[data-testid="stButton"] > button[aria-label*="{r.slot_code}"]:active,
         button[aria-label*="{r.slot_code}"]:active {{
             transform: translateY(0px) !important;
         }}
@@ -920,8 +936,10 @@ with tab1:
                         else:
                             ind_text = "LEAVING"
 
+                        # Clean formatted single-line button text with bullet separator
+                        button_label = f"{row.slot_code} · {ind_text}"
                         if st.button(
-                            f"{row.slot_code}\n{ind_text}",
+                            button_label,
                             key=f"bay_slot_btn_{row.slot_id}",
                             help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
                             use_container_width=True,
