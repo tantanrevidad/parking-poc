@@ -703,18 +703,6 @@ if "selected_slot_id" not in st.session_state:
 if "selected_slot_code" not in st.session_state:
     st.session_state.selected_slot_code = None
 
-# Handle interactive parking stall click via URL query parameter
-if "slot_inspect" in st.query_params:
-    try:
-        inspect_id = int(st.query_params["slot_inspect"])
-        st.session_state.selected_slot_id = inspect_id
-        match_slot = live_df[live_df.slot_id == inspect_id]
-        if not match_slot.empty:
-            st.session_state.selected_slot_code = str(match_slot.iloc[0]["slot_code"])
-            inspect_slot_dialog(inspect_id, str(match_slot.iloc[0]["slot_code"]), match_slot.iloc[0].to_dict())
-    except Exception:
-        pass
-
 
 # ---------------------------------------------------------------------------
 # Tabs
@@ -826,6 +814,46 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
+    # Inject Solid Color CSS for Parking Bay Buttons
+    btn_css_rules = []
+    for _, r in live_df.iterrows():
+        bg = sm.STATUS_COLORS[r.status]
+        fg = "#0F172A" if r.status in (sm.FREE, sm.OCCUPIED_PENDING_MATCH) else "#FFFFFF"
+        btn_css_rules.append(f"""
+        button[aria-label*="{r.slot_code}"] {{
+            background-color: {bg} !important;
+            background: {bg} !important;
+            color: {fg} !important;
+            border: 1px solid rgba(0, 0, 0, 0.25) !important;
+            font-weight: 800 !important;
+            font-size: 0.78rem !important;
+            border-radius: 7px !important;
+            min-height: 48px !important;
+            padding: 5px 2px !important;
+            white-space: pre-line !important;
+            line-height: 1.15 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+        }}
+        button[aria-label*="{r.slot_code}"] p {{
+            color: {fg} !important;
+            font-weight: 800 !important;
+            font-size: 0.78rem !important;
+            margin: 0 !important;
+        }}
+        button[aria-label*="{r.slot_code}"]:hover {{
+            background-color: {bg} !important;
+            background: {bg} !important;
+            filter: brightness(1.15) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+        }}
+        button[aria-label*="{r.slot_code}"]:active {{
+            transform: translateY(0px) !important;
+        }}
+        """)
+    st.markdown(f"<style>{''.join(btn_css_rules)}</style>", unsafe_allow_html=True)
+
     # ── Render Township & Zone Seat-Map Sections ──
     for _, site in sites_df.iterrows():
         if site.site_id not in active_site_ids:
@@ -884,27 +912,23 @@ with tab1:
                 for c_idx, (_, row) in enumerate(row_slice.iterrows()):
                     with cols[c_idx]:
                         if row.status == sm.FREE:
-                            status_class = "bay-stall-free"
                             ind_text = "OPEN"
                         elif row.status == sm.OCCUPIED_UNPAID:
-                            status_class = "bay-stall-occupied"
                             ind_text = "BUSY"
                         elif row.status == sm.OCCUPIED_PENDING_MATCH:
-                            status_class = "bay-stall-pending"
                             ind_text = "MATCH"
                         else:
-                            status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        st.markdown(
-                            f"<a href='?slot_inspect={row.slot_id}' target='_self' style='text-decoration:none; display:block;'>"
-                            f"<div class='bay-stall {status_class}' title='Click to inspect SQLite row for {row.slot_code}'>"
-                            f"<div class='bay-code'>{row.slot_code}</div>"
-                            f"<div class='bay-indicator'>{ind_text}</div>"
-                            f"</div>"
-                            f"</a>",
-                            unsafe_allow_html=True,
-                        )
+                        if st.button(
+                            f"{row.slot_code}\n{ind_text}",
+                            key=f"bay_slot_btn_{row.slot_id}",
+                            help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
+                            use_container_width=True,
+                        ):
+                            st.session_state.selected_slot_id = int(row.slot_id)
+                            st.session_state.selected_slot_code = str(row.slot_code)
+                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
 
             # Zone-Level Database Row Inspector Tool
             with st.expander(f"Inspect SQLite Database Row for {z.label} Bays", expanded=False):
