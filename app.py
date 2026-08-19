@@ -44,19 +44,19 @@ if "theme_mode" not in st.session_state:
 
 def get_theme_css(theme_mode: str = "dark") -> str:
     is_dark = theme_mode == "dark"
-    bg_app = "#121417" if is_dark else "#F4F5F7"
+    bg_app = "#121417" if is_dark else "#F8FAFC"
     bg_card = "#1A1C23" if is_dark else "#FFFFFF"
-    bg_card_hover = "#22252E" if is_dark else "#F8FAFC"
+    bg_card_hover = "#22252E" if is_dark else "#E2E8F0"
     bg_sidebar = "#16181F" if is_dark else "#FFFFFF"
-    border_color = "#282C37" if is_dark else "#E2E8F0"
-    border_subtle = "#20232C" if is_dark else "#EDF2F7"
+    border_color = "#282C37" if is_dark else "#CBD5E1"
+    border_subtle = "#20232C" if is_dark else "#E2E8F0"
     text_primary = "#F8FAFC" if is_dark else "#0F172A"
-    text_secondary = "#94A3B8" if is_dark else "#475569"
-    text_muted = "#64748B" if is_dark else "#94A3B8"
+    text_secondary = "#94A3B8" if is_dark else "#334155"
+    text_muted = "#64748B" if is_dark else "#64748B"
     accent_blue = "#38BDF8" if is_dark else "#0284C7"
     accent_purple = "#C084FC" if is_dark else "#9333EA"
-    card_subtle = "#14161C" if is_dark else "#F8FAFC"
-    tab_bg = "#1A1C23" if is_dark else "#E2E8F0"
+    card_subtle = "#14161C" if is_dark else "#F1F5F9"
+    tab_bg = "#16181F" if is_dark else "#E2E8F0"
     tab_active_bg = "#2563EB" if is_dark else "#2563EB"
 
     return f"""
@@ -157,30 +157,58 @@ section[data-testid="stSidebar"] {{
     margin: 2px 0 0 0;
 }}
 
-/* ── Tab Bar ── */
+/* ── Segmented Tab Bar Navigation ── */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 4px;
-    background-color: {tab_bg};
-    padding: 4px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 18px;
+    gap: 6px !important;
+    background-color: {tab_bg} !important;
+    padding: 6px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-color) !important;
+    margin-bottom: 20px !important;
+    display: inline-flex !important;
+    width: 100% !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {{
+    display: none !important;
 }}
 .stTabs [data-baseweb="tab"] {{
-    height: 38px;
-    border-radius: 7px;
+    height: 40px !important;
+    border-radius: 8px !important;
     color: var(--text-secondary) !important;
-    font-weight: 600;
-    font-size: 0.82rem;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
     border: none !important;
     padding: 0px 18px !important;
     background-color: transparent !important;
-    transition: all 0.15s ease;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}}
+.stTabs [data-baseweb="tab"] p {{
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    margin: 0 !important;
+    transition: color 0.15s ease !important;
+}}
+.stTabs [data-baseweb="tab"]:hover {{
+    background-color: var(--bg-card-hover) !important;
+    color: var(--text-primary) !important;
+}}
+.stTabs [data-baseweb="tab"]:hover p {{
+    color: var(--text-primary) !important;
 }}
 .stTabs [aria-selected="true"] {{
     background-color: {tab_active_bg} !important;
     color: #FFFFFF !important;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}}
+.stTabs [aria-selected="true"] p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
 }}
 
 /* ── Legend Strip ── */
