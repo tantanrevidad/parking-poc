@@ -157,28 +157,38 @@ section[data-testid="stSidebar"] {{
     margin: 2px 0 0 0;
 }}
 
-/* ── Segmented Tab Bar Navigation ── */
+/* ── Segmented Tab Bar Navigation (Bulletproof Light & Dark Mode) ── */
 .stTabs [data-baseweb="tab-list"] {{
     gap: 6px !important;
     background-color: {tab_bg} !important;
     padding: 6px !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     border: 1px solid var(--border-color) !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 22px !important;
     display: inline-flex !important;
     width: 100% !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
 }}
 .stTabs [data-baseweb="tab-highlight"],
 .stTabs [data-baseweb="tab-border"] {{
     display: none !important;
 }}
+.stTabs [data-baseweb="tab-list"] button,
+.stTabs [data-baseweb="tab-list"] button *,
+.stTabs [data-baseweb="tab"],
+.stTabs [data-baseweb="tab"] *,
+button[data-baseweb="tab"],
+button[data-baseweb="tab"] * {{
+    color: {tab_text_color} !important;
+    -webkit-text-fill-color: {tab_text_color} !important;
+    font-weight: 800 !important;
+    font-size: 0.86rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}}
 .stTabs [data-baseweb="tab"] {{
     height: 40px !important;
     border-radius: 8px !important;
-    color: {tab_text_color} !important;
-    font-weight: 800 !important;
-    font-size: 0.86rem !important;
     border: none !important;
     padding: 0px 18px !important;
     background-color: transparent !important;
@@ -187,28 +197,41 @@ section[data-testid="stSidebar"] {{
     align-items: center !important;
     justify-content: center !important;
 }}
-.stTabs [data-baseweb="tab"] p {{
-    color: {tab_text_color} !important;
-    font-weight: 800 !important;
-    font-size: 0.86rem !important;
-    margin: 0 !important;
-    transition: color 0.15s ease !important;
-}}
 .stTabs [data-baseweb="tab"]:hover {{
     background-color: var(--bg-card-hover) !important;
-    color: {tab_text_color} !important;
 }}
-.stTabs [data-baseweb="tab"]:hover p {{
-    color: {tab_text_color} !important;
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"],
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] *,
+.stTabs [data-baseweb="tab"][aria-selected="true"],
+.stTabs [data-baseweb="tab"][aria-selected="true"] *,
+button[data-baseweb="tab"][aria-selected="true"],
+button[data-baseweb="tab"][aria-selected="true"] * {{
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    background-color: {tab_active_bg} !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
 }}
 .stTabs [aria-selected="true"] {{
     background-color: {tab_active_bg} !important;
-    color: #FFFFFF !important;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
 }}
-.stTabs [aria-selected="true"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
+
+/* ── Streamlit Form Controls Adaptation ── */
+div[data-testid="stDateInput"] input,
+div[data-testid="stTimeInput"] input,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {{
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    font-weight: 600 !important;
+}}
+div[data-testid="stDateInput"] label,
+div[data-testid="stTimeInput"] label,
+div[data-testid="stSelectbox"] label {{
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
 }}
 
 /* ── Legend Strip ── */
@@ -272,9 +295,9 @@ section[data-testid="stSidebar"] {{
     margin-left: 10px;
     vertical-align: middle;
 }}
-.zone-tag-office   {{ background: rgba(14, 165, 233, 0.15); color: #38BDF8; border: 1px solid rgba(14, 165, 233, 0.3); }}
-.zone-tag-mall     {{ background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }}
-.zone-tag-residential {{ background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }}
+.zone-tag-office   {{ background: { "rgba(14, 165, 233, 0.15)" if is_dark else "#E0F2FE" }; color: { "#38BDF8" if is_dark else "#0369A1" }; border: 1px solid { "rgba(14, 165, 233, 0.3)" if is_dark else "#BAE6FD" }; }}
+.zone-tag-mall     {{ background: { "rgba(245, 158, 11, 0.15)" if is_dark else "#FEF3C7" }; color: { "#FBBF24" if is_dark else "#B45309" }; border: 1px solid { "rgba(245, 158, 11, 0.3)" if is_dark else "#FDE68A" }; }}
+.zone-tag-residential {{ background: { "rgba(16, 185, 129, 0.15)" if is_dark else "#D1FAE5" }; color: { "#34D399" if is_dark else "#047857" }; border: 1px solid { "rgba(16, 185, 129, 0.3)" if is_dark else "#A7F3D0" }; }}
 
 .zone-avail {{
     font-size: 0.88rem;
@@ -508,7 +531,7 @@ button[aria-label*="LEAVING"] p {{
 .drive-aisle-line {{
     flex: 1;
     height: 2px;
-    background: repeating-linear-gradient(90deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 10px, transparent 10px, transparent 20px);
+    background: repeating-linear-gradient(90deg, { "rgba(255,255,255,0.2)" if is_dark else "#94A3B8" } 0px, { "rgba(255,255,255,0.2)" if is_dark else "#94A3B8" } 10px, transparent 10px, transparent 20px);
 }}
 .drive-aisle-label {{
     font-size: 0.65rem;
@@ -519,6 +542,7 @@ button[aria-label*="LEAVING"] p {{
     padding: 2px 10px;
     border: 1px dashed var(--border-color);
     border-radius: 4px;
+    background: { "transparent" if is_dark else "#F1F5F9" };
 }}
 
 /* ── Modern Metric Cards ── */
@@ -563,6 +587,14 @@ button[aria-label*="LEAVING"] p {{
     color: var(--text-muted);
     margin-bottom: 16px;
     line-height: 1.4;
+}}
+
+/* ── Dialog Inspector Modal ── */
+div[data-testid="stDialog"] div[role="dialog"] {{
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px !important;
 }}
 
 /* ── Misc ── */
