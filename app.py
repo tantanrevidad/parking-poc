@@ -54,6 +54,7 @@ def get_theme_css(theme_mode: str = "dark") -> str:
     text_muted = "#64748B" if is_dark else "#94A3B8"
     accent_blue = "#38BDF8" if is_dark else "#0284C7"
     accent_purple = "#C084FC" if is_dark else "#9333EA"
+    card_subtle = "#14161C" if is_dark else "#F8FAFC"
     tab_bg = "#1A1C23" if is_dark else "#E2E8F0"
     tab_active_bg = "#2563EB" if is_dark else "#2563EB"
 
