@@ -259,51 +259,75 @@ section[data-testid="stSidebar"] {{
     font-size: 1rem;
 }}
 
-/* ── Solid Color Architectural Parking Stalls ── */
-.bay-stall {{
-    border-radius: 7px;
-    padding: 10px 4px 8px 4px;
-    text-align: center;
+/* ── Solid Color Architectural Parking Stall Buttons ── */
+.slot-container {{
+    width: 100%;
     margin-bottom: 8px;
-    font-weight: 800;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
 }}
-.bay-stall:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-    filter: brightness(1.1);
+.slot-container div[data-testid="stButton"] button {{
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.02em !important;
+    min-height: 48px !important;
+    padding: 6px 2px !important;
+    border: 1px solid rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+    white-space: pre-line !important;
+    line-height: 1.15 !important;
 }}
-.bay-stall-free {{
+.slot-container div[data-testid="stButton"] button:hover {{
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    filter: brightness(1.14) !important;
+}}
+.slot-container div[data-testid="stButton"] button:active {{
+    transform: translateY(0px) !important;
+}}
+
+.slot-container.bay-stall-free div[data-testid="stButton"] button {{
     background-color: #10B981 !important;
+    background: #10B981 !important;
     color: #FFFFFF !important;
+    border-color: #059669 !important;
 }}
-.bay-stall-occupied {{
+.slot-container.bay-stall-free div[data-testid="stButton"] button p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+}}
+
+.slot-container.bay-stall-occupied div[data-testid="stButton"] button {{
     background-color: #E11D48 !important;
+    background: #E11D48 !important;
     color: #FFFFFF !important;
+    border-color: #BE123C !important;
 }}
-.bay-stall-pending {{
+.slot-container.bay-stall-occupied div[data-testid="stButton"] button p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+}}
+
+.slot-container.bay-stall-pending div[data-testid="stButton"] button {{
     background-color: #F59E0B !important;
+    background: #F59E0B !important;
     color: #1E293B !important;
+    border-color: #D97706 !important;
 }}
-.bay-stall-vacating {{
+.slot-container.bay-stall-pending div[data-testid="stButton"] button p {{
+    color: #1E293B !important;
+    font-weight: 800 !important;
+}}
+
+.slot-container.bay-stall-vacating div[data-testid="stButton"] button {{
     background-color: #0284C7 !important;
+    background: #0284C7 !important;
     color: #FFFFFF !important;
+    border-color: #0369A1 !important;
 }}
-.bay-code {{
-    font-size: 0.82rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-}}
-.bay-indicator {{
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-top: 3px;
-    opacity: 0.95;
+.slot-container.bay-stall-vacating div[data-testid="stButton"] button p {{
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
 }}
 
 /* ── Drive Aisle Separator ── */
@@ -566,51 +590,102 @@ def fetch_slot_db_records(slot_id: int):
 def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
     slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(slot_id)
 
-    st.markdown(f"### Parking Stall `{slot_code}` (Database Row)")
-    st.caption(f"Direct SQLite table inspection from `data/parking.db` for Slot ID `{slot_id}`")
+    st.markdown(f"### Parking Stall `{slot_code}` (Database Row Inspector)")
+    st.caption(f"Direct relational records queried from SQLite database (`data/parking.db`) for Slot ID `{slot_id}`")
 
-    tab_merged, tab_state, tab_ticket, tab_alpr, tab_sql = st.tabs([
-        "Live Merged State",
-        "current_state Table",
-        "ticketing_records Table",
-        "plate_reads Table",
-        "Raw SQL Query",
+    tab_merged, tab_state, tab_ticket, tab_alpr, tab_slot, tab_sql = st.tabs([
+        "Active Live Telemetry",
+        "Active Occupancy State (current_state)",
+        "Ticketing & Settlement (ticketing_records)",
+        "Optical Plate Read (plate_reads)",
+        "Infrastructure Metadata (slots & zones)",
+        "Executed SQLite Statement (Raw SQL)",
     ])
 
     with tab_merged:
-        st.markdown("**Simulated Live Row (Memory & Database Combined):**")
+        st.markdown("##### Consolidated Telemetry Snapshot")
         df_live = pd.DataFrame([live_row_dict])
-        st.dataframe(df_live, hide_index=True, width="stretch")
+        rename_map = {
+            "slot_id": "Slot ID",
+            "zone_id": "Zone ID",
+            "slot_code": "Slot Code",
+            "status": "Occupancy Status",
+            "plate": "Assigned Vehicle Plate",
+            "ticket_id": "Ticket ID",
+            "read_text": "OCR Read Text",
+            "true_plate": "True Plate",
+            "confidences": "Char Confidences",
+            "site_id": "Township Site ID",
+        }
+        df_live_renamed = df_live.rename(columns={k: v for k, v in rename_map.items() if k in df_live.columns})
+        st.dataframe(df_live_renamed, hide_index=True, width="stretch")
 
     with tab_state:
-        st.markdown("**`current_state` SQLite Table Record:**")
+        st.markdown("##### Active Bay Occupancy State (`current_state` Table)")
         if not state_info.empty:
-            st.dataframe(state_info, hide_index=True, width="stretch")
+            df_state_renamed = state_info.rename(columns={
+                "slot_id": "Slot ID",
+                "status": "Current Occupancy Status",
+                "updated_at": "Last State Timestamp",
+            })
+            st.dataframe(df_state_renamed, hide_index=True, width="stretch")
         else:
-            st.info("No record found in `current_state` table.")
+            st.info("No active occupancy state found in `current_state` table.")
 
     with tab_ticket:
-        st.markdown("**`ticketing_records` SQLite Table Record:**")
+        st.markdown("##### Ticketing & Settlement Record (`ticketing_records` Table)")
         if not ticket_info.empty:
-            st.dataframe(ticket_info, hide_index=True, width="stretch")
+            df_ticket_renamed = ticket_info.rename(columns={
+                "ticket_id": "Ticket ID",
+                "plate": "Registered License Plate",
+                "entry_time": "Entry Timestamp",
+                "payment_settled_at": "Payment Settlement Time",
+                "slot_id": "Assigned Slot ID",
+            })
+            st.dataframe(df_ticket_renamed, hide_index=True, width="stretch")
         else:
-            st.info("Bay is currently vacant — no active ticketing record on file.")
+            st.info("Bay is currently vacant — no active ticketing or billing record on file.")
 
     with tab_alpr:
-        st.markdown("**`plate_reads` SQLite Table Record:**")
+        st.markdown("##### Optical Character Recognition Plate Read (`plate_reads` Table)")
         if not plate_info.empty:
-            st.dataframe(plate_info, hide_index=True, width="stretch")
+            df_plate_renamed = plate_info.rename(columns={
+                "read_id": "Read ID",
+                "slot_id": "Monitored Slot ID",
+                "raw_ocr_text": "Optical OCR Text",
+                "char_confidences": "Per-Character Confidence Vector",
+                "true_plate": "Ground Truth Plate",
+            })
+            st.dataframe(df_plate_renamed, hide_index=True, width="stretch")
         else:
-            st.info("No optical plate capture associated with this bay.")
+            st.info("No optical camera plate capture record associated with this parking bay.")
+
+    with tab_slot:
+        st.markdown("##### Parking Bay Infrastructure Metadata (`slots` & `zones` Tables)")
+        if not slot_info.empty:
+            df_slot_renamed = slot_info.rename(columns={
+                "slot_id": "Slot ID",
+                "slot_code": "Slot Identifier Code",
+                "zone_name": "Parking Zone Name",
+                "level": "Building Deck Level",
+                "zone_type": "Zone Commercial Archetype",
+                "site_name": "Township Site Name",
+                "capacity": "Total Zone Capacity",
+            })
+            st.dataframe(df_slot_renamed, hide_index=True, width="stretch")
+        else:
+            st.info("No slot infrastructure metadata found.")
 
     with tab_sql:
-        st.markdown("**Underlying SQLite Query Executed:**")
-        sql_query = f"""SELECT s.slot_id, s.slot_code, z.label AS zone_name, z.level,
-       cs.status, cs.updated_at,
-       tr.ticket_id, tr.plate, tr.entry_time, tr.payment_settled_at,
-       pr.raw_ocr_text, pr.true_plate
+        st.markdown("##### Executed Underlying SQLite Statement")
+        sql_query = f"""SELECT 
+    s.slot_id, s.slot_code, z.label AS zone_name, z.level, z.zone_type, st.name AS site_name,
+    cs.status, cs.updated_at,
+    tr.ticket_id, tr.plate, tr.entry_time, tr.payment_settled_at,
+    pr.read_id, pr.raw_ocr_text, pr.char_confidences, pr.true_plate
 FROM slots s
 LEFT JOIN zones z ON s.zone_id = z.zone_id
+LEFT JOIN sites st ON z.site_id = st.site_id
 LEFT JOIN current_state cs ON s.slot_id = cs.slot_id
 LEFT JOIN ticketing_records tr ON s.slot_id = tr.slot_id
 LEFT JOIN plate_reads pr ON s.slot_id = pr.slot_id
@@ -831,13 +906,17 @@ with tab1:
                             status_class = "bay-stall-vacating"
                             ind_text = "LEAVING"
 
-                        st.markdown(
-                            f"<div class='bay-stall {status_class}'>"
-                            f"<div class='bay-code'>{row.slot_code}</div>"
-                            f"<div class='bay-indicator'>{ind_text}</div>"
-                            f"</div>",
-                            unsafe_allow_html=True,
-                        )
+                        st.markdown(f"<div class='slot-container {status_class}'>", unsafe_allow_html=True)
+                        if st.button(
+                            f"{row.slot_code}\n{ind_text}",
+                            key=f"slot_btn_{row.slot_id}",
+                            help=f"Click to inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
+                            use_container_width=True,
+                        ):
+                            st.session_state.selected_slot_id = int(row.slot_id)
+                            st.session_state.selected_slot_code = str(row.slot_code)
+                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
+                        st.markdown("</div>", unsafe_allow_html=True)
 
             # Zone-Level Database Row Inspector Tool
             with st.expander(f"Inspect SQLite Database Row for {z.label} Bays", expanded=False):
@@ -875,25 +954,59 @@ with tab1:
         """, unsafe_allow_html=True)
 
         it1, it2, it3, it4 = st.tabs([
-            "current_state Table",
-            "ticketing_records Table",
-            "plate_reads Table",
-            "slots Metadata Table",
+            "Active Occupancy State (current_state)",
+            "Ticketing & Settlement (ticketing_records)",
+            "Optical Plate Read (plate_reads)",
+            "Infrastructure Metadata (slots & zones)",
         ])
         with it1:
-            st.dataframe(state_info, hide_index=True, width="stretch")
+            if not state_info.empty:
+                df_s = state_info.rename(columns={
+                    "slot_id": "Slot ID",
+                    "status": "Current Occupancy Status",
+                    "updated_at": "Last State Timestamp",
+                })
+                st.dataframe(df_s, hide_index=True, width="stretch")
+            else:
+                st.info("No active occupancy state found in `current_state` table.")
         with it2:
             if not ticket_info.empty:
-                st.dataframe(ticket_info, hide_index=True, width="stretch")
+                df_t = ticket_info.rename(columns={
+                    "ticket_id": "Ticket ID",
+                    "plate": "Registered License Plate",
+                    "entry_time": "Entry Timestamp",
+                    "payment_settled_at": "Payment Settlement Time",
+                    "slot_id": "Assigned Slot ID",
+                })
+                st.dataframe(df_t, hide_index=True, width="stretch")
             else:
                 st.info("Bay is vacant — no active ticketing record in database.")
         with it3:
             if not plate_info.empty:
-                st.dataframe(plate_info, hide_index=True, width="stretch")
+                df_p = plate_info.rename(columns={
+                    "read_id": "Read ID",
+                    "slot_id": "Monitored Slot ID",
+                    "raw_ocr_text": "Optical OCR Text",
+                    "char_confidences": "Per-Character Confidence Vector",
+                    "true_plate": "Ground Truth Plate",
+                })
+                st.dataframe(df_p, hide_index=True, width="stretch")
             else:
                 st.info("No optical plate capture record in database.")
         with it4:
-            st.dataframe(slot_info, hide_index=True, width="stretch")
+            if not slot_info.empty:
+                df_sl = slot_info.rename(columns={
+                    "slot_id": "Slot ID",
+                    "slot_code": "Slot Identifier Code",
+                    "zone_name": "Parking Zone Name",
+                    "level": "Building Deck Level",
+                    "zone_type": "Zone Commercial Archetype",
+                    "site_name": "Township Site Name",
+                    "capacity": "Total Zone Capacity",
+                })
+                st.dataframe(df_sl, hide_index=True, width="stretch")
+            else:
+                st.info("No slot infrastructure metadata found.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
