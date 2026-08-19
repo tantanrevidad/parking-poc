@@ -34,307 +34,296 @@ DB_PATH = "data/parking.db"
 CV_DEMO_DIR = Path("cv-demo")
 
 # ---------------------------------------------------------------------------
-# Custom Enterprise CSS
+# Theme System & Professional Enterprise CSS
 # ---------------------------------------------------------------------------
 
-CUSTOM_CSS = """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "dark"
 
-html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+
+def get_theme_css(theme_mode: str = "dark") -> str:
+    is_dark = theme_mode == "dark"
+    bg_app = "#121417" if is_dark else "#F4F5F7"
+    bg_card = "#1A1C23" if is_dark else "#FFFFFF"
+    bg_card_hover = "#22252E" if is_dark else "#F8FAFC"
+    bg_sidebar = "#16181F" if is_dark else "#FFFFFF"
+    border_color = "#282C37" if is_dark else "#E2E8F0"
+    border_subtle = "#20232C" if is_dark else "#EDF2F7"
+    text_primary = "#F8FAFC" if is_dark else "#0F172A"
+    text_secondary = "#94A3B8" if is_dark else "#475569"
+    text_muted = "#64748B" if is_dark else "#94A3B8"
+    accent_blue = "#38BDF8" if is_dark else "#0284C7"
+    accent_purple = "#C084FC" if is_dark else "#9333EA"
+    tab_bg = "#1A1C23" if is_dark else "#E2E8F0"
+    tab_active_bg = "#2563EB" if is_dark else "#2563EB"
+
+    return f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {{
+    --bg-app: {bg_app};
+    --bg-card: {bg_card};
+    --bg-card-hover: {bg_card_hover};
+    --border-color: {border_color};
+    --border-subtle: {border_subtle};
+    --text-primary: {text_primary};
+    --text-secondary: {text_secondary};
+    --text-muted: {text_muted};
+    --accent-blue: {accent_blue};
+    --accent-purple: {accent_purple};
+}}
+
+html, body, [class*="css"] {{
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}}
 
 /* Hide default chrome */
-header[data-testid="stHeader"] { background: transparent !important; }
-footer { visibility: hidden; }
-#MainMenu { visibility: hidden; }
+header[data-testid="stHeader"] {{ background: transparent !important; }}
+footer {{ visibility: hidden; }}
+#MainMenu {{ visibility: hidden; }}
 
-.stApp {
-    background-color: #0F172A;
-    color: #F8FAFC;
-}
+.stApp {{
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+}}
 
-section[data-testid="stSidebar"] {
-    background-color: #1E293B !important;
-    border-right: 1px solid #334155 !important;
-}
+section[data-testid="stSidebar"] {{
+    background-color: {bg_sidebar} !important;
+    border-right: 1px solid var(--border-color) !important;
+}}
 
-/* ── Header ── */
-.app-header {
-    padding: 20px 0 8px 0;
-    margin-bottom: 4px;
-}
-.app-header h1 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #F8FAFC;
-    margin: 0;
-    letter-spacing: -0.03em;
-}
-.app-header p {
-    font-size: 0.82rem;
-    color: #64748B;
-    margin: 4px 0 0 0;
-}
-
-/* ── Clock Toolbar ── */
-.clock-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 10px 20px;
-    margin-bottom: 12px;
-}
-.clock-time {
-    font-size: 1.15rem;
+/* ── Hero Centered Date & Time Header ── */
+.hero-clock-container {{
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px 20px 20px 20px;
+    margin: 8px 0 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    position: relative;
+    overflow: hidden;
+}}
+.hero-clock-container::before {{
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #38BDF8, #818CF8, #C084FC);
+}}
+.hero-clock-eyebrow {{
+    font-size: 0.72rem;
     font-weight: 700;
-    color: #F8FAFC;
-    letter-spacing: -0.01em;
-}
-.clock-label {
-    font-size: 0.68rem;
-    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748B;
-    margin-bottom: 2px;
-}
-
-/* ── Site Selector Pills ── */
-.site-pills {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-}
-.site-pill {
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}}
+.hero-clock-time {{
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin: 2px 0 4px 0;
+    font-feature-settings: "tnum";
+}}
+.hero-clock-date {{
+    font-size: 1.05rem;
     font-weight: 600;
-    cursor: pointer;
-    border: 1px solid #334155;
-    background: #1E293B;
-    color: #94A3B8;
-    transition: all 0.15s ease;
-}
-.site-pill.active {
-    background: #0EA5E9;
-    color: #FFFFFF;
-    border-color: #0EA5E9;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-}
+    color: var(--accent-blue);
+    letter-spacing: -0.01em;
+}}
+
+/* ── Top Bar Brand ── */
+.app-brand {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0 12px 0;
+}}
+.app-brand h1 {{
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+}}
+.app-brand p {{
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 2px 0 0 0;
+}}
 
 /* ── Tab Bar ── */
-.stTabs [data-baseweb="tab-list"] {
+.stTabs [data-baseweb="tab-list"] {{
     gap: 4px;
-    background-color: #1E293B;
+    background-color: {tab_bg};
     padding: 4px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    margin-bottom: 20px;
-}
-.stTabs [data-baseweb="tab"] {
-    height: 36px;
-    border-radius: 6px;
-    color: #94A3B8 !important;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 18px;
+}}
+.stTabs [data-baseweb="tab"] {{
+    height: 38px;
+    border-radius: 7px;
+    color: var(--text-secondary) !important;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     border: none !important;
-    padding: 0px 16px !important;
+    padding: 0px 18px !important;
     background-color: transparent !important;
     transition: all 0.15s ease;
-}
-.stTabs [aria-selected="true"] {
-    background-color: #0EA5E9 !important;
+}}
+.stTabs [aria-selected="true"] {{
+    background-color: {tab_active_bg} !important;
     color: #FFFFFF !important;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-}
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+}}
 
-/* ── Legend ── */
-.legend-strip {
+/* ── Legend Strip ── */
+.legend-strip {{
     display: flex;
-    gap: 20px;
-    padding: 0 0 14px 0;
+    gap: 16px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 18px;
     align-items: center;
-}
-.legend-entry {
+    flex-wrap: wrap;
+}}
+.legend-entry {{
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #94A3B8;
-}
-.legend-entry .dot {
-    width: 8px;
-    height: 8px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}}
+.legend-entry .dot {{
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     flex-shrink: 0;
-}
+}}
 
-/* ── Zone Section ── */
-.zone-section {
-    margin-bottom: 20px;
-}
-.site-divider {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #64748B;
-    padding: 10px 0 8px 0;
-    border-bottom: 1px solid #1E293B;
-    margin-bottom: 12px;
-}
-.zone-header {
+/* ── Zone Section Card ── */
+.zone-card {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}}
+.zone-header {{
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    padding: 6px 0 8px 0;
-}
-.zone-name {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}}
+.zone-name {{
     font-size: 0.95rem;
     font-weight: 700;
-    color: #E2E8F0;
-}
-.zone-tag {
+    color: var(--text-primary);
+}}
+.zone-tag {{
     display: inline-block;
-    padding: 1px 7px;
-    border-radius: 3px;
-    font-size: 0.62rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-left: 8px;
     vertical-align: middle;
-}
-.zone-tag-office   { background: rgba(14, 165, 233, 0.15); color: #38BDF8; }
-.zone-tag-mall     { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
-.zone-tag-residential { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+}}
+.zone-tag-office   {{ background: rgba(14, 165, 233, 0.15); color: #38BDF8; }}
+.zone-tag-mall     {{ background: rgba(245, 158, 11, 0.15); color: #FBBF24; }}
+.zone-tag-residential {{ background: rgba(16, 185, 129, 0.15); color: #34D399; }}
 
-.zone-avail {
+.zone-avail {{
     font-size: 0.82rem;
     font-weight: 500;
-    color: #64748B;
-}
-.zone-avail strong {
-    color: #CBD5E1;
+    color: var(--text-secondary);
+}}
+.zone-avail strong {{
+    color: var(--text-primary);
     font-weight: 700;
-}
+}}
 
 /* ── Slot Grid ── */
-.slot-card {
-    border-radius: 6px;
+.slot-card {{
+    border-radius: 7px;
     padding: 10px 4px;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 700;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     letter-spacing: 0.02em;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.slot-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-}
+}}
+.slot-card:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}}
 
-/* ── Metric Cards ── */
-.metric-card {
-    background: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 16px 18px;
-}
-.metric-label {
+/* ── Modern Metric Cards ── */
+.metric-card {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}}
+.metric-label {{
     font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #64748B;
-    margin-bottom: 4px;
-}
-.metric-value {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #F8FAFC;
-    line-height: 1.2;
-}
-.metric-sub {
-    font-size: 0.72rem;
-    color: #38BDF8;
-    margin-top: 3px;
-    font-weight: 500;
-}
-
-/* ── Forecast Banner ── */
-.forecast-banner {
-    border-radius: 10px;
-    padding: 18px 24px;
-    text-align: center;
-    margin-bottom: 16px;
-}
-.forecast-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    color: var(--text-muted);
     margin-bottom: 2px;
-}
-.forecast-value {
-    font-size: 1.35rem;
+}}
+.metric-value {{
+    font-size: 1.45rem;
     font-weight: 800;
-    color: #F8FAFC;
-}
-
-/* ── Result Banners ── */
-.banner-success {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    color: #34D399;
-    border-radius: 8px;
-    padding: 12px 16px;
+    color: var(--text-primary);
+    line-height: 1.2;
+}}
+.metric-sub {{
+    font-size: 0.72rem;
+    color: var(--accent-blue);
+    margin-top: 2px;
     font-weight: 600;
-    font-size: 0.85rem;
-}
-.banner-warning {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    color: #FBBF24;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
+}}
 
 /* ── Section Title ── */
-.section-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #F8FAFC;
+.section-title {{
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
     margin-bottom: 2px;
-}
-.section-desc {
+    letter-spacing: -0.02em;
+}}
+.section-desc {{
     font-size: 0.82rem;
-    color: #64748B;
+    color: var(--text-muted);
     margin-bottom: 16px;
     line-height: 1.4;
-}
+}}
 
 /* ── Misc ── */
-hr.subtle {
+hr.subtle {{
     border: none;
-    border-top: 1px solid #1E293B;
+    border-top: 1px solid var(--border-subtle);
     margin: 16px 0;
-}
+}}
 </style>
 """
-
-st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -343,16 +332,24 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 PLOTLY_COLORS = ["#0EA5E9", "#10B981", "#F59E0B", "#F43F5E", "#8B5CF6", "#06B6D4"]
 
-def apply_plotly_theme(fig):
+def apply_plotly_theme(fig, theme_mode=None):
+    if theme_mode is None:
+        theme_mode = st.session_state.get("theme_mode", "dark")
+    is_dark = theme_mode == "dark"
+    paper_bg = "#1A1C23" if is_dark else "#FFFFFF"
+    plot_bg = "#1A1C23" if is_dark else "#FFFFFF"
+    font_color = "#94A3B8" if is_dark else "#475569"
+    grid_color = "#282C37" if is_dark else "#E2E8F0"
+    
     fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#1E293B",
-        plot_bgcolor="#1E293B",
-        font=dict(family="Inter, sans-serif", color="#94A3B8", size=11),
+        template="plotly_dark" if is_dark else "plotly_white",
+        paper_bgcolor=paper_bg,
+        plot_bgcolor=plot_bg,
+        font=dict(family="Plus Jakarta Sans, Inter, sans-serif", color=font_color, size=11),
         margin=dict(l=24, r=24, t=36, b=24),
-        xaxis=dict(gridcolor="#1E293B", zerolinecolor="#334155", showline=True, linecolor="#334155"),
-        yaxis=dict(gridcolor="#262f40", zerolinecolor="#334155", showline=True, linecolor="#334155"),
-        legend=dict(bgcolor="rgba(0,0,0,0)", borderwidth=0, font=dict(size=11, color="#94A3B8")),
+        xaxis=dict(gridcolor=grid_color, zerolinecolor=grid_color, showline=True, linecolor=grid_color),
+        yaxis=dict(gridcolor=grid_color, zerolinecolor=grid_color, showline=True, linecolor=grid_color),
+        legend=dict(bgcolor="rgba(0,0,0,0)", borderwidth=0, font=dict(size=11, color=font_color)),
         colorway=PLOTLY_COLORS,
     )
     return fig
@@ -395,43 +392,43 @@ if "sim_time" not in st.session_state:
 
 
 # ---------------------------------------------------------------------------
-# Header
+# Top Bar: Brand & Global Theme Controls
 # ---------------------------------------------------------------------------
 
-st.markdown("""
-<div class="app-header">
-    <h1>Smart Parking Availability & Prediction</h1>
-    <p>Multi-township occupancy tracking, ML availability forecasting, and plate recognition — running on synthetic data with real algorithms.</p>
-</div>
-""", unsafe_allow_html=True)
+brand_col, ctrl_col = st.columns([3, 2])
 
+with brand_col:
+    st.markdown("""
+    <div class="app-brand">
+        <div>
+            <h1>🅿️ Megaworld Smart Parking Platform</h1>
+            <p>Predictive availability, computer vision space detection, and confidence-weighted plate matching.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# Inline Clock Toolbar + Site Selector
-# ---------------------------------------------------------------------------
+with ctrl_col:
+    t_col1, t_col2 = st.columns([2, 1])
+    with t_col1:
+        site_names = ["All Sites"] + list(sites_df["name"])
+        selected_site = st.selectbox(
+            "Township Selector",
+            options=site_names,
+            label_visibility="collapsed",
+            key="global_site_select",
+        )
+    with t_col2:
+        theme_val = st.segmented_control(
+            "Theme",
+            options=["🌙 Dark", "☀️ Light"],
+            default="🌙 Dark" if st.session_state.theme_mode == "dark" else "☀️ Light",
+            label_visibility="collapsed",
+            key="theme_toggle_ctrl",
+        )
+        st.session_state.theme_mode = "dark" if "Dark" in theme_val else "light"
 
-clock_left, clock_center, clock_right = st.columns([2, 5, 3])
-
-with clock_left:
-    st.markdown(f"<div class='clock-label'>Simulated Clock</div><div class='clock-time'>{st.session_state.sim_time.strftime('%a %b %d, %I:%M %p')}</div>", unsafe_allow_html=True)
-
-with clock_center:
-    b1, b2, b3, spacer = st.columns([1, 1, 2, 4])
-    if b1.button("+15m", key="btn_15m"):
-        st.session_state.sim_time += timedelta(minutes=15)
-        st.rerun()
-    if b2.button("+1h", key="btn_1h"):
-        st.session_state.sim_time += timedelta(hours=1)
-        st.rerun()
-    if b3.button("Reset to 6:30 PM", key="btn_reset"):
-        st.session_state.sim_time = datetime.now().replace(hour=18, minute=30, second=0, microsecond=0)
-        st.rerun()
-
-with clock_right:
-    site_names = ["All Sites"] + list(sites_df["name"])
-    selected_site = st.radio(
-        "Township", options=site_names, horizontal=True, label_visibility="collapsed"
-    )
+# Inject dynamic CSS based on active theme
+st.markdown(get_theme_css(st.session_state.theme_mode), unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -439,17 +436,17 @@ with clock_right:
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    st.markdown("#### Dataset")
-    st.markdown(f"**{len(sites_df)}** townships · **{len(zones_df)}** zones · **{len(slots_df)}** slots")
-    st.markdown(f"**{len(history_df):,}** historical readings")
+    st.markdown("#### 🏢 Platform Overview")
+    st.markdown(f"**{len(sites_df)}** Townships · **{len(zones_df)}** Zones · **{len(slots_df)}** Slots")
+    st.markdown(f"**{len(history_df):,}** Historical ML Datapoints")
     st.markdown("---")
-    if st.button("Regenerate Dataset"):
+    if st.button("🔄 Regenerate Synthetic Data"):
         gd.main()
         st.cache_data.clear()
         st.cache_resource.clear()
         st.rerun()
     st.markdown("---")
-    st.caption("All data is synthetically generated. The ML model and matching algorithm are real.")
+    st.caption("Engineered for Megaworld Township Parking Proof of Concept.")
 
 
 # ---------------------------------------------------------------------------
@@ -478,41 +475,127 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# TAB 1 — Occupancy Map
+# TAB 1 — Occupancy Map & Township Overview
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab1:
-    # Legend strip
+    # ── Prominent Large Hero Clock (Date and Time Centered) ──
+    formatted_time = st.session_state.sim_time.strftime("%I:%M %p")
+    formatted_date = st.session_state.sim_time.strftime("%A, %B %d, %Y")
+
     st.markdown(f"""
-    <div class="legend-strip">
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> Free</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_UNPAID]};"></div> Occupied</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_PENDING_MATCH]};"></div> Pending Match</div>
-        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> Vacating</div>
+    <div class="hero-clock-container">
+        <div class="hero-clock-eyebrow">PHILIPPINE STANDARD TIME (PST) · REAL-TIME SYSTEM CLOCK</div>
+        <div class="hero-clock-time">{formatted_time}</div>
+        <div class="hero-clock-date">{formatted_date}</div>
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Time Simulation Controls Row ──
+    shift_col1, shift_col2, shift_col3, shift_col4, shift_col5 = st.columns([1, 1, 1.5, 1.5, 3])
+    with shift_col1:
+        if st.button("⏩ +15m", key="tab1_btn_15m", use_container_width=True):
+            st.session_state.sim_time += timedelta(minutes=15)
+            st.rerun()
+    with shift_col2:
+        if st.button("⏩ +1h", key="tab1_btn_1h", use_container_width=True):
+            st.session_state.sim_time += timedelta(hours=1)
+            st.rerun()
+    with shift_col3:
+        if st.button("⏪ -15m", key="tab1_btn_minus_15m", use_container_width=True):
+            st.session_state.sim_time -= timedelta(minutes=15)
+            st.rerun()
+    with shift_col4:
+        if st.button("🔄 Reset (6:30 PM)", key="tab1_btn_reset", use_container_width=True):
+            st.session_state.sim_time = datetime.now().replace(hour=18, minute=30, second=0, microsecond=0)
+            st.rerun()
+
+    st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+
+    # ── Township High-Level KPI Summary ──
+    active_slots = live_df[live_df.zone_id.isin(active_zones.zone_id)]
+    total_slots_count = len(active_slots)
+    vacant_slots_count = (active_slots.status == sm.FREE).sum()
+    occupied_slots_count = total_slots_count - vacant_slots_count
+    saturation_pct = (occupied_slots_count / total_slots_count * 100.0) if total_slots_count > 0 else 0.0
+
+    kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
+    with kpi_col1:
+        st.markdown(
+            f"<div class='metric-card' style='border-left:3px solid #38BDF8;'>"
+            f"<div class='metric-label'>Total Capacity</div>"
+            f"<div class='metric-value'>{total_slots_count}</div>"
+            f"<div class='metric-sub'>Monitored Bays</div></div>",
+            unsafe_allow_html=True,
+        )
+    with kpi_col2:
+        st.markdown(
+            f"<div class='metric-card' style='border-left:3px solid #34D399;'>"
+            f"<div class='metric-label'>Available Slots</div>"
+            f"<div class='metric-value' style='color:#34D399;'>{vacant_slots_count}</div>"
+            f"<div class='metric-sub'>🟢 Ready for Drivers</div></div>",
+            unsafe_allow_html=True,
+        )
+    with kpi_col3:
+        st.markdown(
+            f"<div class='metric-card' style='border-left:3px solid #F43F5E;'>"
+            f"<div class='metric-label'>Occupied Slots</div>"
+            f"<div class='metric-value' style='color:#F43F5E;'>{occupied_slots_count}</div>"
+            f"<div class='metric-sub'>🔴 Active Parking</div></div>",
+            unsafe_allow_html=True,
+        )
+    with kpi_col4:
+        sat_color = "#34D399" if saturation_pct < 70 else ("#FBBF24" if saturation_pct < 88 else "#F43F5E")
+        st.markdown(
+            f"<div class='metric-card' style='border-left:3px solid {sat_color};'>"
+            f"<div class='metric-label'>Township Saturation</div>"
+            f"<div class='metric-value' style='color:{sat_color};'>{saturation_pct:.1f}%</div>"
+            f"<div class='metric-sub'>Capacity Load</div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
+    # ── Legend Strip ──
+    st.markdown(f"""
+    <div class="legend-strip">
+        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-right:6px;">Status Key:</span>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.FREE]};"></div> 🟢 Available / Free</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_UNPAID]};"></div> 🔴 Occupied</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_PENDING_MATCH]};"></div> 🟡 Pending Plate Match</div>
+        <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> 🔵 Likely Vacating</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Render Township & Zone Seat-Map Sections ──
     for _, site in sites_df.iterrows():
         if site.site_id not in active_site_ids:
             continue
 
-        st.markdown(f"<div class='site-divider'>{site['name']}</div>", unsafe_allow_html=True)
         site_zones = zones_df[zones_df.site_id == site.site_id]
+
+        st.markdown(
+            f"<div style='font-size:1.15rem; font-weight:800; color:var(--text-primary); margin:20px 0 12px 0; letter-spacing:-0.02em;'>"
+            f"📍 {site['name']}</div>",
+            unsafe_allow_html=True,
+        )
 
         for _, z in site_zones.iterrows():
             zone_slots = live_df[live_df.zone_id == z.zone_id].sort_values("slot_code")
             n_free = (zone_slots.status == sm.FREE).sum()
             total = len(zone_slots)
             tag_class = f"zone-tag-{z.zone_type}" if z.zone_type in ("office", "mall", "residential") else ""
+            type_icon = "🏢 Office" if z.zone_type == "office" else ("🛒 Mall" if z.zone_type == "mall" else "🏠 Residential")
 
             st.markdown(f"""
-            <div class="zone-header">
-                <div>
-                    <span class="zone-name">{z.label} — {z.level}</span>
-                    <span class="zone-tag {tag_class}">{z.zone_type}</span>
+            <div class="zone-card">
+                <div class="zone-header">
+                    <div>
+                        <span class="zone-name">{z.label} — {z.level}</span>
+                        <span class="zone-tag {tag_class}">{type_icon}</span>
+                    </div>
+                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free</div>
                 </div>
-                <div class="zone-avail"><strong>{n_free}</strong> / {total} available</div>
-            </div>
             """, unsafe_allow_html=True)
 
             cols = st.columns(8)
@@ -525,7 +608,7 @@ with tab1:
                         unsafe_allow_html=True,
                     )
 
-        st.markdown("<hr class='subtle'/>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
