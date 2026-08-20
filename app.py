@@ -669,7 +669,41 @@ history_df = load_history_df()
 model, metrics, importance_df, holdout_df, baseline_lookup = get_trained_model(history_df)
 
 if "sim_time" not in st.session_state:
-    st.session_state.sim_time = datetime.now()
+    st.session_state.sim_time = datetime.now().replace(microsecond=0)
+
+if "tab1_calendar_date_picker" not in st.session_state:
+    st.session_state.tab1_calendar_date_picker = st.session_state.sim_time.date()
+if "tab1_clock_time_picker" not in st.session_state:
+    st.session_state.tab1_clock_time_picker = st.session_state.sim_time.time()
+if "tab2_calendar_date_picker" not in st.session_state:
+    st.session_state.tab2_calendar_date_picker = st.session_state.sim_time.date()
+if "tab2_clock_time_picker" not in st.session_state:
+    st.session_state.tab2_clock_time_picker = st.session_state.sim_time.time()
+
+
+def sync_sim_time_from_tab1():
+    d = st.session_state.get("tab1_calendar_date_picker", st.session_state.sim_time.date())
+    t = st.session_state.get("tab1_clock_time_picker", st.session_state.sim_time.time())
+    st.session_state.sim_time = datetime.combine(d, t)
+    st.session_state["tab2_calendar_date_picker"] = d
+    st.session_state["tab2_clock_time_picker"] = t
+
+
+def sync_sim_time_from_tab2():
+    d = st.session_state.get("tab2_calendar_date_picker", st.session_state.sim_time.date())
+    t = st.session_state.get("tab2_clock_time_picker", st.session_state.sim_time.time())
+    st.session_state.sim_time = datetime.combine(d, t)
+    st.session_state["tab1_calendar_date_picker"] = d
+    st.session_state["tab1_clock_time_picker"] = t
+
+
+def reset_to_live_time():
+    now = datetime.now().replace(microsecond=0)
+    st.session_state.sim_time = now
+    st.session_state["tab1_calendar_date_picker"] = now.date()
+    st.session_state["tab1_clock_time_picker"] = now.time()
+    st.session_state["tab2_calendar_date_picker"] = now.date()
+    st.session_state["tab2_clock_time_picker"] = now.time()
 
 
 # ---------------------------------------------------------------------------
@@ -926,29 +960,21 @@ with tab1:
     # ── Interactive Clock & Calendar Time-Setter Interface ──
     clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
     with clock_card_col1:
-        chosen_date = st.date_input(
+        st.date_input(
             "Calendar Date",
-            value=st.session_state.sim_time.date(),
             key="tab1_calendar_date_picker",
+            on_change=sync_sim_time_from_tab1,
         )
     with clock_card_col2:
-        chosen_time = st.time_input(
+        st.time_input(
             "Clock Time",
-            value=st.session_state.sim_time.time(),
             key="tab1_clock_time_picker",
             step=60,
+            on_change=sync_sim_time_from_tab1,
         )
     with clock_card_col3:
         st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
-        if st.button("Sync Live Clock", key="tab1_btn_sync_live", use_container_width=True):
-            st.session_state.sim_time = datetime.now()
-            st.rerun()
-
-    # Sync and update state when calendar date or clock time is manually changed
-    updated_dt = datetime.combine(chosen_date, chosen_time)
-    if updated_dt != st.session_state.sim_time:
-        st.session_state.sim_time = updated_dt
-        st.rerun()
+        st.button("Sync Live Clock", key="tab1_btn_sync_live", on_click=reset_to_live_time, use_container_width=True)
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
@@ -1114,29 +1140,21 @@ with tab2:
     # ── Interactive Clock & Calendar Time-Setter Interface ──
     clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
     with clock_card_col1:
-        chosen_date_tab2 = st.date_input(
+        st.date_input(
             "Calendar Date",
-            value=st.session_state.sim_time.date(),
             key="tab2_calendar_date_picker",
+            on_change=sync_sim_time_from_tab2,
         )
     with clock_card_col2:
-        chosen_time_tab2 = st.time_input(
+        st.time_input(
             "Clock Time",
-            value=st.session_state.sim_time.time(),
             key="tab2_clock_time_picker",
             step=60,
+            on_change=sync_sim_time_from_tab2,
         )
     with clock_card_col3:
         st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
-        if st.button("Sync Live Clock", key="tab2_btn_sync_live", use_container_width=True):
-            st.session_state.sim_time = datetime.now()
-            st.rerun()
-
-    # Sync and update state when calendar date or clock time is manually changed
-    updated_dt_tab2 = datetime.combine(chosen_date_tab2, chosen_time_tab2)
-    if updated_dt_tab2 != st.session_state.sim_time:
-        st.session_state.sim_time = updated_dt_tab2
-        st.rerun()
+        st.button("Sync Live Clock", key="tab2_btn_sync_live", on_click=reset_to_live_time, use_container_width=True)
 
     st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
