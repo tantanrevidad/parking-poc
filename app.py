@@ -692,6 +692,32 @@ def parse_time_string(time_str: str):
     return None
 
 
+def handle_date_change(key_prefix: str):
+    d = st.session_state.get(f"{key_prefix}_date_input")
+    if d:
+        st.session_state.sim_time = datetime.combine(d, st.session_state.sim_time.time())
+
+
+def handle_hour_change(key_prefix: str):
+    h = st.session_state.get(f"{key_prefix}_hour_select")
+    if h is not None:
+        st.session_state.sim_time = st.session_state.sim_time.replace(hour=int(h))
+
+
+def handle_minute_change(key_prefix: str):
+    m = st.session_state.get(f"{key_prefix}_minute_input")
+    if m is not None:
+        st.session_state.sim_time = st.session_state.sim_time.replace(minute=int(m))
+
+
+def handle_direct_time_change(key_prefix: str):
+    val = st.session_state.get(f"{key_prefix}_direct_time_str", "").strip()
+    if val:
+        parsed = parse_time_string(val)
+        if parsed:
+            st.session_state.sim_time = datetime.combine(st.session_state.sim_time.date(), parsed)
+
+
 def render_hero_clock_and_setter(key_prefix="tab1"):
     # ── Prominent Large Hero Clock (Date and Time Centered) ──
     formatted_time = st.session_state.sim_time.strftime("%I:%M %p")
@@ -709,42 +735,39 @@ def render_hero_clock_and_setter(key_prefix="tab1"):
     col_date, col_hour, col_min, col_quick = st.columns([1.5, 1.2, 1.1, 2.2])
 
     with col_date:
-        d = st.date_input(
+        st.date_input(
             "Calendar Date",
             value=st.session_state.sim_time.date(),
             key=f"{key_prefix}_date_input",
+            on_change=handle_date_change,
+            args=(key_prefix,),
         )
-        if d != st.session_state.sim_time.date():
-            st.session_state.sim_time = datetime.combine(d, st.session_state.sim_time.time())
-            st.rerun()
 
     with col_hour:
         hours_12 = [h for h in range(24)]
         curr_h = st.session_state.sim_time.hour
-        sel_h = st.selectbox(
+        st.selectbox(
             "Hour",
             options=hours_12,
             index=curr_h,
             format_func=lambda h: f"{12 if h % 12 == 0 else h % 12:02d} {'AM' if h < 12 else 'PM'} ({h:02d}:00)",
             key=f"{key_prefix}_hour_select",
+            on_change=handle_hour_change,
+            args=(key_prefix,),
         )
-        if sel_h != st.session_state.sim_time.hour:
-            st.session_state.sim_time = st.session_state.sim_time.replace(hour=sel_h)
-            st.rerun()
 
     with col_min:
         curr_m = st.session_state.sim_time.minute
-        sel_m = st.number_input(
+        st.number_input(
             "Minute",
             min_value=0,
             max_value=59,
             value=curr_m,
             step=5,
             key=f"{key_prefix}_minute_input",
+            on_change=handle_minute_change,
+            args=(key_prefix,),
         )
-        if int(sel_m) != st.session_state.sim_time.minute:
-            st.session_state.sim_time = st.session_state.sim_time.replace(minute=int(sel_m))
-            st.rerun()
 
     with col_quick:
         st.markdown("<div style='font-size:0.8rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;'>Quick Time Jump</div>", unsafe_allow_html=True)
@@ -773,19 +796,13 @@ def render_hero_clock_and_setter(key_prefix="tab1"):
     # Direct Text Entry row
     t_col, _ = st.columns([2.5, 3.5])
     with t_col:
-        direct_t = st.text_input(
+        st.text_input(
             "Direct Time Input (e.g. 14:30, 2:30pm, 09:00)",
-            placeholder="Type any time and press Enter...",
+            placeholder="Type time e.g. 14:30 or 2:30pm and press Enter...",
             key=f"{key_prefix}_direct_time_str",
+            on_change=handle_direct_time_change,
+            args=(key_prefix,),
         )
-        if direct_t:
-            parsed = parse_time_string(direct_t)
-            if parsed:
-                st.session_state.sim_time = datetime.combine(st.session_state.sim_time.date(), parsed)
-                st.session_state[f"{key_prefix}_direct_time_str"] = ""
-                st.rerun()
-            else:
-                st.warning("Unrecognized time format. Try formats like '14:30', '2:30 PM', or '9am'.")
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
