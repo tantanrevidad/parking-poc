@@ -1141,25 +1141,23 @@ with tab2:
     st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
     st.markdown("<div class='section-title'>Predictive Availability</div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-desc'>Select a parking zone and how far ahead you plan to arrive. The model forecasts whether a spot will be available.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-desc'>Select a parking zone to forecast availability for the selected date and time above.</div>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns([3, 2])
-    with col1:
-        zone_options = active_zones.zone_id.tolist()
-        zone_choice = st.selectbox(
-            "Zone", options=zone_options,
-            format_func=lambda zid: (
-                zones_df.loc[zones_df.zone_id == zid, "label"].iloc[0]
-                + " — " + zones_df.loc[zones_df.zone_id == zid, "level"].iloc[0]
-                + " (" + sites_df.loc[
-                    sites_df.site_id == zones_df.loc[zones_df.zone_id == zid, "site_id"].iloc[0], "name"
-                ].iloc[0] + ")"
-            ),
-        )
-    with col2:
-        hours_ahead = st.slider("Hours ahead", 0.0, 12.0, 2.0, step=0.5)
+    zone_options = active_zones.zone_id.tolist()
+    zone_choice = st.selectbox(
+        "Select Parking Zone",
+        options=zone_options,
+        format_func=lambda zid: (
+            zones_df.loc[zones_df.zone_id == zid, "label"].iloc[0]
+            + " — " + zones_df.loc[zones_df.zone_id == zid, "level"].iloc[0]
+            + " (" + sites_df.loc[
+                sites_df.site_id == zones_df.loc[zones_df.zone_id == zid, "site_id"].iloc[0], "name"
+            ].iloc[0] + ")"
+        ),
+        key="tab2_forecast_zone_select",
+    )
 
-    target_ts = pd.Timestamp(st.session_state.sim_time + timedelta(hours=hours_ahead))
+    target_ts = pd.Timestamp(st.session_state.sim_time)
     result = predictor.predict_for_timestamp(model, baseline_lookup, history_df, zone_choice, target_ts)
 
     # Forecast banner
@@ -1172,7 +1170,7 @@ with tab2:
 
     st.markdown(f"""
     <div class="forecast-banner" style="background:{bg}; border: 1px solid {accent};">
-        <div class="forecast-label" style="color:{accent};">Forecast for {target_ts.strftime('%A, %I:%M %p')}</div>
+        <div class="forecast-label" style="color:{accent};">Forecast for {target_ts.strftime('%A, %B %d, %Y · %I:%M %p')}</div>
         <div class="forecast-value">{result['label']}</div>
     </div>
     """, unsafe_allow_html=True)
