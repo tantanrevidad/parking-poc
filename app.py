@@ -1099,6 +1099,47 @@ with tab1:
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab2:
+    # ── Prominent Large Hero Clock (Date and Time Centered) ──
+    formatted_time_tab2 = st.session_state.sim_time.strftime("%I:%M %p")
+    formatted_date_tab2 = st.session_state.sim_time.strftime("%A, %B %d, %Y")
+
+    st.markdown(f"""
+    <div class="hero-clock-container">
+        <div class="hero-clock-eyebrow">PHILIPPINE STANDARD TIME (PST) · REAL-TIME SYSTEM CLOCK</div>
+        <div class="hero-clock-time">{formatted_time_tab2}</div>
+        <div class="hero-clock-date">{formatted_date_tab2}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Interactive Clock & Calendar Time-Setter Interface ──
+    clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
+    with clock_card_col1:
+        chosen_date_tab2 = st.date_input(
+            "Calendar Date",
+            value=st.session_state.sim_time.date(),
+            key="tab2_calendar_date_picker",
+        )
+    with clock_card_col2:
+        chosen_time_tab2 = st.time_input(
+            "Clock Time",
+            value=st.session_state.sim_time.time(),
+            key="tab2_clock_time_picker",
+            step=60,
+        )
+    with clock_card_col3:
+        st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
+        if st.button("Sync Live Clock", key="tab2_btn_sync_live", use_container_width=True):
+            st.session_state.sim_time = datetime.now()
+            st.rerun()
+
+    # Sync and update state when calendar date or clock time is manually changed
+    updated_dt_tab2 = datetime.combine(chosen_date_tab2, chosen_time_tab2)
+    if updated_dt_tab2 != st.session_state.sim_time:
+        st.session_state.sim_time = updated_dt_tab2
+        st.rerun()
+
+    st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+
     st.markdown("<div class='section-title'>Predictive Availability</div>", unsafe_allow_html=True)
     st.markdown("<div class='section-desc'>Select a parking zone and how far ahead you plan to arrive. The model forecasts whether a spot will be available.</div>", unsafe_allow_html=True)
 
