@@ -49,6 +49,7 @@ yolov8n.pt
 .DS_Store
 Thumbs.db
 desktop.ini
+*.exe
 
 # Ultralytics YOLO model cache
 runs/

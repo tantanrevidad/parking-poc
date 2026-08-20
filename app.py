@@ -671,39 +671,123 @@ model, metrics, importance_df, holdout_df, baseline_lookup = get_trained_model(h
 if "sim_time" not in st.session_state:
     st.session_state.sim_time = datetime.now().replace(microsecond=0)
 
-if "tab1_calendar_date_picker" not in st.session_state:
-    st.session_state.tab1_calendar_date_picker = st.session_state.sim_time.date()
-if "tab1_clock_time_picker" not in st.session_state:
-    st.session_state.tab1_clock_time_picker = st.session_state.sim_time.time()
-if "tab2_calendar_date_picker" not in st.session_state:
-    st.session_state.tab2_calendar_date_picker = st.session_state.sim_time.date()
-if "tab2_clock_time_picker" not in st.session_state:
-    st.session_state.tab2_clock_time_picker = st.session_state.sim_time.time()
+
+def parse_time_string(time_str: str):
+    if not time_str:
+        return None
+    time_str = time_str.strip().upper()
+    formats = [
+        "%H:%M", "%I:%M %p", "%I:%M%p", "%I %p", "%I%p",
+        "%H:%M:%S", "%I:%M:%S %p", "%I:%M:%S%p"
+    ]
+    for fmt in formats:
+        try:
+            return datetime.strptime(time_str, fmt).time()
+        except ValueError:
+            pass
+    if time_str.isdigit():
+        val = int(time_str)
+        if 0 <= val <= 23:
+            return datetime.strptime(f"{val}:00", "%H:%M").time()
+    return None
 
 
-def sync_sim_time_from_tab1():
-    d = st.session_state.get("tab1_calendar_date_picker", st.session_state.sim_time.date())
-    t = st.session_state.get("tab1_clock_time_picker", st.session_state.sim_time.time())
-    st.session_state.sim_time = datetime.combine(d, t)
-    st.session_state["tab2_calendar_date_picker"] = d
-    st.session_state["tab2_clock_time_picker"] = t
+def render_hero_clock_and_setter(key_prefix="tab1"):
+    # ── Prominent Large Hero Clock (Date and Time Centered) ──
+    formatted_time = st.session_state.sim_time.strftime("%I:%M %p")
+    formatted_date = st.session_state.sim_time.strftime("%A, %B %d, %Y")
 
+    st.markdown(f"""
+    <div class="hero-clock-container">
+        <div class="hero-clock-eyebrow">PHILIPPINE STANDARD TIME (PST) · REAL-TIME SYSTEM CLOCK</div>
+        <div class="hero-clock-time">{formatted_time}</div>
+        <div class="hero-clock-date">{formatted_date}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-def sync_sim_time_from_tab2():
-    d = st.session_state.get("tab2_calendar_date_picker", st.session_state.sim_time.date())
-    t = st.session_state.get("tab2_clock_time_picker", st.session_state.sim_time.time())
-    st.session_state.sim_time = datetime.combine(d, t)
-    st.session_state["tab1_calendar_date_picker"] = d
-    st.session_state["tab1_clock_time_picker"] = t
+    # ── Interactive Clock & Calendar Time-Setter Interface ──
+    col_date, col_hour, col_min, col_quick = st.columns([1.5, 1.2, 1.1, 2.2])
 
+    with col_date:
+        d = st.date_input(
+            "Calendar Date",
+            value=st.session_state.sim_time.date(),
+            key=f"{key_prefix}_date_input",
+        )
+        if d != st.session_state.sim_time.date():
+            st.session_state.sim_time = datetime.combine(d, st.session_state.sim_time.time())
+            st.rerun()
 
-def reset_to_live_time():
-    now = datetime.now().replace(microsecond=0)
-    st.session_state.sim_time = now
-    st.session_state["tab1_calendar_date_picker"] = now.date()
-    st.session_state["tab1_clock_time_picker"] = now.time()
-    st.session_state["tab2_calendar_date_picker"] = now.date()
-    st.session_state["tab2_clock_time_picker"] = now.time()
+    with col_hour:
+        hours_12 = [h for h in range(24)]
+        curr_h = st.session_state.sim_time.hour
+        sel_h = st.selectbox(
+            "Hour",
+            options=hours_12,
+            index=curr_h,
+            format_func=lambda h: f"{12 if h % 12 == 0 else h % 12:02d} {'AM' if h < 12 else 'PM'} ({h:02d}:00)",
+            key=f"{key_prefix}_hour_select",
+        )
+        if sel_h != st.session_state.sim_time.hour:
+            st.session_state.sim_time = st.session_state.sim_time.replace(hour=sel_h)
+            st.rerun()
+
+    with col_min:
+        curr_m = st.session_state.sim_time.minute
+        sel_m = st.number_input(
+            "Minute",
+            min_value=0,
+            max_value=59,
+            value=curr_m,
+            step=5,
+            key=f"{key_prefix}_minute_input",
+        )
+        if int(sel_m) != st.session_state.sim_time.minute:
+            st.session_state.sim_time = st.session_state.sim_time.replace(minute=int(sel_m))
+            st.rerun()
+
+    with col_quick:
+        st.markdown("<div style='font-size:0.8rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;'>Quick Time Jump</div>", unsafe_allow_html=True)
+        q1, q2, q3, q4, q5 = st.columns(5)
+        with q1:
+            if st.button("-1h", key=f"{key_prefix}_q_m1h", use_container_width=True):
+                st.session_state.sim_time -= timedelta(hours=1)
+                st.rerun()
+        with q2:
+            if st.button("-15m", key=f"{key_prefix}_q_m15m", use_container_width=True):
+                st.session_state.sim_time -= timedelta(minutes=15)
+                st.rerun()
+        with q3:
+            if st.button("+15m", key=f"{key_prefix}_q_p15m", use_container_width=True):
+                st.session_state.sim_time += timedelta(minutes=15)
+                st.rerun()
+        with q4:
+            if st.button("+1h", key=f"{key_prefix}_q_p1h", use_container_width=True):
+                st.session_state.sim_time += timedelta(hours=1)
+                st.rerun()
+        with q5:
+            if st.button("Live", key=f"{key_prefix}_q_live", use_container_width=True, help="Reset to real-time clock"):
+                st.session_state.sim_time = datetime.now().replace(microsecond=0)
+                st.rerun()
+
+    # Direct Text Entry row
+    t_col, _ = st.columns([2.5, 3.5])
+    with t_col:
+        direct_t = st.text_input(
+            "Direct Time Input (e.g. 14:30, 2:30pm, 09:00)",
+            placeholder="Type any time and press Enter...",
+            key=f"{key_prefix}_direct_time_str",
+        )
+        if direct_t:
+            parsed = parse_time_string(direct_t)
+            if parsed:
+                st.session_state.sim_time = datetime.combine(st.session_state.sim_time.date(), parsed)
+                st.session_state[f"{key_prefix}_direct_time_str"] = ""
+                st.rerun()
+            else:
+                st.warning("Unrecognized time format. Try formats like '14:30', '2:30 PM', or '9am'.")
+
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -945,38 +1029,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab1:
-    # ── Prominent Large Hero Clock (Date and Time Centered) ──
-    formatted_time = st.session_state.sim_time.strftime("%I:%M %p")
-    formatted_date = st.session_state.sim_time.strftime("%A, %B %d, %Y")
-
-    st.markdown(f"""
-    <div class="hero-clock-container">
-        <div class="hero-clock-eyebrow">PHILIPPINE STANDARD TIME (PST) · REAL-TIME SYSTEM CLOCK</div>
-        <div class="hero-clock-time">{formatted_time}</div>
-        <div class="hero-clock-date">{formatted_date}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Interactive Clock & Calendar Time-Setter Interface ──
-    clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
-    with clock_card_col1:
-        st.date_input(
-            "Calendar Date",
-            key="tab1_calendar_date_picker",
-            on_change=sync_sim_time_from_tab1,
-        )
-    with clock_card_col2:
-        st.time_input(
-            "Clock Time",
-            key="tab1_clock_time_picker",
-            step=60,
-            on_change=sync_sim_time_from_tab1,
-        )
-    with clock_card_col3:
-        st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
-        st.button("Sync Live Clock", key="tab1_btn_sync_live", on_click=reset_to_live_time, use_container_width=True)
-
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+    render_hero_clock_and_setter("tab1")
 
     # ── Township High-Level KPI Summary ──
     active_slots = live_df[live_df.zone_id.isin(active_zones.zone_id)]
@@ -1125,38 +1178,7 @@ with tab1:
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab2:
-    # ── Prominent Large Hero Clock (Date and Time Centered) ──
-    formatted_time_tab2 = st.session_state.sim_time.strftime("%I:%M %p")
-    formatted_date_tab2 = st.session_state.sim_time.strftime("%A, %B %d, %Y")
-
-    st.markdown(f"""
-    <div class="hero-clock-container">
-        <div class="hero-clock-eyebrow">PHILIPPINE STANDARD TIME (PST) · REAL-TIME SYSTEM CLOCK</div>
-        <div class="hero-clock-time">{formatted_time_tab2}</div>
-        <div class="hero-clock-date">{formatted_date_tab2}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Interactive Clock & Calendar Time-Setter Interface ──
-    clock_card_col1, clock_card_col2, clock_card_col3 = st.columns([2, 2, 1.2])
-    with clock_card_col1:
-        st.date_input(
-            "Calendar Date",
-            key="tab2_calendar_date_picker",
-            on_change=sync_sim_time_from_tab2,
-        )
-    with clock_card_col2:
-        st.time_input(
-            "Clock Time",
-            key="tab2_clock_time_picker",
-            step=60,
-            on_change=sync_sim_time_from_tab2,
-        )
-    with clock_card_col3:
-        st.markdown("<div style='height:28px;'></div>", unsafe_allow_html=True)
-        st.button("Sync Live Clock", key="tab2_btn_sync_live", on_click=reset_to_live_time, use_container_width=True)
-
-    st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
+    render_hero_clock_and_setter("tab2")
 
     st.markdown("<div class='section-title'>Predictive Availability</div>", unsafe_allow_html=True)
     st.markdown("<div class='section-desc'>Select a parking zone to forecast availability for the selected date and time above.</div>", unsafe_allow_html=True)
