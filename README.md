@@ -1,19 +1,22 @@
 # Smart Parking Management System — Proof of Concept (POC)
 
-An enterprise-grade Streamlit application demonstrating every layer of the Smart Parking system end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio & Eastwood City).
+An enterprise-grade Streamlit application demonstrating every layer of the Smart Parking system end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, interactive direct-click SQLite database telemetry inspection, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio & Eastwood City).
 
 ---
 
 ## 🚀 Key Highlights & Current State
 
-- **Multi-Township Simulation:** Live multi-zone simulation across **Uptown Bonifacio** and **Eastwood City** featuring heterogeneous zone profiles (**Office**, **Mall**, **Residential**) with distinct diurnal curves and weekend behaviors.
-- **Grace-Period State Machine:** Real-time 4-state slot tracking (`Free`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs and grace periods.
+- **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity (48 Mall bays, 24 Office bays, 16 Residential bays).
+- **Direct Click-to-Inspect Parking Blocks:** Every parking stall block is an interactive solid-color card. Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
+- **Hero Philippine Standard Time (PST) System Clock:** Centered live real-time PST clock synced with interactive calendar date and time pickers for granular simulation timeline control.
+- **Grace-Period State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs and grace periods.
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
 - **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on 28 days of 15-minute historical readings using causal feature engineering, evaluated on a chronological holdout dataset against a naive baseline.
 - **Dual Computer Vision ALPR Validation:**
-  1. **🇵🇭 Philippine CCTV Parking Lot & Gate Dataset:** 20 real-world surveillance video frames from multi-level decks, boom barriers, and low-light basement checkpoints.
-  2. **🌍 Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
-- **Enterprise Dark Dashboard:** Modern Slate-dark UI (`#0F172A`), quick simulation clock toolbar (`+15m`, `+1h`, `Reset`), township filtering, and interactive Plotly visual diagnostics.
+  1. **Philippine CCTV Parking Lot & Gate Dataset:** 20 real-world surveillance video frames from multi-level decks, boom barriers, and low-light basement checkpoints.
+  2. **Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
+- **5-Phase Computer Vision Space Detection Engine:** YOLOv8n vehicle detector with adaptive low-light CLAHE contrast enhancement, true perspective polygon ROI calibration (`slots_config.json`), Intersection over Area (IoA) occupancy scoring with centroid containment, and 5-frame temporal state debouncing.
+- **High-Contrast Dark & Light Theme Engine:** Segmented theme switcher with responsive styling, bold pure-black tab typography in Light Mode, and adaptive Plotly chart themes.
 
 ---
 
@@ -23,11 +26,12 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 |---|---|---|
 | **Camera Feed / Slot Occupancy** | **Simulated** | Synthetic 28-day 15-minute time series generated with zone-specific mathematical curves + Gaussian noise + event multipliers. |
 | **License Plate OCR (App Live Stream)** | **Simulated** | Synthetic reads corrupted via an optical confusion matrix ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$) with randomized confidence scores. |
-| **Ticketing POS Integration** | **Simulated** | SQLite relational transaction log (`ticketing_records`) tracking entry, payment timestamp, and ticket status. |
+| **Ticketing POS Integration** | **Simulated** | SQLite relational transaction log (`ticketing_records` in `data/parking.db`) tracking entry, payment timestamp, and ticket status. |
 | **Plate-to-Ticket Matching Algorithm** | **Real** | Confidence-weighted Levenshtein matching with confusable character penalty discounts in `matcher.py`. |
 | **Slot State Machine Engine** | **Real** | State transition rules in `state_machine.py` modeling Free, Unpaid, Pending Match, and Vacating states. |
 | **ML Predictive Forecaster** | **Real** | `HistGradientBoostingRegressor` in `predictor.py` trained with time-based holdout validation, MAE metrics, and permutation feature importance. |
 | **Computer Vision ALPR Pipeline** | **Real** | YOLOv8n vehicle detection + Sobel-X vertical edge plate localization + OCR + real candidate matching in `cv_demo.py`. |
+| **Computer Vision Space Detector** | **Real** | 5-phase ROI & IoA vehicle detection engine with CLAHE enhancement in `parking_detector.py`. |
 
 ---
 
@@ -80,20 +84,20 @@ python cv_demo.py --dataset all
 
 ## 📱 Application Modules & Tabs
 
-1. **Occupancy Map:** Live seat-map grid across Uptown Bonifacio and Eastwood City zones (Basement 1, Level 2, Podium 3, etc.) displaying real-time occupancy, available bays, and slot status color-coding.
+1. **Occupancy Map:** Interactive seat-map grid across Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger instant in-page SQLite modal inspection.
 2. **Availability Forecast:** Interactive trip planner allowing users to pick any zone and arrival horizon (0 to 12 hours ahead) to receive an ML forecast, baseline comparison, conservative safety margin, and historical trend curve.
 3. **Model Performance:** Diagnostic dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings, and match margin confirmation.
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot Dataset** and the **OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
-6. **Space Detection (CV):** Enterprise computer vision parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing a **5-Phase Occupancy Detection Algorithm**: (1) **Dual Native ROI Calibration** from `slots_config.json` with true perspective trapezoids traced on master reference (`empty lot.jpg` @ 1372×768) and native video streams (457×192) with automatic resolution scaling, (2) YOLOv8n vehicle inference with **Adaptive Low-Light CLAHE Boost** and dual-exposure multi-pass NMS for dark vehicles (SUVs, pickups), (3) Intersection over Area (IoA) spatial occupancy calculation with **Centroid Containment** and tire ground-contact reinforcement, (4) temporal sliding-window state debouncing (5-frame history, ≥60% consensus), and (5) standardized JSON output payload generation with real-time 🟢 FREE / 🔴 OCCUPIED slot overlays, capacity KPIs, borderline quality flags, and slot-by-slot telemetry.
+6. **Space Detection (CV):** Enterprise computer vision parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing a **5-Phase Occupancy Detection Algorithm**: (1) Dual Native ROI Calibration from `slots_config.json`, (2) YOLOv8n vehicle inference with Adaptive Low-Light CLAHE Boost, (3) Intersection over Area (IoA) spatial occupancy calculation with Centroid Containment, (4) temporal sliding-window state debouncing (5-frame history, $\ge 60\%$ consensus), and (5) standardized JSON output payload generation with real-time overlays, capacity KPIs, and telemetry.
 
 ---
 
 ## 🏢 Zone Archetypes
 
-- **🏢 Office Zones:** Morning surge (08:00–09:30), slight midday dip (12:00–13:00), evening drain after 17:30. Minimal weekend volume.
-- **🛒 Mall Zones:** Gradual morning volume, sustained afternoon build, peak evening traffic (18:00–21:30), +35% higher traffic on weekends.
-- **🏠 Residential Zones:** High overnight occupancy (85–95%), workday drop (08:00–17:00), consistent profile across weekdays and weekends.
+- **Office Zones:** Morning surge (08:00–09:30), slight midday dip (12:00–13:00), evening drain after 17:30. Minimal weekend volume.
+- **Mall Zones:** Gradual morning volume, sustained afternoon build, peak evening traffic (18:00–21:30), +35% higher traffic on weekends.
+- **Residential Zones:** High overnight occupancy (85–95%), workday drop (08:00–17:00), consistent profile across weekdays and weekends.
 
 ---
 
@@ -102,14 +106,16 @@ python cv_demo.py --dataset all
 ```
 parking-poc/
 ├── .streamlit/
-│   └── config.toml               # Custom enterprise dark theme config
+│   └── config.toml               # Custom enterprise theme configuration
 ├── car_dataset/                  # Multi-angle CCTV & parking row surveillance frames
 ├── cv-demo/                      # Local ALPR benchmark outputs (gitignored)
+├── data/
+│   └── parking.db                # SQLite database with relational schemas & telemetry
 ├── debug_output/                 # Visual regression layers & JSON telemetry outputs
 ├── docs/
 │   ├── Revised_Prototype_Plan.md      # Prototype architectural roadmap
 │   ├── SYSTEM_DOCUMENTATION.md        # Comprehensive technical specification
-│   ├── TAB6_SPACE_DETECTION_GUIDE.md  # Beginner-friendly guide to Tab 6 Space Detection
+│   ├── TAB6_SPACE_DETECTION_GUIDE.md  # Space Detection engine guide
 │   ├── Smart_Parking_Implementation_Plan.pdf
 │   └── Smart_Parking_POC_Technical_Implementation_Plan.pdf
 ├── scripts/

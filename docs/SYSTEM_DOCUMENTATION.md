@@ -485,10 +485,35 @@ flowchart TD
 
 ## 10. Enterprise Dashboard UI Architecture (`app.py`)
 
-Built with Streamlit and styled with a custom dark-mode CSS design system (`#0F172A` slate background, `#1E293B` cards, `#38BDF8` cyan accents, Inter typography).
+Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#121417` Deep Dark / `#F8FAFC` Light Slate) with high-contrast typography, interactive Plotly visualizations, and zero-page-reload modal dialogues.
 
-### 6 Dedicated Functional Tabs:
-1. **Occupancy Map:** Interactive seat-map grid displaying all 120 slots across Uptown Bonifacio and Eastwood City zones (Office, Mall, Residential) with real-time status color coding (`Free`, `Occupied — Unpaid`, `Pending Match`, `Likely Vacating`), vehicle plate details, and live availability counters.
+### 10.1 Key UI & UX Innovations
+
+1. **Township Deck Map & Sequential Hierarchy:**
+   - Zones are strictly ordered according to commercial parking schemes: **Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**.
+   - Facing rows are separated by realistic labeled **Drive Aisles** (`DRIVE AISLE · LANE A ➔`, `LANE B`, `LANE C`).
+   - Expanded parking bay capacity modeling (48 Mall bays, 24 Office bays, 16 Residential bays).
+
+2. **Direct Click-To-Inspect Parking Blocks:**
+   - Every individual parking bay block is rendered as an interactive, solid-color card (`.bay-stall-free`, `.bay-stall-occupied`, `.bay-stall-pending`, `.bay-stall-vacating`).
+   - Clicking directly on any block triggers an in-page **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll-jump, populated with 6 comprehensive tabs:
+     - `Active Live Telemetry` — Consolidated snapshot of state, ticket, and OCR reading.
+     - `Active Occupancy State (current_state)` — Bay status and last state change timestamp.
+     - `Ticketing & Settlement (ticketing_records)` — Assigned vehicle plate, entry time, payment settlement time.
+     - `Optical Plate Read (plate_reads)` — Camera OCR detected text, confidence vector, ground truth plate.
+     - `Infrastructure Metadata (slots & zones)` — Deck level, archetype, township site, zone capacity.
+     - `Executed SQLite Statement (Raw SQL)` — Underlying SQL statement executed against `data/parking.db`.
+
+3. **Hero Centered PST System Clock:**
+   - Prominently positioned centered clock showing real-time Philippine Standard Time (PST) in 12-hour format with day and date.
+   - Interactive calendar date and clock time-setters allow operators to jump to any simulated timeline and inspect temporal occupancy shifts.
+
+4. **Dual Theme Engine (Light & Dark Mode):**
+   - Seamless segmented theme switch between Dark Mode and Light Mode.
+   - Light Mode features bold pure-black (`#000000`) tab typography, clear Slate form controls, white cards, and auto-adapting Plotly charts.
+
+### 10.2 Dedicated Functional Tabs:
+1. **Occupancy Map:** Live seat-map grid displaying all bays across Uptown Bonifacio and Eastwood City zones ordered by archetype with Drive Aisles, live capacity KPIs, and direct-click database row inspection.
 2. **Availability Forecast:** Interactive trip planner allowing operators and visitors to pick any zone and arrival horizon (0 to 12 hours ahead), displaying the ML forecast, baseline comparison, conservative safety margin, and historical diurnal curve.
 3. **Model Performance:** Model diagnostics dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Holdout Validation Sample Count, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
