@@ -63,6 +63,32 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ---
 
+## 🗄️ Inspecting SQLite Database Records
+
+The persistent relational database is stored locally in `data/parking.db`.
+
+### Method A: In-Dashboard Direct Click Inspection
+1. Navigate to **Tab 1: Occupancy Map**.
+2. Click **directly on any colored parking stall block** (`M-001`, `O-001`, `R-001`, etc.).
+3. An interactive modal dialog opens displaying:
+   - **Active Live Telemetry** — Consolidated snapshot of state, ticket, and OCR reading.
+   - **Active Occupancy State (`current_state`)** — Current status and state change timestamp.
+   - **Ticketing & Settlement (`ticketing_records`)** — Assigned vehicle plate, entry time, payment settlement time.
+   - **Optical Plate Read (`plate_reads`)** — Camera OCR detected text, confidence vector, ground truth plate.
+   - **Infrastructure Metadata (`slots` & `zones`)** — Deck level, archetype, township site, zone capacity.
+   - **Executed SQLite Statement (Raw SQL)** — Underlying parameterized SQL statement executed against `data/parking.db`.
+
+### Method B: External Database Viewers
+You can open `data/parking.db` directly with any SQLite GUI tool:
+- **DB Browser for SQLite:** [sqlitebrowser.org](https://sqlitebrowser.org/)
+- **VS Code / Cursor Extensions:** `SQLite Viewer` or `Database Client`
+- **CLI Query:**
+  ```powershell
+  python -c "import sqlite3, pandas as pd; conn = sqlite3.connect('data/parking.db'); print(pd.read_sql('SELECT * FROM current_state LIMIT 10', conn))"
+  ```
+
+---
+
 ## 👁️ Computer Vision Feasibility Demo
 
 The CV demo evaluates vehicle detection and plate recognition against **real-world images with hand-verified ground truth**:
