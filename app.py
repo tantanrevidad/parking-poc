@@ -831,6 +831,214 @@ div[data-testid="stDialog"] div[role="dialog"] {{
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
 }}
 
+/* ═══════════════════════════════════════════════════════════════════════
+   GLOBAL READABILITY: TEXT, BACKGROUNDS, AND ALL STREAMLIT ELEMENTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Global Text Color Reset ── */
+.stApp, .stApp * {{
+    color: var(--text-primary);
+}}
+.stApp p, .stApp span, .stApp li, .stApp td, .stApp th, .stApp label {{
+    color: var(--text-primary) !important;
+}}
+
+/* ── Markdown Headings ── */
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 {{
+    color: var(--text-primary) !important;
+}}
+
+/* ── st.caption ── */
+div[data-testid="stCaptionContainer"],
+div[data-testid="stCaptionContainer"] * {{
+    color: var(--text-muted) !important;
+}}
+
+/* ── Sidebar ── */
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] * {{
+    color: var(--text-primary) !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{
+    color: var(--text-muted) !important;
+}}
+
+/* ── st.info / st.success / st.warning / st.error Alert Banners ── */
+div[data-testid="stAlert"] {{
+    background-color: { "rgba(14, 165, 233, 0.10)" if is_dark else "#F0F9FF" } !important;
+    border: 1px solid { "rgba(14, 165, 233, 0.3)" if is_dark else "#BAE6FD" } !important;
+    border-radius: 10px !important;
+}}
+div[data-testid="stAlert"] p,
+div[data-testid="stAlert"] span {{
+    color: { "#7DD3FC" if is_dark else "#0C4A6E" } !important;
+}}
+div[role="alert"] {{
+    border-radius: 10px !important;
+}}
+
+/* ── Expander ── */
+div[data-testid="stExpander"] {{
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+}}
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] summary span,
+div[data-testid="stExpander"] summary p {{
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+}}
+div[data-testid="stExpander"] summary svg {{
+    fill: var(--text-secondary) !important;
+    color: var(--text-secondary) !important;
+}}
+div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
+div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] * {{
+    color: var(--text-primary) !important;
+}}
+
+/* ── Slider ── */
+div[data-testid="stSlider"] label,
+div[data-testid="stSlider"] label * {{
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+}}
+div[data-testid="stSlider"] div[data-baseweb="slider"] div {{
+    color: var(--text-primary) !important;
+}}
+div[data-testid="stSlider"] [data-testid="stThumbValue"],
+div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stTickBarMax"] {{
+    color: var(--text-secondary) !important;
+}}
+
+/* ── Toggle / Checkbox ── */
+div[data-testid="stCheckbox"] label span,
+div[data-testid="stCheckbox"] label p {{
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}}
+
+/* ── Radio Buttons ── */
+div[data-testid="stRadio"] label {{
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+}}
+div[data-testid="stRadio"] div[role="radiogroup"] label,
+div[data-testid="stRadio"] div[role="radiogroup"] label span,
+div[data-testid="stRadio"] div[role="radiogroup"] label p {{
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}}
+
+/* ── Regular Buttons (Quick Jump, Sidebar, etc.) ── */
+div[data-testid="stButton"] button {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    color: var(--text-primary) !important;
+    border: 1px solid { "#334155" if is_dark else "#CBD5E1" } !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+}}
+div[data-testid="stButton"] button:hover {{
+    background-color: { "#334155" if is_dark else "#E2E8F0" } !important;
+    border-color: { "#475569" if is_dark else "#94A3B8" } !important;
+}}
+div[data-testid="stButton"] button p {{
+    color: var(--text-primary) !important;
+}}
+
+/* Preserve parking stall button colors - override generic button styling */
+.zone-card div[data-testid="stButton"] button {{
+    background-color: unset !important;
+    border: unset !important;
+}}
+
+/* ── st.code Block ── */
+div[data-testid="stCode"],
+div[data-testid="stCode"] pre,
+div[data-testid="stCode"] code {{
+    background-color: { "#0D1117" if is_dark else "#F6F8FA" } !important;
+    color: { "#C9D1D9" if is_dark else "#24292F" } !important;
+    border: 1px solid { "#21262D" if is_dark else "#D0D7DE" } !important;
+    border-radius: 8px !important;
+}}
+
+/* ── st.json Viewer ── */
+div[data-testid="stJson"] {{
+    background-color: { "#0D1117" if is_dark else "#F6F8FA" } !important;
+    border: 1px solid { "#21262D" if is_dark else "#D0D7DE" } !important;
+    border-radius: 8px !important;
+}}
+
+/* ── st.dataframe / st.table ── */
+div[data-testid="stDataFrame"] {{
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}}
+
+/* ── Tooltip / Help text ── */
+div[data-testid="stTooltipContent"] {{
+    background-color: { "#1E293B" if is_dark else "#FFFFFF" } !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+}}
+div[data-testid="stTooltipContent"] p {{
+    color: var(--text-primary) !important;
+}}
+
+/* ── Multiselect (if used anywhere) ── */
+div[data-testid="stMultiSelect"] div[data-baseweb="select"],
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
+}}
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+}}
+
+/* ── Date/Time Picker Calendar Popover ── */
+div[data-baseweb="calendar"],
+div[data-baseweb="calendar"] * {{
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+}}
+div[data-baseweb="calendar"] button {{
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+}}
+div[data-baseweb="calendar"] button:hover {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+}}
+
+/* ── Number Input Stepper Arrows ── */
+div[data-testid="stNumberInput"] button {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
+    color: var(--text-primary) !important;
+}}
+div[data-testid="stNumberInput"] button svg {{
+    fill: { "#94A3B8" if is_dark else "#475569" } !important;
+    color: { "#94A3B8" if is_dark else "#475569" } !important;
+}}
+
+/* ── st.image captions ── */
+div[data-testid="stImage"] div[data-testid="caption"],
+div[data-testid="stImage"] div[data-testid="caption"] * {{
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+}}
+
+/* ── Links ── */
+.stApp a {{
+    color: var(--accent-blue) !important;
+}}
+.stApp a:hover {{
+    color: var(--accent-indigo) !important;
+}}
+
 /* ── Misc ── */
 hr.subtle {{
     border: none;
