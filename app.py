@@ -622,21 +622,31 @@ div[data-testid="stSegmentedControl"] label {{
 }}
 
 /* ── Direct Solid-Color Parking Stall Buttons (Guaranteed Column Targeting) ── */
-.zone-card div[data-testid="stButton"] button,
-.zone-card div[data-testid="stButton"] button *,
-.zone-card div[data-testid="stButton"] button p,
-.zone-card div[data-testid="stButton"] button span,
-.zone-card div[data-testid="stButton"] button div,
-.zone-card button,
-.zone-card button *,
-.zone-card button p,
-.zone-card button span {{
+div[data-testid="stColumn"]:has(.slot-marker) button,
+div[data-testid="stColumn"]:has(.slot-marker) button *,
+div[data-testid="stColumn"]:has(.slot-marker) button p,
+div[data-testid="stColumn"]:has(.slot-marker) button span,
+div[data-testid="stColumn"]:has(.slot-marker) button div,
+div[data-testid="column"]:has(.slot-marker) button,
+div[data-testid="column"]:has(.slot-marker) button *,
+div[data-testid="column"]:has(.slot-marker) button p,
+div[data-testid="column"]:has(.slot-marker) button span,
+div[data-testid="column"]:has(.slot-marker) button div,
+div[data-testid="stColumn"]:has(.slot-free) button *,
+div[data-testid="stColumn"]:has(.slot-occupied) button *,
+div[data-testid="stColumn"]:has(.slot-pending) button *,
+div[data-testid="stColumn"]:has(.slot-vacating) button *,
+div[data-testid="column"]:has(.slot-free) button *,
+div[data-testid="column"]:has(.slot-occupied) button *,
+div[data-testid="column"]:has(.slot-pending) button *,
+div[data-testid="column"]:has(.slot-vacating) button * {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
     font-size: 0.82rem !important;
     line-height: 1.25 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    opacity: 1 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
 }}
 
 div[data-testid="column"]:has(.slot-free) button,
@@ -998,26 +1008,29 @@ div[data-testid="stButton"] button p {{
 }}
 
 /* Preserve parking stall button colors & enforce crisp white text in BOTH Dark & Light modes */
-.stApp .zone-card div[data-testid="stButton"] button,
-.stApp .zone-card div[data-testid="stButton"] button *,
-.stApp .zone-card div[data-testid="stButton"] button p,
-.stApp .zone-card div[data-testid="stButton"] button span,
-.stApp .zone-card div[data-testid="stButton"] button div,
-.zone-card div[data-testid="stButton"] button,
-.zone-card div[data-testid="stButton"] button *,
-.zone-card div[data-testid="stButton"] button p,
-.zone-card div[data-testid="stButton"] button span,
-.zone-card div[data-testid="stButton"] button div,
-.zone-card button,
-.zone-card button *,
-.zone-card button p,
-.zone-card button span {{
+.stApp div[data-testid="stColumn"]:has(.slot-marker) div[data-testid="stButton"] button,
+.stApp div[data-testid="stColumn"]:has(.slot-marker) div[data-testid="stButton"] button *,
+.stApp div[data-testid="stColumn"]:has(.slot-marker) div[data-testid="stButton"] button p,
+.stApp div[data-testid="stColumn"]:has(.slot-marker) div[data-testid="stButton"] button span,
+.stApp div[data-testid="stColumn"]:has(.slot-marker) div[data-testid="stButton"] button div,
+.stApp div[data-testid="column"]:has(.slot-marker) div[data-testid="stButton"] button,
+.stApp div[data-testid="column"]:has(.slot-marker) div[data-testid="stButton"] button *,
+.stApp div[data-testid="column"]:has(.slot-marker) div[data-testid="stButton"] button p,
+.stApp div[data-testid="column"]:has(.slot-marker) div[data-testid="stButton"] button span,
+.stApp div[data-testid="column"]:has(.slot-marker) div[data-testid="stButton"] button div,
+div[data-testid="stColumn"]:has(.slot-marker) button,
+div[data-testid="stColumn"]:has(.slot-marker) button *,
+div[data-testid="stColumn"]:has(.slot-marker) button p,
+div[data-testid="column"]:has(.slot-marker) button,
+div[data-testid="column"]:has(.slot-marker) button *,
+div[data-testid="column"]:has(.slot-marker) button p {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
     font-size: 0.82rem !important;
     line-height: 1.25 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    opacity: 1 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
 }}
 
 /* ── st.code Block ── */
