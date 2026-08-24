@@ -1122,11 +1122,7 @@ div[data-baseweb="calendar"] header *,
 div[data-baseweb="calendar"] [role="grid"],
 div[data-baseweb="calendar"] [role="grid"] *,
 div[data-baseweb="calendar"] [role="row"],
-div[data-baseweb="calendar"] [role="row"] *,
-div[data-baseweb="calendar"] [role="gridcell"],
-div[data-baseweb="calendar"] [role="gridcell"] *,
-div[data-baseweb="calendar"] [role="presentation"],
-div[data-baseweb="calendar"] [role="presentation"] * {{
+div[data-baseweb="calendar"] [role="row"] * {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -1134,15 +1130,59 @@ div[data-baseweb="calendar"] [role="presentation"] * {{
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
-/* Empty filler day slots (before start of month / after end of month) */
-div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)),
-div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)) *,
-div[data-baseweb="calendar"] [aria-disabled="true"]:not(:has(button)),
-div[data-baseweb="calendar"] [aria-disabled="true"]:not(:has(button)) *,
-[data-baseweb="popover"] [aria-disabled="true"]:not(:has(button)),
-[data-baseweb="popover"] [aria-disabled="true"]:not(:has(button)) * {{
-    background-color: transparent !important;
+/* Active Days in Calendar */
+div[data-baseweb="calendar"] [role="gridcell"],
+div[data-baseweb="calendar"] [role="gridcell"] *,
+div[data-baseweb="calendar"] [role="gridcell"]:not([aria-disabled="true"]),
+div[data-baseweb="calendar"] [role="gridcell"]:not([aria-disabled="true"]) * {{
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
+    background: { "transparent" if is_dark else "#FFFFFF" } !important;
+    cursor: pointer !important;
+}}
+
+/* Day Names Header (Su, Mo, Tu, We, Th, Fr, Sa) */
+div[data-baseweb="calendar"] [role="columnheader"],
+div[data-baseweb="calendar"] [role="columnheader"] * {{
+    color: { "#94A3B8" if is_dark else "#64748B" } !important;
+    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#64748B" } !important;
+    font-weight: 700 !important;
     background: transparent !important;
+}}
+
+/* Selected Date in Calendar */
+div[data-baseweb="calendar"] [aria-selected="true"],
+div[data-baseweb="calendar"] [aria-selected="true"] *,
+div[data-baseweb="calendar"] [aria-selected="true"] div {{
+    background-color: #2563EB !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 800 !important;
+    border-radius: 6px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}}
+
+/* Hover on Calendar Day */
+div[data-baseweb="calendar"] [role="gridcell"]:hover:not([aria-disabled="true"]),
+div[data-baseweb="calendar"] [role="gridcell"]:hover:not([aria-disabled="true"]) * {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+}}
+
+/* Empty filler day slots (aria-disabled empty padding days) */
+div[data-baseweb="calendar"] [aria-disabled="true"],
+div[data-baseweb="calendar"] [aria-disabled="true"] *,
+div[data-baseweb="calendar"] [role="gridcell"][aria-disabled="true"],
+div[data-baseweb="calendar"] [role="gridcell"][aria-disabled="true"] * {{
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    background: { "#111827" if is_dark else "#FFFFFF" } !important;
     border: none !important;
     border-color: transparent !important;
     box-shadow: none !important;
@@ -1150,41 +1190,9 @@ div[data-baseweb="calendar"] [aria-disabled="true"]:not(:has(button)) *,
     opacity: 0 !important;
 }}
 
-div[data-baseweb="calendar"] [role="columnheader"],
-div[data-baseweb="calendar"] [role="columnheader"] * {{
-    color: { "#94A3B8" if is_dark else "#64748B" } !important;
-    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#64748B" } !important;
-    font-weight: 700 !important;
-}}
-div[data-baseweb="calendar"] button {{
-    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
-    border-radius: 6px !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}}
-div[data-baseweb="calendar"] button:hover {{
-    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
-    color: { "#38BDF8" if is_dark else "#0284C7" } !important;
-    -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
-}}
 div[data-baseweb="calendar"] button svg {{
     fill: { "#94A3B8" if is_dark else "#475569" } !important;
     color: { "#94A3B8" if is_dark else "#475569" } !important;
-}}
-div[data-baseweb="calendar"] [aria-selected="true"],
-div[data-baseweb="calendar"] [aria-selected="true"] *,
-div[data-baseweb="calendar"] [aria-selected="true"] button,
-div[data-baseweb="calendar"] [aria-selected="true"] button *,
-div[data-baseweb="calendar"] button[aria-selected="true"],
-div[data-baseweb="calendar"] button[aria-selected="true"] * {{
-    background-color: #2563EB !important;
-    background: #2563EB !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    font-weight: 800 !important;
-    border-radius: 6px !important;
 }}
 
 /* ── Number Input Stepper Arrows ── */
