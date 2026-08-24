@@ -352,19 +352,39 @@ button[role="tab"][aria-selected="true"] span {{
     visibility: visible !important;
 }}
 
-/* ── Streamlit Form Controls Adaptation (Dropdowns & Inputs) ── */
+/* ── Streamlit Form Controls Adaptation (Date, Time, Text, Number Inputs) ── */
+div[data-testid="stDateInput"],
+div[data-testid="stDateInput"] *,
 div[data-testid="stDateInput"] input,
+div[data-testid="stDateInput"] div,
+div[data-testid="stDateInput"] [data-baseweb="input"],
+div[data-testid="stDateInput"] [data-baseweb="base-input"],
+div[data-testid="stTimeInput"],
+div[data-testid="stTimeInput"] *,
 div[data-testid="stTimeInput"] input,
+div[data-testid="stTimeInput"] div,
+div[data-testid="stTimeInput"] [data-baseweb="input"],
+div[data-testid="stTimeInput"] [data-baseweb="base-input"],
+div[data-testid="stTimeInput"] [data-baseweb="select"],
+div[data-testid="stTextInput"],
+div[data-testid="stTextInput"] *,
 div[data-testid="stTextInput"] input,
+div[data-testid="stTextInput"] div,
+div[data-testid="stNumberInput"],
+div[data-testid="stNumberInput"] *,
 div[data-testid="stNumberInput"] input,
-div[data-testid="stDateInput"] div[data-baseweb="input"],
-div[data-testid="stTimeInput"] div[data-baseweb="input"],
-div[data-testid="stTimeInput"] div[data-baseweb="select"],
-div[data-testid="stTimeInput"] div[data-baseweb="select"] > div {{
+div[data-testid="stNumberInput"] div {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
+}}
+
+div[data-testid="stDateInput"] input,
+div[data-testid="stTimeInput"] input,
+div[data-testid="stTextInput"] input,
+div[data-testid="stNumberInput"] input {{
     border: 1px solid { "#1F2937" if is_dark else "#CBD5E1" } !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
@@ -1091,22 +1111,25 @@ div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
 
 /* ── Date/Time Picker Calendar Popover ── */
 div[data-baseweb="calendar"],
+div[data-baseweb="calendar"] *,
 div[data-baseweb="calendar"] > div,
 div[data-baseweb="calendar"] header,
+div[data-baseweb="calendar"] header *,
 div[data-baseweb="calendar"] [role="grid"],
+div[data-baseweb="calendar"] [role="grid"] *,
 div[data-baseweb="calendar"] [role="row"],
-div[data-baseweb="calendar"] [role="gridcell"] {{
+div[data-baseweb="calendar"] [role="row"] *,
+div[data-baseweb="calendar"] [role="gridcell"],
+div[data-baseweb="calendar"] [role="gridcell"] *,
+div[data-baseweb="calendar"] [role="presentation"],
+div[data-baseweb="calendar"] [role="presentation"] *,
+div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]),
+div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]) * {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
-}}
-div[data-baseweb="calendar"] *,
-div[data-baseweb="calendar"] span,
-div[data-baseweb="calendar"] p,
-div[data-baseweb="calendar"] div {{
-    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 div[data-baseweb="calendar"] [role="columnheader"],
 div[data-baseweb="calendar"] [role="columnheader"] * {{
@@ -1116,31 +1139,31 @@ div[data-baseweb="calendar"] [role="columnheader"] * {{
 }}
 div[data-baseweb="calendar"] button {{
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     border-radius: 6px !important;
 }}
 div[data-baseweb="calendar"] button:hover {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
 }}
 div[data-baseweb="calendar"] button svg {{
     fill: { "#94A3B8" if is_dark else "#475569" } !important;
     color: { "#94A3B8" if is_dark else "#475569" } !important;
 }}
 div[data-baseweb="calendar"] [aria-selected="true"],
+div[data-baseweb="calendar"] [aria-selected="true"] *,
 div[data-baseweb="calendar"] [aria-selected="true"] button,
-div[data-baseweb="calendar"] button[aria-selected="true"] {{
+div[data-baseweb="calendar"] [aria-selected="true"] button *,
+div[data-baseweb="calendar"] button[aria-selected="true"],
+div[data-baseweb="calendar"] button[aria-selected="true"] * {{
     background-color: #2563EB !important;
     background: #2563EB !important;
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
     border-radius: 6px !important;
-}}
-div[data-baseweb="calendar"] [aria-selected="true"] *,
-div[data-baseweb="calendar"] [aria-selected="true"] button *,
-div[data-baseweb="calendar"] button[aria-selected="true"] * {{
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
 }}
 
 /* ── Number Input Stepper Arrows ── */
