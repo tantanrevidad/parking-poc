@@ -391,34 +391,42 @@ div[data-baseweb="select"] span {{
     font-weight: 600 !important;
 }}
 
-/* Selectbox Open Popover Menu (Options List) */
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] > div,
-div[data-baseweb="menu"],
-div[data-baseweb="menu"] > ul,
-ul[role="listbox"],
-ul[role="listbox"] > li,
-li[role="option"] {{
+/* Selectbox Open Popover Menu (Options List) — Nuclear Override
+   BaseWeb renders popovers as body-level portals OUTSIDE .stApp.
+   Inline styles are applied by JS. We use extremely broad selectors
+   with !important to override them. */
+[data-baseweb="popover"],
+[data-baseweb="popover"] *,
+[data-baseweb="layer"] [data-baseweb="popover"],
+[data-baseweb="layer"] [data-baseweb="popover"] *,
+body [data-baseweb="popover"],
+body [data-baseweb="popover"] > div,
+body [data-baseweb="popover"] > div > div,
+body [data-baseweb="popover"] > div > div > div,
+[data-baseweb="menu"],
+[data-baseweb="menu"] *,
+body [data-baseweb="menu"],
+body [data-baseweb="menu"] > ul,
+body ul[role="listbox"],
+body ul[role="listbox"] > li,
+body li[role="option"],
+body li[role="option"] > div,
+body li[role="option"] > div > div {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
-ul[role="listbox"] li[role="option"] * {{
-    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    font-weight: 600 !important;
-}}
-
-ul[role="listbox"] li[role="option"]:hover,
-ul[role="listbox"] li[role="option"][aria-selected="true"] {{
+body ul[role="listbox"] li[role="option"]:hover,
+body ul[role="listbox"] li[role="option"]:hover *,
+body ul[role="listbox"] li[role="option"][aria-selected="true"],
+body ul[role="listbox"] li[role="option"][aria-selected="true"] *,
+body [data-baseweb="menu"] li:hover,
+body [data-baseweb="menu"] li:hover * {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
-    color: { "#38BDF8" if is_dark else "#0284C7" } !important;
-}}
-ul[role="listbox"] li[role="option"]:hover *,
-ul[role="listbox"] li[role="option"][aria-selected="true"] * {{
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
     -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
 }}
@@ -1290,6 +1298,92 @@ with ctrl_col:
 
 # Inject dynamic CSS based on active theme
 st.markdown(get_theme_css(st.session_state.theme_mode), unsafe_allow_html=True)
+
+# Inject JS MutationObserver to forcefully theme dropdown popovers at body level
+_is_dark_js = "true" if st.session_state.theme_mode == "dark" else "false"
+_popover_theme_js = f"""
+<script>
+(function() {{
+    const isDark = {_is_dark_js};
+    const bg = isDark ? '#111827' : '#FFFFFF';
+    const bgHover = isDark ? '#1E293B' : '#F1F5F9';
+    const textColor = isDark ? '#F8FAFC' : '#0F172A';
+    const borderColor = isDark ? '#1F2937' : '#CBD5E1';
+    const hoverColor = isDark ? '#38BDF8' : '#0284C7';
+
+    function themePopover(popover) {{
+        popover.style.setProperty('background-color', bg, 'important');
+        popover.style.setProperty('background', bg, 'important');
+        popover.style.setProperty('border-color', borderColor, 'important');
+        popover.style.setProperty('border', '1px solid ' + borderColor, 'important');
+        popover.style.setProperty('border-radius', '10px', 'important');
+        popover.style.setProperty('box-shadow', isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.1)', 'important');
+
+        const allChildren = popover.querySelectorAll('*');
+        allChildren.forEach(function(el) {{
+            el.style.setProperty('background-color', bg, 'important');
+            el.style.setProperty('background', bg, 'important');
+            el.style.setProperty('color', textColor, 'important');
+            el.style.setProperty('-webkit-text-fill-color', textColor, 'important');
+        }});
+
+        const listItems = popover.querySelectorAll('li[role="option"], ul[role="listbox"] > li');
+        listItems.forEach(function(li) {{
+            li.style.setProperty('background-color', bg, 'important');
+            li.style.setProperty('background', bg, 'important');
+            li.style.setProperty('color', textColor, 'important');
+            li.style.setProperty('-webkit-text-fill-color', textColor, 'important');
+
+            li.addEventListener('mouseenter', function() {{
+                this.style.setProperty('background-color', bgHover, 'important');
+                this.style.setProperty('background', bgHover, 'important');
+                this.style.setProperty('color', hoverColor, 'important');
+                this.style.setProperty('-webkit-text-fill-color', hoverColor, 'important');
+                this.querySelectorAll('*').forEach(function(c) {{
+                    c.style.setProperty('color', hoverColor, 'important');
+                    c.style.setProperty('-webkit-text-fill-color', hoverColor, 'important');
+                }});
+            }});
+            li.addEventListener('mouseleave', function() {{
+                this.style.setProperty('background-color', bg, 'important');
+                this.style.setProperty('background', bg, 'important');
+                this.style.setProperty('color', textColor, 'important');
+                this.style.setProperty('-webkit-text-fill-color', textColor, 'important');
+                this.querySelectorAll('*').forEach(function(c) {{
+                    c.style.setProperty('color', textColor, 'important');
+                    c.style.setProperty('-webkit-text-fill-color', textColor, 'important');
+                }});
+            }});
+        }});
+    }}
+
+    // Access the parent document (Streamlit host) from this iframe
+    const target = window.parent.document.body;
+    const observer = new MutationObserver(function(mutations) {{
+        mutations.forEach(function(m) {{
+            m.addedNodes.forEach(function(node) {{
+                if (node.nodeType === 1) {{
+                    if (node.getAttribute && node.getAttribute('data-baseweb') === 'popover') {{
+                        setTimeout(function() {{ themePopover(node); }}, 10);
+                    }}
+                    const popovers = node.querySelectorAll ? node.querySelectorAll('[data-baseweb="popover"]') : [];
+                    popovers.forEach(function(p) {{
+                        setTimeout(function() {{ themePopover(p); }}, 10);
+                    }});
+                }}
+            }});
+        }});
+    }});
+    observer.observe(target, {{ childList: true, subtree: true }});
+
+    // Also theme any popovers already visible
+    target.querySelectorAll('[data-baseweb="popover"]').forEach(function(p) {{
+        themePopover(p);
+    }});
+}})();
+</script>
+"""
+components.html(_popover_theme_js, height=0, width=0)
 
 
 # ---------------------------------------------------------------------------
