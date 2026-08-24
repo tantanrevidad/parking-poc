@@ -622,6 +622,23 @@ div[data-testid="stSegmentedControl"] label {{
 }}
 
 /* ── Direct Solid-Color Parking Stall Buttons (Guaranteed Column Targeting) ── */
+.zone-card div[data-testid="stButton"] button,
+.zone-card div[data-testid="stButton"] button *,
+.zone-card div[data-testid="stButton"] button p,
+.zone-card div[data-testid="stButton"] button span,
+.zone-card div[data-testid="stButton"] button div,
+.zone-card button,
+.zone-card button *,
+.zone-card button p,
+.zone-card button span {{
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}}
+
 div[data-testid="column"]:has(.slot-free) button,
 div[data-testid="stColumn"]:has(.slot-free) button,
 div:has(> .slot-free) + div[data-testid="stButton"] button,
@@ -629,6 +646,7 @@ button[aria-label*="OPEN"] {{
     background-color: #10B981 !important;
     background: #10B981 !important;
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     border: 1px solid #059669 !important;
     border-radius: 8px !important;
     font-weight: 800 !important;
@@ -640,17 +658,6 @@ button[aria-label*="OPEN"] {{
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
-div[data-testid="column"]:has(.slot-free) button p,
-div[data-testid="stColumn"]:has(.slot-free) button p,
-button[aria-label*="OPEN"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.8rem !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-align: center !important;
-    line-height: 1.25 !important;
-}}
 
 div[data-testid="column"]:has(.slot-occupied) button,
 div[data-testid="stColumn"]:has(.slot-occupied) button,
@@ -659,6 +666,7 @@ button[aria-label*="BUSY"] {{
     background-color: #E11D48 !important;
     background: #E11D48 !important;
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     border: 1px solid #BE123C !important;
     border-radius: 8px !important;
     font-weight: 800 !important;
@@ -670,17 +678,6 @@ button[aria-label*="BUSY"] {{
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
-div[data-testid="column"]:has(.slot-occupied) button p,
-div[data-testid="stColumn"]:has(.slot-occupied) button p,
-button[aria-label*="BUSY"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.8rem !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-align: center !important;
-    line-height: 1.25 !important;
-}}
 
 div[data-testid="column"]:has(.slot-pending) button,
 div[data-testid="stColumn"]:has(.slot-pending) button,
@@ -688,7 +685,8 @@ div:has(> .slot-pending) + div[data-testid="stButton"] button,
 button[aria-label*="MATCH"] {{
     background-color: #F59E0B !important;
     background: #F59E0B !important;
-    color: #1E293B !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     border: 1px solid #D97706 !important;
     border-radius: 8px !important;
     font-weight: 800 !important;
@@ -700,17 +698,6 @@ button[aria-label*="MATCH"] {{
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
-div[data-testid="column"]:has(.slot-pending) button p,
-div[data-testid="stColumn"]:has(.slot-pending) button p,
-button[aria-label*="MATCH"] p {{
-    color: #1E293B !important;
-    font-weight: 800 !important;
-    font-size: 0.8rem !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-align: center !important;
-    line-height: 1.25 !important;
-}}
 
 div[data-testid="column"]:has(.slot-vacating) button,
 div[data-testid="stColumn"]:has(.slot-vacating) button,
@@ -719,6 +706,7 @@ button[aria-label*="LEAVING"] {{
     background-color: #0284C7 !important;
     background: #0284C7 !important;
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     border: 1px solid #0369A1 !important;
     border-radius: 8px !important;
     font-weight: 800 !important;
@@ -729,17 +717,6 @@ button[aria-label*="LEAVING"] {{
     line-height: 1.25 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
-}}
-div[data-testid="column"]:has(.slot-vacating) button p,
-div[data-testid="stColumn"]:has(.slot-vacating) button p,
-button[aria-label*="LEAVING"] p {{
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    font-size: 0.8rem !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-align: center !important;
-    line-height: 1.25 !important;
 }}
 
 .zone-card div[data-testid="stButton"] button:hover {{
