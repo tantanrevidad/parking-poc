@@ -1910,6 +1910,8 @@ with tab2:
                 unsafe_allow_html=True,
             )
 
+    st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+
     # Area chart
     dow = target_ts.dayofweek
     hist_feat = predictor.engineer_features(history_df)
@@ -1967,6 +1969,8 @@ with tab3:
                 f"<div class='metric-sub'>{sub}</div></div>",
                 unsafe_allow_html=True,
             )
+
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
