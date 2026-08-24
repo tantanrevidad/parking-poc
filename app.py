@@ -1112,6 +1112,7 @@ div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
 /* ── Date/Time Picker Calendar Popover ── */
 div[data-baseweb="calendar"],
 div[data-baseweb="calendar"] *,
+div[data-baseweb="calendar"] div,
 div[data-baseweb="calendar"] > div,
 div[data-baseweb="calendar"] header,
 div[data-baseweb="calendar"] header *,
@@ -1123,14 +1124,32 @@ div[data-baseweb="calendar"] [role="gridcell"],
 div[data-baseweb="calendar"] [role="gridcell"] *,
 div[data-baseweb="calendar"] [role="presentation"],
 div[data-baseweb="calendar"] [role="presentation"] *,
+div[data-baseweb="calendar"] [aria-disabled="true"],
+div[data-baseweb="calendar"] [aria-disabled="true"] *,
+div[data-baseweb="calendar"] [aria-hidden="true"],
+div[data-baseweb="calendar"] [aria-hidden="true"] *,
 div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]),
-div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]) * {{
+div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]) *,
+[data-baseweb="popover"] [data-baseweb="calendar"],
+[data-baseweb="popover"] [data-baseweb="calendar"] * {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
+
+/* Empty filler day slots (before start of month / after end of month) */
+div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)),
+div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)) *,
+div[data-baseweb="calendar"] [aria-disabled="true"],
+div[data-baseweb="calendar"] [aria-disabled="true"] * {{
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    background: { "#111827" if is_dark else "#FFFFFF" } !important;
+    border: none !important;
+    box-shadow: none !important;
+}}
+
 div[data-baseweb="calendar"] [role="columnheader"],
 div[data-baseweb="calendar"] [role="columnheader"] * {{
     color: { "#94A3B8" if is_dark else "#64748B" } !important;
