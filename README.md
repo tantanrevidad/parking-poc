@@ -9,7 +9,8 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 - **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity (48 Mall bays, 24 Office bays, 16 Residential bays).
 - **Zero-Page-Reload Direct Stall Inspection:** Every parking stall block is an interactive solid-color card powered by isolated fragment execution (`@st.fragment`). Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll jitter, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
 - **Dynamic Real-Time PST Hero Clock (Tab 1):** Live client-side Philippine Standard Time clock counting up seconds, minutes, and hours (`HH:MM:SS AM/PM`) dynamically with zero server overhead and a pulsing live monitoring badge.
-- **Predictive Timeline Control (Tab 2):** Dedicated future simulation interface with calendar date selection, 12-hour/minute pickers, direct time entry (`14:30`, `2:30pm`, `09:00`), and quick-step toolbar (`-1h`, `-15m`, `+15m`, `+1h`, `Live`).
+- **Streamlined Date & Time Controls (Tab 2):** Dedicated future simulation interface featuring clean, centered Date and Time selectors for rapid predictive scenario analysis across any future timestamp.
+- **Forecast Intelligence & Methodology (Tab 2):** Integrated analytical intelligence providing zone behavioral classification (Mall vs. Office vs. Residential), 4-week telemetry dataset provenance (2,688 intervals at 15-minute resolution), and detailed model specifications.
 - **Stabilized Simulation State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs, grace periods, and stabilized 5-minute simulation window seeds.
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
 - **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on 28 days of 15-minute historical readings using causal feature engineering, evaluated on a chronological holdout dataset against a naive baseline.
@@ -17,7 +18,7 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
   1. **Philippine CCTV Parking Lot & Gate Dataset:** 20 real-world surveillance video frames from multi-level decks, boom barriers, and low-light basement checkpoints.
   2. **Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
 - **5-Phase Computer Vision Space Detection Engine:** YOLOv8n vehicle detector with adaptive low-light CLAHE contrast enhancement, true perspective polygon ROI calibration (`slots_config.json`), Intersection over Area (IoA) occupancy scoring with centroid containment, and 5-frame temporal state debouncing.
-- **High-Contrast Dark & Light Theme Engine:** Segmented theme switcher with responsive styling, bold pure-black tab typography in Light Mode, and adaptive Plotly chart themes.
+- **Enterprise Dark & Light Mode Theme Engine:** Dynamic theme switcher with comprehensive styling across all widgets, BaseWeb calendars, popover dropdowns, and adaptive Plotly charts.
 
 ---
 
@@ -112,7 +113,7 @@ python cv_demo.py --dataset all
 ## 📱 Application Modules & Tabs
 
 1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger in-place SQLite modal inspection with zero page reload.
-2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using 12-hour dropdowns, minute pickers, or direct text time inputs) to receive an ML forecast, baseline comparison, conservative safety margin, and historical trend curve.
+2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using clean centered Date & Time pickers) to receive an ML forecast, baseline comparison, conservative safety margin, historical trend curve, and an in-depth Forecast Intelligence & Methodology analysis breakdown.
 3. **Model Performance:** Diagnostic dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings, and match margin confirmation.
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot Dataset** and the **OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.

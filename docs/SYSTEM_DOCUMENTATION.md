@@ -509,17 +509,18 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
    - Centered client-side Philippine Standard Time (PST) clock displaying hours, minutes, and continuous ticking seconds (`HH:MM:SS AM/PM`) with zero backend reload overhead.
    - Features a pulsing green status indicator (`🟢 PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING`).
 
-4. **Multi-Modal Predictive Timeline Controls (Tab 2):**
-   - Dedicated future simulation interface featuring calendar date picking, 12-hour AM/PM selectbox, minute step input, quick jump toolbar (`[-1h]`, `[-15m]`, `[+15m]`, `[+1h]`, `[Live]`), and flexible direct text entry (e.g. `14:30`, `2:30pm`, `09:00`).
+4. **Streamlined Predictive Timeline Controls & Forecast Intelligence (Tab 2):**
+   - Clean, centered Date and Time selectors for rapid predictive scenario analysis across any future timestamp.
    - Simulation state engine uses 5-minute window block seeds to prevent stochastic bay reshuffling during active inspection.
+   - Integrated **Forecast Intelligence & Methodology** module providing zone classification profiles (Mall vs. Office vs. Residential), 4-week telemetry dataset provenance (2,688 intervals at 15-minute resolution), and detailed model specifications.
 
-5. **Dual Theme Engine (Light & Dark Mode):**
+5. **Enterprise Dark & Light Mode Theme Engine:**
    - Seamless segmented theme switch between Dark Mode and Light Mode.
-   - Light Mode features bold pure-black (`#000000`) tab typography, clear Slate form controls, white cards, and auto-adapting Plotly charts.
+   - Full dynamic theme coverage across BaseWeb calendars, popover dropdowns, segmented controls, number/time inputs, and auto-adapting Plotly charts.
 
 ### 10.2 Dedicated Functional Tabs:
 1. **Occupancy Map:** Live real-time operations deck displaying all bays across Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype with Drive Aisles, live capacity KPIs, dynamic ticking PST clock, and in-place `@st.fragment` database row inspection.
-2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, and historical diurnal curve.
+2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, historical diurnal curve, and Forecast Intelligence breakdown.
 3. **Model Performance:** Model diagnostics dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Holdout Validation Sample Count, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
