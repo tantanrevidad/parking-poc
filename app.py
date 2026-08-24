@@ -391,31 +391,25 @@ div[data-baseweb="select"] svg {{
     color: { "#94A3B8" if is_dark else "#475569" } !important;
 }}
 
-/* ── Selectbox Open Popover Menu & Option List Items ── */
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] *,
-div[data-baseweb="popover"] > div,
-div[data-baseweb="popover"] > div > div,
-div[data-baseweb="popover"] > div > div > div,
-div[data-baseweb="menu"],
-div[data-baseweb="menu"] *,
-div[data-baseweb="menu"] > div,
-div[data-baseweb="menu"] > ul,
-div[data-baseweb="menu"] ul,
-div[data-baseweb="menu"] li,
-div[data-baseweb="layer"] [data-baseweb="popover"],
-div[data-baseweb="layer"] [data-baseweb="popover"] *,
+/* ── Selectbox Open Popover Menu & Option List Items (Global Portals) ── */
 [data-baseweb="popover"],
 [data-baseweb="popover"] *,
 [data-baseweb="menu"],
 [data-baseweb="menu"] *,
+[data-baseweb="layer"] [data-baseweb="popover"],
+[data-baseweb="layer"] [data-baseweb="popover"] *,
+[role="listbox"],
+[role="listbox"] *,
+[role="option"],
+[role="option"] *,
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] *,
 ul[role="listbox"],
 ul[role="listbox"] *,
-ul[role="listbox"] > li,
 li[role="option"],
-li[role="option"] *,
-li[role="option"] > div,
-li[role="option"] > div > div {{
+li[role="option"] * {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -423,29 +417,34 @@ li[role="option"] > div > div {{
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
-/* Popover Item Hover & Selected States */
+/* Option Hover & Active */
+[data-baseweb="popover"] li:hover,
+[data-baseweb="popover"] li:hover *,
+[data-baseweb="popover"] [aria-selected="true"],
+[data-baseweb="popover"] [aria-selected="true"] *,
+[data-baseweb="menu"] li:hover,
+[data-baseweb="menu"] li:hover *,
+[data-baseweb="menu"] [aria-selected="true"],
+[data-baseweb="menu"] [aria-selected="true"] *,
+[role="listbox"] [role="option"]:hover,
+[role="listbox"] [role="option"]:hover *,
+[role="listbox"] [role="option"][aria-selected="true"],
+[role="listbox"] [role="option"][aria-selected="true"] *,
 ul[role="listbox"] li[role="option"]:hover,
 ul[role="listbox"] li[role="option"]:hover *,
 ul[role="listbox"] li[role="option"][aria-selected="true"],
-ul[role="listbox"] li[role="option"][aria-selected="true"] *,
-li[role="option"]:hover,
-li[role="option"]:hover *,
-li[role="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"] *,
-div[data-baseweb="menu"] li:hover,
-div[data-baseweb="menu"] li:hover *,
-div[data-baseweb="menu"] li[aria-selected="true"],
-div[data-baseweb="menu"] li[aria-selected="true"] * {{
+ul[role="listbox"] li[role="option"][aria-selected="true"] * {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
     -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
 }}
 
-/* ── Segmented Control Switcher (Theme / View Mode) ── */
-div[data-testid="stSegmentedControl"],
-div[data-testid="stSegmentedControl"] > div,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {{
+/* ── Segmented Control Switcher & Button Groups (Theme / View Mode) ── */
+div[data-baseweb="button-group"],
+div[data-testid*="SegmentedControl"],
+div[data-testid*="ButtonGroup"],
+[data-baseweb="button-group"] {{
     background-color: { "#111827" if is_dark else "#E2E8F0" } !important;
     background: { "#111827" if is_dark else "#E2E8F0" } !important;
     border: 1px solid { "#1F2937" if is_dark else "#CBD5E1" } !important;
@@ -454,15 +453,17 @@ div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {{
     gap: 4px !important;
 }}
 
-/* ALL Inactive Segmented Control Buttons (e.g. 'Light' in Dark Mode, 'Dark' in Light Mode) */
-div[data-testid="stSegmentedControl"] button,
-div[data-testid="stSegmentedControl"] button *,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button *,
-div[data-testid="stSegmentedControl"] button[aria-checked="false"],
-div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="false"],
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="false"] * {{
+/* ALL Buttons inside Button Groups (Default / Inactive State) */
+div[data-baseweb="button-group"] button,
+div[data-baseweb="button-group"] button *,
+div[data-testid*="SegmentedControl"] button,
+div[data-testid*="SegmentedControl"] button *,
+div[data-testid*="ButtonGroup"] button,
+div[data-testid*="ButtonGroup"] button *,
+button[role="radio"],
+button[role="radio"] *,
+button[role="tab"],
+button[role="tab"] * {{
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     background: { "transparent" if is_dark else "#FFFFFF" } !important;
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
@@ -474,8 +475,10 @@ div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-
 }}
 
 /* Hover on Inactive Button */
-div[data-testid="stSegmentedControl"] button:hover:not([aria-checked="true"]),
-div[data-testid="stSegmentedControl"] button:hover:not([aria-checked="true"]) * {{
+div[data-baseweb="button-group"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]),
+div[data-baseweb="button-group"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]) *,
+div[data-testid*="SegmentedControl"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]),
+div[data-testid*="SegmentedControl"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]) * {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: { "#FFFFFF" if is_dark else "#000000" } !important;
@@ -483,12 +486,14 @@ div[data-testid="stSegmentedControl"] button:hover:not([aria-checked="true"]) * 
 }}
 
 /* ACTIVE / SELECTED Segmented Button */
-div[data-testid="stSegmentedControl"] button[aria-checked="true"],
-div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
-div[data-testid="stSegmentedControl"] button[aria-selected="true"],
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="true"],
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"],
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-selected="true"] {{
+div[data-baseweb="button-group"] button[aria-checked="true"],
+div[data-baseweb="button-group"] button[aria-pressed="true"],
+div[data-baseweb="button-group"] button[aria-selected="true"],
+div[data-testid*="SegmentedControl"] button[aria-checked="true"],
+div[data-testid*="SegmentedControl"] button[aria-pressed="true"],
+div[data-testid*="SegmentedControl"] button[aria-selected="true"],
+button[role="radio"][aria-checked="true"],
+button[role="tab"][aria-selected="true"] {{
     background-color: #2563EB !important;
     background: #2563EB !important;
     color: #FFFFFF !important;
@@ -497,12 +502,14 @@ div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-
     font-weight: 800 !important;
     box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35) !important;
 }}
-div[data-testid="stSegmentedControl"] button[aria-checked="true"] *,
-div[data-testid="stSegmentedControl"] button[aria-pressed="true"] *,
-div[data-testid="stSegmentedControl"] button[aria-selected="true"] *,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="true"] *,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"] *,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-selected="true"] * {{
+div[data-baseweb="button-group"] button[aria-checked="true"] *,
+div[data-baseweb="button-group"] button[aria-pressed="true"] *,
+div[data-baseweb="button-group"] button[aria-selected="true"] *,
+div[data-testid*="SegmentedControl"] button[aria-checked="true"] *,
+div[data-testid*="SegmentedControl"] button[aria-pressed="true"] *,
+div[data-testid*="SegmentedControl"] button[aria-selected="true"] *,
+button[role="radio"][aria-checked="true"] *,
+button[role="tab"][aria-selected="true"] * {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
