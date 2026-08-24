@@ -138,6 +138,12 @@ section[data-testid="stSidebar"] {{
     letter-spacing: -0.01em;
 }}
 
+@keyframes pulse-green {{
+    0% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }}
+    70% {{ transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }}
+    100% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
+}}
+
 /* ── Top Bar Brand ── */
 .app-brand {{
     padding: 6px 0 16px 0;
@@ -1047,17 +1053,33 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 
 with tab1:
     now_live = datetime.now()
-    live_time_str = now_live.strftime("%I:%M %p")
+    live_time_str = now_live.strftime("%I:%M:%S %p")
     live_date_str = now_live.strftime("%A, %B %d, %Y")
 
     st.markdown(f"""
     <div class="hero-clock-container">
         <div class="hero-clock-eyebrow">
-            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10B981; margin-right:6px; box-shadow:0 0 8px #10B981;"></span>
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10B981; margin-right:6px; box-shadow:0 0 8px #10B981; animation: pulse-green 1.5s infinite;"></span>
             PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING
         </div>
-        <div class="hero-clock-time">{live_time_str}</div>
-        <div class="hero-clock-date">{live_date_str}</div>
+        <div id="live-hero-clock-time" class="hero-clock-time">{live_time_str}</div>
+        <div id="live-hero-clock-date" class="hero-clock-date">{live_date_str}</div>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="display:none;" onload="(function(){{
+            function updateLiveClock(){{
+                var elTime = document.getElementById('live-hero-clock-time') || (window.parent && window.parent.document.getElementById('live-hero-clock-time'));
+                var elDate = document.getElementById('live-hero-clock-date') || (window.parent && window.parent.document.getElementById('live-hero-clock-date'));
+                var now = new Date();
+                if(elTime){{
+                    elTime.innerText = now.toLocaleTimeString('en-US', {{ timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }});
+                }}
+                if(elDate){{
+                    elDate.innerText = now.toLocaleDateString('en-US', {{ timeZone: 'Asia/Manila', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }});
+                }}
+            }}
+            updateLiveClock();
+            if(window._liveHeroClockInterval) clearInterval(window._liveHeroClockInterval);
+            window._liveHeroClockInterval = setInterval(updateLiveClock, 1000);
+        }})()" onerror="this.onload()">
     </div>
     """, unsafe_allow_html=True)
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
