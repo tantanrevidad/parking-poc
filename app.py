@@ -45,21 +45,26 @@ if "theme_mode" not in st.session_state:
 
 def get_theme_css(theme_mode: str = "dark") -> str:
     is_dark = theme_mode == "dark"
-    bg_app = "#121417" if is_dark else "#F8FAFC"
-    bg_card = "#1A1C23" if is_dark else "#FFFFFF"
-    bg_card_hover = "#22252E" if is_dark else "#E2E8F0"
-    bg_sidebar = "#16181F" if is_dark else "#FFFFFF"
-    border_color = "#282C37" if is_dark else "#CBD5E1"
-    border_subtle = "#20232C" if is_dark else "#E2E8F0"
+    bg_app = "#0B0F19" if is_dark else "#F8FAFC"
+    bg_card = "#111827" if is_dark else "#FFFFFF"
+    bg_card_hover = "#1E293B" if is_dark else "#F1F5F9"
+    bg_card_subtle = "#0F172A" if is_dark else "#F8FAFC"
+    bg_sidebar = "#0B0F19" if is_dark else "#FFFFFF"
+    border_color = "#1F2937" if is_dark else "#E2E8F0"
+    border_subtle = "#192231" if is_dark else "#F1F5F9"
     text_primary = "#F8FAFC" if is_dark else "#0F172A"
     text_secondary = "#94A3B8" if is_dark else "#334155"
     text_muted = "#64748B" if is_dark else "#64748B"
     accent_blue = "#38BDF8" if is_dark else "#0284C7"
+    accent_indigo = "#818CF8" if is_dark else "#4F46E5"
+    accent_emerald = "#34D399" if is_dark else "#059669"
+    accent_amber = "#FBBF24" if is_dark else "#D97706"
+    accent_rose = "#FB7185" if is_dark else "#E11D48"
     accent_purple = "#C084FC" if is_dark else "#9333EA"
-    card_subtle = "#14161C" if is_dark else "#F1F5F9"
-    tab_bg = "#16181F" if is_dark else "#E2E8F0"
+    tab_bg = "#111827" if is_dark else "#E2E8F0"
     tab_active_bg = "#2563EB" if is_dark else "#2563EB"
-    tab_text_color = "#94A3B8" if is_dark else "#000000"
+    tab_text_color = "#94A3B8" if is_dark else "#0F172A"
+    box_shadow_card = "0 4px 20px rgba(0, 0, 0, 0.28)" if is_dark else "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)"
 
     return f"""
 <style>
@@ -69,12 +74,17 @@ def get_theme_css(theme_mode: str = "dark") -> str:
     --bg-app: {bg_app};
     --bg-card: {bg_card};
     --bg-card-hover: {bg_card_hover};
+    --bg-card-subtle: {bg_card_subtle};
     --border-color: {border_color};
     --border-subtle: {border_subtle};
     --text-primary: {text_primary};
     --text-secondary: {text_secondary};
     --text-muted: {text_muted};
     --accent-blue: {accent_blue};
+    --accent-indigo: {accent_indigo};
+    --accent-emerald: {accent_emerald};
+    --accent-amber: {accent_amber};
+    --accent-rose: {accent_rose};
     --accent-purple: {accent_purple};
 }}
 
@@ -97,15 +107,58 @@ section[data-testid="stSidebar"] {{
     border-right: 1px solid var(--border-color) !important;
 }}
 
-/* ── Hero Centered Date & Time Header ── */
+/* ── Top Bar Brand Header ── */
+.app-brand {{
+    padding: 4px 0 16px 0;
+    margin-bottom: 12px;
+}}
+.brand-pill {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: { "rgba(56, 189, 248, 0.12)" if is_dark else "#E0F2FE" };
+    border: 1px solid { "rgba(56, 189, 248, 0.3)" if is_dark else "#BAE6FD" };
+    color: { "#38BDF8" if is_dark else "#0369A1" };
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}}
+.brand-pill .pulse-dot {{
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: { "#38BDF8" if is_dark else "#0284C7" };
+    box-shadow: 0 0 8px { "#38BDF8" if is_dark else "#0284C7" };
+    animation: pulse-green 1.8s infinite;
+}}
+.brand-title {{
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}}
+.brand-subtitle {{
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    margin: 3px 0 0 0;
+    font-weight: 500;
+}}
+
+/* ── Hero Centered Date & Time Header (Tab 2 Future Timeline) ── */
 .hero-clock-container {{
     text-align: center;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 24px 20px 20px 20px;
-    margin: 8px 0 20px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    padding: 22px 20px 18px 20px;
+    margin: 6px 0 18px 0;
+    box-shadow: {box_shadow_card};
     position: relative;
     overflow: hidden;
 }}
@@ -116,24 +169,29 @@ section[data-testid="stSidebar"] {{
     background: linear-gradient(90deg, #38BDF8, #818CF8, #C084FC);
 }}
 .hero-clock-eyebrow {{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }}
 .hero-clock-time {{
-    font-size: 2.8rem;
+    font-size: 2.75rem;
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.03em;
     line-height: 1.05;
-    margin: 2px 0 4px 0;
+    margin: 2px 0;
     font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
 }}
 .hero-clock-date {{
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     font-weight: 600;
     color: var(--accent-blue);
     letter-spacing: -0.01em;
@@ -141,40 +199,21 @@ section[data-testid="stSidebar"] {{
 
 @keyframes pulse-green {{
     0% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }}
-    70% {{ transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }}
+    70% {{ transform: scale(1.15); opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }}
     100% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
 }}
 
-/* ── Top Bar Brand ── */
-.app-brand {{
-    padding: 6px 0 16px 0;
-    border-bottom: 1px solid var(--border-subtle);
-    margin-bottom: 18px;
-}}
-.app-brand h1 {{
-    font-size: 1.55rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0;
-    letter-spacing: -0.02em;
-}}
-.app-brand p {{
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 2px 0 0 0;
-}}
-
-/* ── Segmented Tab Bar Navigation (Bulletproof Light & Dark Mode) ── */
+/* ── Segmented Tab Bar Navigation (Pill Style) ── */
 .stTabs [data-baseweb="tab-list"] {{
     gap: 6px !important;
     background-color: {tab_bg} !important;
     padding: 6px !important;
     border-radius: 12px !important;
     border: 1px solid var(--border-color) !important;
-    margin-bottom: 22px !important;
+    margin-bottom: 20px !important;
     display: inline-flex !important;
     width: 100% !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }}
 .stTabs [data-baseweb="tab-highlight"],
 .stTabs [data-baseweb="tab-border"] {{
@@ -188,16 +227,16 @@ button[data-baseweb="tab"],
 button[data-baseweb="tab"] * {{
     color: {tab_text_color} !important;
     -webkit-text-fill-color: {tab_text_color} !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     font-size: 0.86rem !important;
     opacity: 1 !important;
     visibility: visible !important;
 }}
 .stTabs [data-baseweb="tab"] {{
-    height: 40px !important;
+    height: 38px !important;
     border-radius: 8px !important;
     border: none !important;
-    padding: 0px 18px !important;
+    padding: 0px 16px !important;
     background-color: transparent !important;
     transition: all 0.15s ease !important;
     display: inline-flex !important;
@@ -227,14 +266,19 @@ button[data-baseweb="tab"][aria-selected="true"] * {{
 /* ── Streamlit Form Controls Adaptation ── */
 div[data-testid="stDateInput"] input,
 div[data-testid="stTimeInput"] input,
+div[data-testid="stTextInput"] input,
+div[data-testid="stNumberInput"] input,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {{
     background-color: var(--bg-card) !important;
     color: var(--text-primary) !important;
     border-color: var(--border-color) !important;
     font-weight: 600 !important;
+    border-radius: 8px !important;
 }}
 div[data-testid="stDateInput"] label,
 div[data-testid="stTimeInput"] label,
+div[data-testid="stTextInput"] label,
+div[data-testid="stNumberInput"] label,
 div[data-testid="stSelectbox"] label {{
     color: var(--text-secondary) !important;
     font-weight: 700 !important;
@@ -244,26 +288,27 @@ div[data-testid="stSelectbox"] label {{
 /* ── Legend Strip ── */
 .legend-strip {{
     display: flex;
-    gap: 28px;
-    padding: 14px 22px;
+    gap: 24px;
+    padding: 12px 20px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     align-items: center;
     flex-wrap: wrap;
+    box-shadow: {box_shadow_card};
 }}
 .legend-entry {{
     display: flex;
     align-items: center;
-    gap: 9px;
-    font-size: 0.98rem;
+    gap: 8px;
+    font-size: 0.86rem;
     font-weight: 700;
     color: var(--text-primary);
 }}
 .legend-entry .dot {{
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     flex-shrink: 0;
 }}
@@ -273,16 +318,16 @@ div[data-testid="stSelectbox"] label {{
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 14px;
-    padding: 20px 22px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    box-shadow: {box_shadow_card};
 }}
 .zone-header {{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 14px;
-    margin-bottom: 16px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
     border-bottom: 1px solid var(--border-subtle);
 }}
 .zone-name {{
@@ -317,82 +362,6 @@ div[data-testid="stSelectbox"] label {{
     font-size: 1rem;
 }}
 
-/* ── Solid Color Architectural Parking Stalls ── */
-.bay-stall {{
-    border-radius: 7px;
-    padding: 10px 4px 8px 4px;
-    text-align: center;
-    margin-bottom: 8px;
-    font-weight: 800;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-    cursor: pointer;
-    user-select: none;
-    display: block;
-}}
-.bay-stall:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    filter: brightness(1.12);
-}}
-.bay-stall:active {{
-    transform: translateY(0px);
-}}
-
-.bay-stall-free {{
-    background-color: #10B981 !important;
-    background: #10B981 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #059669 !important;
-}}
-.bay-stall-free .bay-code {{ color: #FFFFFF !important; }}
-.bay-stall-free .bay-indicator {{ color: #ECFDF5 !important; }}
-
-.bay-stall-occupied {{
-    background-color: #E11D48 !important;
-    background: #E11D48 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #BE123C !important;
-}}
-.bay-stall-occupied .bay-code {{ color: #FFFFFF !important; }}
-.bay-stall-occupied .bay-indicator {{ color: #FFE4E6 !important; }}
-
-.bay-stall-pending {{
-    background-color: #F59E0B !important;
-    background: #F59E0B !important;
-    color: #1E293B !important;
-    border: 1px solid #D97706 !important;
-}}
-.bay-stall-pending .bay-code {{ color: #1E293B !important; }}
-.bay-stall-pending .bay-indicator {{ color: #451A03 !important; }}
-
-.bay-stall-vacating {{
-    background-color: #0284C7 !important;
-    background: #0284C7 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #0369A1 !important;
-}}
-.bay-stall-vacating .bay-code {{ color: #FFFFFF !important; }}
-.bay-stall-vacating .bay-indicator {{ color: #E0F2FE !important; }}
-
-.bay-code {{
-    font-size: 0.84rem;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    line-height: 1.1;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}}
-.bay-indicator {{
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 3px;
-    opacity: 0.95;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}}
-
 /* ── Direct Solid-Color Parking Stall Buttons (Guaranteed Column Targeting) ── */
 div[data-testid="column"]:has(.slot-free) button,
 div[data-testid="stColumn"]:has(.slot-free) button,
@@ -402,14 +371,14 @@ button[aria-label*="OPEN"] {{
     background: #10B981 !important;
     color: #FFFFFF !important;
     border: 1px solid #059669 !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
     font-weight: 800 !important;
     font-size: 0.8rem !important;
     min-height: 52px !important;
     padding: 6px 2px !important;
     white-space: pre-line !important;
     line-height: 1.25 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
 div[data-testid="column"]:has(.slot-free) button p,
@@ -432,14 +401,14 @@ button[aria-label*="BUSY"] {{
     background: #E11D48 !important;
     color: #FFFFFF !important;
     border: 1px solid #BE123C !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
     font-weight: 800 !important;
     font-size: 0.8rem !important;
     min-height: 52px !important;
     padding: 6px 2px !important;
     white-space: pre-line !important;
     line-height: 1.25 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
 div[data-testid="column"]:has(.slot-occupied) button p,
@@ -462,14 +431,14 @@ button[aria-label*="MATCH"] {{
     background: #F59E0B !important;
     color: #1E293B !important;
     border: 1px solid #D97706 !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
     font-weight: 800 !important;
     font-size: 0.8rem !important;
     min-height: 52px !important;
     padding: 6px 2px !important;
     white-space: pre-line !important;
     line-height: 1.25 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
 div[data-testid="column"]:has(.slot-pending) button p,
@@ -492,14 +461,14 @@ button[aria-label*="LEAVING"] {{
     background: #0284C7 !important;
     color: #FFFFFF !important;
     border: 1px solid #0369A1 !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
     font-weight: 800 !important;
     font-size: 0.8rem !important;
     min-height: 52px !important;
     padding: 6px 2px !important;
     white-space: pre-line !important;
     line-height: 1.25 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
 }}
 div[data-testid="column"]:has(.slot-vacating) button p,
@@ -538,7 +507,7 @@ button[aria-label*="LEAVING"] p {{
 .drive-aisle-line {{
     flex: 1;
     height: 2px;
-    background: repeating-linear-gradient(90deg, { "rgba(255,255,255,0.2)" if is_dark else "#94A3B8" } 0px, { "rgba(255,255,255,0.2)" if is_dark else "#94A3B8" } 10px, transparent 10px, transparent 20px);
+    background: repeating-linear-gradient(90deg, { "rgba(255,255,255,0.2)" if is_dark else "#CBD5E1" } 0px, { "rgba(255,255,255,0.2)" if is_dark else "#CBD5E1" } 10px, transparent 10px, transparent 20px);
 }}
 .drive-aisle-label {{
     font-size: 0.65rem;
@@ -546,9 +515,9 @@ button[aria-label*="LEAVING"] p {{
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-muted);
-    padding: 2px 10px;
+    padding: 3px 12px;
     border: 1px dashed var(--border-color);
-    border-radius: 4px;
+    border-radius: 6px;
     background: { "transparent" if is_dark else "#F1F5F9" };
 }}
 
@@ -556,44 +525,98 @@ button[aria-label*="LEAVING"] p {{
 .metric-card {{
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 14px 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: {box_shadow_card};
 }}
 .metric-label {{
-    font-size: 0.68rem;
-    font-weight: 700;
+    font-size: 0.7rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-muted);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }}
 .metric-value {{
-    font-size: 1.45rem;
+    font-size: 1.55rem;
     font-weight: 800;
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.15;
 }}
 .metric-sub {{
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     color: var(--accent-blue);
-    margin-top: 2px;
+    margin-top: 3px;
     font-weight: 600;
 }}
 
-/* ── Section Title ── */
+/* ── Section Title & Descriptions ── */
 .section-title {{
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 2px;
     letter-spacing: -0.02em;
 }}
 .section-desc {{
-    font-size: 0.82rem;
-    color: var(--text-muted);
+    font-size: 0.84rem;
+    color: var(--text-secondary);
     margin-bottom: 16px;
-    line-height: 1.4;
+    line-height: 1.45;
+}}
+
+/* ── Universal Banners ── */
+.banner-success {{
+    background: { "rgba(16, 185, 129, 0.12)" if is_dark else "#ECFDF5" };
+    border: 1px solid { "rgba(16, 185, 129, 0.35)" if is_dark else "#A7F3D0" };
+    color: { "#34D399" if is_dark else "#047857" };
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 10px 0;
+}}
+.banner-warning {{
+    background: { "rgba(245, 158, 11, 0.12)" if is_dark else "#FFFBEB" };
+    border: 1px solid { "rgba(245, 158, 11, 0.35)" if is_dark else "#FDE68A" };
+    color: { "#FBBF24" if is_dark else "#B45309" };
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 10px 0;
+}}
+.banner-info {{
+    background: { "rgba(14, 165, 233, 0.12)" if is_dark else "#F0F9FF" };
+    border: 1px solid { "rgba(14, 165, 233, 0.35)" if is_dark else "#BAE6FD" };
+    color: { "#38BDF8" if is_dark else "#0369A1" };
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 10px 0;
+}}
+
+/* ── Forecast Banner (Tab 2) ── */
+.forecast-banner {{
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    text-align: center;
+    box-shadow: {box_shadow_card};
+}}
+.forecast-label {{
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+}}
+.forecast-value {{
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
 }}
 
 /* ── Dialog Inspector Modal ── */
@@ -601,7 +624,8 @@ div[data-testid="stDialog"] div[role="dialog"] {{
     background-color: var(--bg-card) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border-color) !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
 }}
 
 /* ── Misc ── */
@@ -624,10 +648,10 @@ def apply_plotly_theme(fig, theme_mode=None):
     if theme_mode is None:
         theme_mode = st.session_state.get("theme_mode", "dark")
     is_dark = theme_mode == "dark"
-    paper_bg = "#1A1C23" if is_dark else "#FFFFFF"
-    plot_bg = "#1A1C23" if is_dark else "#FFFFFF"
-    font_color = "#94A3B8" if is_dark else "#475569"
-    grid_color = "#282C37" if is_dark else "#E2E8F0"
+    paper_bg = "#111827" if is_dark else "#FFFFFF"
+    plot_bg = "#111827" if is_dark else "#FFFFFF"
+    font_color = "#94A3B8" if is_dark else "#334155"
+    grid_color = "#1F2937" if is_dark else "#E2E8F0"
     
     fig.update_layout(
         template="plotly_dark" if is_dark else "plotly_white",
@@ -823,14 +847,17 @@ brand_col, ctrl_col = st.columns([3, 2])
 with brand_col:
     st.markdown("""
     <div class="app-brand">
-        <div>
-            <h1>Megaworld Smart Parking Platform</h1>
-            <p>Predictive availability, computer vision space detection, and confidence-weighted plate matching.</p>
+        <div class="brand-pill">
+            <span class="pulse-dot"></span>
+            MEGAWORLD TOWNSHIP SMART PARKING OPERATIONS · POC
         </div>
+        <h1 class="brand-title">Smart Parking Management Platform</h1>
+        <p class="brand-subtitle">Real-time deck telemetry, computer vision slot detection, and AI predictive occupancy analytics.</p>
     </div>
     """, unsafe_allow_html=True)
 
 with ctrl_col:
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
     t_col1, t_col2 = st.columns([2, 1])
     with t_col1:
         site_names = ["All Sites"] + list(sites_df["name"])
@@ -1353,12 +1380,13 @@ with tab2:
     result = predictor.predict_for_timestamp(model, baseline_lookup, history_df, zone_choice, target_ts)
 
     # Forecast banner
+    is_dark = st.session_state.theme_mode == "dark"
     label_styles = {
-        "Likely available": ("#10B981", "rgba(16, 185, 129, 0.12)"),
-        "Uncertain — may be tight": ("#F59E0B", "rgba(245, 158, 11, 0.12)"),
-        "Unlikely to have space": ("#F43F5E", "rgba(244, 63, 94, 0.12)"),
+        "Likely available": ("#10B981", "rgba(16, 185, 129, 0.12)" if is_dark else "#ECFDF5"),
+        "Uncertain — may be tight": ("#F59E0B", "rgba(245, 158, 11, 0.12)" if is_dark else "#FFFBEB"),
+        "Unlikely to have space": ("#F43F5E", "rgba(244, 63, 94, 0.12)" if is_dark else "#FFF1F2"),
     }
-    accent, bg = label_styles.get(result["label"], ("#0EA5E9", "rgba(14, 165, 233, 0.12)"))
+    accent, bg = label_styles.get(result["label"], ("#0EA5E9", "rgba(14, 165, 233, 0.12)" if is_dark else "#F0F9FF"))
 
     st.markdown(f"""
     <div class="forecast-banner" style="background:{bg}; border: 1px solid {accent};">
@@ -1467,9 +1495,10 @@ with tab3:
         sample = holdout_df[holdout_df.zone_id == insight_zone].tail(150)
 
         fig_pred = go.Figure()
-        fig_pred.add_trace(go.Scatter(x=sample["ts"], y=sample["occupancy_rate"], mode="lines", name="Actual", line=dict(color="#F8FAFC", width=1.5)))
+        actual_line_color = "#F8FAFC" if st.session_state.theme_mode == "dark" else "#0F172A"
+        fig_pred.add_trace(go.Scatter(x=sample["ts"], y=sample["occupancy_rate"], mode="lines", name="Actual", line=dict(color=actual_line_color, width=1.5)))
         fig_pred.add_trace(go.Scatter(x=sample["ts"], y=sample["predicted_trained"], mode="lines", name="ML Model", line=dict(color="#0EA5E9", width=2)))
-        fig_pred.add_trace(go.Scatter(x=sample["ts"], y=sample["predicted_baseline"], mode="lines", name="Baseline", line=dict(color="#475569", width=1, dash="dot")))
+        fig_pred.add_trace(go.Scatter(x=sample["ts"], y=sample["predicted_baseline"], mode="lines", name="Baseline", line=dict(color="#64748B", width=1, dash="dot")))
         fig_pred.update_layout(xaxis_title="Time", yaxis_title="Occupancy Rate")
         apply_plotly_theme(fig_pred)
         st.plotly_chart(fig_pred, width="stretch")
@@ -1497,13 +1526,13 @@ with tab4:
         with c1:
             st.markdown(
                 f"<div class='metric-card'><div class='metric-label'>OCR Read (noisy)</div>"
-                f"<div class='metric-value' style='font-family:monospace; color:#38BDF8;'>{row.read_text}</div></div>",
+                f"<div class='metric-value' style='font-family:monospace; color:var(--accent-blue);'>{row.read_text}</div></div>",
                 unsafe_allow_html=True,
             )
         with c2:
             st.markdown(
-                f"<div class='metric-card'><div class='metric-label'>Ground Truth</div>"
-                f"<div class='metric-value' style='font-family:monospace; color:#CBD5E1;'>{row.plate}</div></div>",
+                f"<div class='metric-card'><div class='metric-label'>Ground Truth Plate</div>"
+                f"<div class='metric-value' style='font-family:monospace; color:var(--text-primary);'>{row.plate}</div></div>",
                 unsafe_allow_html=True,
             )
 
@@ -1634,11 +1663,11 @@ with tab6:
     header_col1, header_col2 = st.columns([4, 1])
     with header_col1:
         st.markdown("<div class='section-title' style='margin-bottom:2px;'>Parking Space Occupancy Detection</div>", unsafe_allow_html=True)
-        st.markdown("<div style='color:#94A3B8; font-size:0.9rem; margin-bottom:12px;'>Real-time computer vision inference engine monitoring individual bay occupancy via overhead CCTV feeds.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-desc'>Real-time computer vision inference engine monitoring individual bay occupancy via overhead CCTV feeds.</div>", unsafe_allow_html=True)
     with header_col2:
         st.markdown(
             "<div style='text-align:right; padding-top:4px;'>"
-            "<span style='background:#064E3B; color:#34D399; border:1px solid #059669; padding:4px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;'>"
+            "<span style='background:rgba(16, 185, 129, 0.15); color:#34D399; border:1px solid #059669; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; letter-spacing:0.06em;'>"
             "● LIVE INFERENCE</span></div>",
             unsafe_allow_html=True,
         )
@@ -1736,7 +1765,7 @@ with tab6:
                 st.markdown(
                     f"<div class='metric-card' style='border-left:3px solid #34D399;'>"
                     f"<div class='metric-label'>Available Bays</div>"
-                    f"<div class='metric-value' style='color:#34D399;'>{summary['vacant_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Free</span></div>"
+                    f"<div class='metric-value' style='color:#34D399;'>{summary['vacant_count']} <span style='font-size:0.85rem; color:var(--text-secondary);'>/ {summary['total_bays']} Free</span></div>"
                     f"<div class='metric-sub'>Ready for Parking</div></div>",
                     unsafe_allow_html=True,
                 )
@@ -1744,7 +1773,7 @@ with tab6:
                 st.markdown(
                     f"<div class='metric-card' style='border-left:3px solid #F43F5E;'>"
                     f"<div class='metric-label'>Occupied Bays</div>"
-                    f"<div class='metric-value' style='color:#F43F5E;'>{summary['occupied_count']} <span style='font-size:0.85rem; color:#94A3B8;'>/ {summary['total_bays']} Filled</span></div>"
+                    f"<div class='metric-value' style='color:#F43F5E;'>{summary['occupied_count']} <span style='font-size:0.85rem; color:var(--text-secondary);'>/ {summary['total_bays']} Filled</span></div>"
                     f"<div class='metric-sub'>Active Vehicles Parked</div></div>",
                     unsafe_allow_html=True,
                 )
@@ -1777,10 +1806,10 @@ with tab6:
             elif view_mode == "Side-by-Side":
                 side_col1, side_col2 = st.columns(2)
                 with side_col1:
-                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#94A3B8; margin-bottom:4px;'>RAW SURVEILLANCE FEED</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:700; font-size:0.8rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:4px;'>RAW SURVEILLANCE FEED</div>", unsafe_allow_html=True)
                     st.image(raw_rgb, width="stretch")
                 with side_col2:
-                    st.markdown("<div style='font-weight:600; font-size:0.85rem; color:#38BDF8; margin-bottom:4px;'>AI OCCUPANCY INFERENCE</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-weight:700; font-size:0.8rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent-blue); margin-bottom:4px;'>AI OCCUPANCY INFERENCE</div>", unsafe_allow_html=True)
                     st.image(annotated_rgb, width="stretch")
             elif view_mode == "Raw Feed":
                 st.image(
@@ -1789,27 +1818,27 @@ with tab6:
                     width="stretch",
                 )
             elif view_mode == "API Payload":
-                st.markdown("<div style='font-weight:600; font-size:0.9rem; color:#38BDF8; margin-bottom:6px;'>Phase 5: Standardized JSON Telemetry Payload</div>", unsafe_allow_html=True)
+                st.markdown("<div style='font-weight:700; font-size:0.88rem; color:var(--accent-blue); margin-bottom:6px;'>Phase 5: Standardized JSON Telemetry Payload</div>", unsafe_allow_html=True)
                 st.json(json_payload)
 
             st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
 
             # Interactive Quick-Glance Bay Status Pills
-            st.markdown("<div style='font-weight:600; font-size:0.95rem; color:#F8FAFC; margin-bottom:8px;'>Live Bay Status Grid</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-weight:700; font-size:0.95rem; color:var(--text-primary); margin-bottom:8px;'>Live Bay Status Grid</div>", unsafe_allow_html=True)
             
             pills_cols = st.columns(min(len(bay_records), 6))
             for idx, b in enumerate(bay_records[:6]):
                 is_occ = b["status"] == "occupied"
-                badge_bg = "rgba(244, 63, 94, 0.15)" if is_occ else "rgba(52, 211, 153, 0.15)"
+                badge_bg = "rgba(244, 63, 94, 0.12)" if is_occ else "rgba(52, 211, 153, 0.12)"
                 badge_border = "#F43F5E" if is_occ else "#34D399"
-                badge_color = "#FDA4AF" if is_occ else "#6EE7B7"
+                badge_color = "#FB7185" if is_occ else ("#34D399" if is_dark else "#059669")
                 badge_text = "OCCUPIED" if is_occ else "VACANT"
                 with pills_cols[idx % len(pills_cols)]:
                     st.markdown(
-                        f"<div style='background:{badge_bg}; border:1px solid {badge_border}; border-radius:8px; padding:8px 10px; text-align:center; margin-bottom:6px;'>"
-                        f"<div style='font-weight:700; font-size:0.85rem; color:#F8FAFC;'>{b['slot_id']}</div>"
-                        f"<div style='font-size:0.75rem; font-weight:600; color:{badge_color}; margin-top:2px;'>{badge_text}</div>"
-                        f"<div style='font-size:0.68rem; color:#94A3B8;'>IoA: {b['occupancy_ratio']*100:.0f}%</div>"
+                        f"<div style='background:{badge_bg}; border:1px solid {badge_border}; border-radius:10px; padding:10px 12px; text-align:center; margin-bottom:6px;'>"
+                        f"<div style='font-weight:800; font-size:0.9rem; color:var(--text-primary);'>{b['slot_id']}</div>"
+                        f"<div style='font-size:0.75rem; font-weight:800; color:{badge_color}; margin-top:3px; letter-spacing:0.04em;'>{badge_text}</div>"
+                        f"<div style='font-size:0.7rem; color:var(--text-secondary); margin-top:2px; font-weight:600;'>IoA: {b['occupancy_ratio']*100:.0f}%</div>"
                         f"</div>",
                         unsafe_allow_html=True,
                     )
@@ -1842,12 +1871,12 @@ with tab6:
                     st.dataframe(display_df, width="stretch", hide_index=True)
 
             with tab_algo:
-                st.markdown("""
-                <div style="background:#1E293B; border:1px solid #334155; border-radius:8px; padding:14px; font-size:0.84rem; line-height:1.6; color:#CBD5E1;">
-                    <strong style="color:#38BDF8;">Phase 1: Dual Native ROI Calibration</strong> — Perspective trapezoids mapped from <code>slots_config.json</code> with proportional scaling.<br/>
-                    <strong style="color:#38BDF8;">Phase 2: Adaptive Low-Light Inference</strong> — Dual-exposure YOLOv8n inference with CLAHE contrast enhancement for dark SUVs & shadows.<br/>
-                    <strong style="color:#38BDF8;">Phase 3: Spatial IoA & Centroid Containment</strong> — Checks point-in-polygon containment, vehicle coverage ratio (≥35%), and IoA overlap.<br/>
-                    <strong style="color:#38BDF8;">Phase 4: Temporal Debouncing</strong> — 5-frame rolling memory with ≥60% majority consensus eliminates flickering.<br/>
-                    <strong style="color:#38BDF8;">Phase 5: Structured JSON Telemetry</strong> — Clean API payloads for driver mobile apps and automated LED entrance signage.
+                st.markdown(f"""
+                <div style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:12px; padding:16px 20px; font-size:0.86rem; line-height:1.65; color:var(--text-secondary);">
+                    <div style="margin-bottom:6px;"><strong style="color:var(--accent-blue);">Phase 1: Dual Native ROI Calibration</strong> — Perspective trapezoids mapped from <code>slots_config.json</code> with proportional scaling.</div>
+                    <div style="margin-bottom:6px;"><strong style="color:var(--accent-blue);">Phase 2: Adaptive Low-Light Inference</strong> — Dual-exposure YOLOv8n inference with CLAHE contrast enhancement for dark SUVs & shadows.</div>
+                    <div style="margin-bottom:6px;"><strong style="color:var(--accent-blue);">Phase 3: Spatial IoA & Centroid Containment</strong> — Checks point-in-polygon containment, vehicle coverage ratio (≥35%), and IoA overlap.</div>
+                    <div style="margin-bottom:6px;"><strong style="color:var(--accent-blue);">Phase 4: Temporal Debouncing</strong> — 5-frame rolling memory with ≥60% majority consensus eliminates flickering.</div>
+                    <div><strong style="color:var(--accent-blue);">Phase 5: Structured JSON Telemetry</strong> — Clean API payloads for driver mobile apps and automated LED entrance signage.</div>
                 </div>
                 """, unsafe_allow_html=True)
