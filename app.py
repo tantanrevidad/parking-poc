@@ -393,23 +393,14 @@ div[data-baseweb="select"] svg {{
 
 /* ── Selectbox Open Popover Menu & Option List Items (Global Portals) ── */
 [data-baseweb="popover"],
-[data-baseweb="popover"] *,
 [data-baseweb="menu"],
-[data-baseweb="menu"] *,
 [data-baseweb="layer"] [data-baseweb="popover"],
-[data-baseweb="layer"] [data-baseweb="popover"] *,
 [role="listbox"],
-[role="listbox"] *,
 [role="option"],
-[role="option"] *,
 div[data-baseweb="popover"],
-div[data-baseweb="popover"] *,
 div[data-baseweb="menu"],
-div[data-baseweb="menu"] *,
 ul[role="listbox"],
-ul[role="listbox"] *,
-li[role="option"],
-li[role="option"] * {{
+li[role="option"] {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -417,25 +408,40 @@ li[role="option"] * {{
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
+/* Ensure inner text of popovers gets the correct color without extra borders */
+[data-baseweb="popover"] *,
+[data-baseweb="menu"] *,
+ul[role="listbox"] *,
+li[role="option"] * {{
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+}}
+
 /* Option Hover & Active */
 [data-baseweb="popover"] li:hover,
-[data-baseweb="popover"] li:hover *,
 [data-baseweb="popover"] [aria-selected="true"],
-[data-baseweb="popover"] [aria-selected="true"] *,
 [data-baseweb="menu"] li:hover,
-[data-baseweb="menu"] li:hover *,
 [data-baseweb="menu"] [aria-selected="true"],
-[data-baseweb="menu"] [aria-selected="true"] *,
 [role="listbox"] [role="option"]:hover,
-[role="listbox"] [role="option"]:hover *,
 [role="listbox"] [role="option"][aria-selected="true"],
-[role="listbox"] [role="option"][aria-selected="true"] *,
-ul[role="listbox"] li[role="option"]:hover,
-ul[role="listbox"] li[role="option"]:hover *,
-ul[role="listbox"] li[role="option"][aria-selected="true"],
-ul[role="listbox"] li[role="option"][aria-selected="true"] * {{
+ul[role="listbox"] li:hover,
+ul[role="listbox"] li[aria-selected="true"],
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+}}
+
+[data-baseweb="popover"] li:hover *,
+[data-baseweb="popover"] [aria-selected="true"] *,
+[data-baseweb="menu"] li:hover *,
+[data-baseweb="menu"] [aria-selected="true"] *,
+[role="listbox"] [role="option"]:hover *,
+[role="listbox"] [role="option"][aria-selected="true"] *,
+ul[role="listbox"] li:hover *,
+ul[role="listbox"] li[aria-selected="true"] *,
+li[role="option"]:hover *,
+li[role="option"][aria-selected="true"] * {{
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
     -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
 }}
@@ -455,15 +461,10 @@ div[data-testid*="ButtonGroup"],
 
 /* ALL Buttons inside Button Groups (Default / Inactive State) */
 div[data-baseweb="button-group"] button,
-div[data-baseweb="button-group"] button *,
 div[data-testid*="SegmentedControl"] button,
-div[data-testid*="SegmentedControl"] button *,
 div[data-testid*="ButtonGroup"] button,
-div[data-testid*="ButtonGroup"] button *,
 button[role="radio"],
-button[role="radio"] *,
-button[role="tab"],
-button[role="tab"] * {{
+button[role="tab"] {{
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     background: { "transparent" if is_dark else "#FFFFFF" } !important;
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
@@ -474,15 +475,25 @@ button[role="tab"] * {{
     box-shadow: { "none" if is_dark else "0 1px 2px rgba(0,0,0,0.05)" } !important;
 }}
 
+/* Text & Icon styling for inner descendants of inactive buttons (NO border/bg duplication) */
+div[data-baseweb="button-group"] button *,
+div[data-testid*="SegmentedControl"] button *,
+div[data-testid*="ButtonGroup"] button *,
+button[role="radio"] *,
+button[role="tab"] * {{
+    color: { "#94A3B8" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}}
+
 /* Hover on Inactive Button */
 div[data-baseweb="button-group"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]),
-div[data-baseweb="button-group"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]) *,
-div[data-testid*="SegmentedControl"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]),
-div[data-testid*="SegmentedControl"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]) * {{
+div[data-testid*="SegmentedControl"] button:hover:not([aria-checked="true"]):not([aria-selected="true"]) {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
-    color: { "#FFFFFF" if is_dark else "#000000" } !important;
-    -webkit-text-fill-color: { "#FFFFFF" if is_dark else "#000000" } !important;
 }}
 
 /* ACTIVE / SELECTED Segmented Button */
@@ -502,6 +513,8 @@ button[role="tab"][aria-selected="true"] {{
     font-weight: 800 !important;
     box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35) !important;
 }}
+
+/* Text styling for inner descendants of active buttons */
 div[data-baseweb="button-group"] button[aria-checked="true"] *,
 div[data-baseweb="button-group"] button[aria-pressed="true"] *,
 div[data-baseweb="button-group"] button[aria-selected="true"] *,
@@ -513,6 +526,10 @@ button[role="tab"][aria-selected="true"] * {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }}
 
 /* Labels */
