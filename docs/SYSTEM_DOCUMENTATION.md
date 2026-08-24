@@ -494,9 +494,10 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
    - Facing rows are separated by realistic labeled **Drive Aisles** (`DRIVE AISLE · LANE A ➔`, `LANE B`, `LANE C`).
    - Expanded parking bay capacity modeling (48 Mall bays, 24 Office bays, 16 Residential bays).
 
-2. **Direct Click-To-Inspect Parking Blocks:**
-   - Every individual parking bay block is rendered as an interactive, solid-color card (`.bay-stall-free`, `.bay-stall-occupied`, `.bay-stall-pending`, `.bay-stall-vacating`).
-   - Clicking directly on any block triggers an in-page **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll-jump, populated with 6 comprehensive tabs:
+2. **Interactive Click-to-Inspect Parking Blocks (`@st.fragment` & `@st.dialog`):**
+   - Every individual parking stall block is an interactive solid-color button matching its real-time state.
+   - Powered by isolated fragment execution (`@st.fragment`), clicking any stall block triggers the modal inspection dialog in-place without reloading the outer dashboard or interrupting the live clock.
+   - Opens a 6-tab modal dialog querying SQLite (`data/parking.db`) for that specific slot:
      - `Active Live Telemetry` — Consolidated snapshot of state, ticket, and OCR reading.
      - `Active Occupancy State (current_state)` — Bay status and last state change timestamp.
      - `Ticketing & Settlement (ticketing_records)` — Assigned vehicle plate, entry time, payment settlement time.
@@ -504,17 +505,21 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
      - `Infrastructure Metadata (slots & zones)` — Deck level, archetype, township site, zone capacity.
      - `Executed SQLite Statement (Raw SQL)` — Underlying SQL statement executed against `data/parking.db`.
 
-3. **Hero Centered PST System Clock:**
-   - Prominently positioned centered clock showing real-time Philippine Standard Time (PST) in 12-hour format with day and date.
-   - Interactive calendar date and clock time-setters allow operators to jump to any simulated timeline and inspect temporal occupancy shifts.
+3. **Dynamic Real-Time PST Hero Clock (Tab 1):**
+   - Centered client-side Philippine Standard Time (PST) clock displaying hours, minutes, and continuous ticking seconds (`HH:MM:SS AM/PM`) with zero backend reload overhead.
+   - Features a pulsing green status indicator (`🟢 PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING`).
 
-4. **Dual Theme Engine (Light & Dark Mode):**
+4. **Multi-Modal Predictive Timeline Controls (Tab 2):**
+   - Dedicated future simulation interface featuring calendar date picking, 12-hour AM/PM selectbox, minute step input, quick jump toolbar (`[-1h]`, `[-15m]`, `[+15m]`, `[+1h]`, `[Live]`), and flexible direct text entry (e.g. `14:30`, `2:30pm`, `09:00`).
+   - Simulation state engine uses 5-minute window block seeds to prevent stochastic bay reshuffling during active inspection.
+
+5. **Dual Theme Engine (Light & Dark Mode):**
    - Seamless segmented theme switch between Dark Mode and Light Mode.
    - Light Mode features bold pure-black (`#000000`) tab typography, clear Slate form controls, white cards, and auto-adapting Plotly charts.
 
 ### 10.2 Dedicated Functional Tabs:
-1. **Occupancy Map:** Live seat-map grid displaying all bays across Uptown Bonifacio and Eastwood City zones ordered by archetype with Drive Aisles, live capacity KPIs, and direct-click database row inspection.
-2. **Availability Forecast:** Interactive trip planner allowing operators and visitors to pick any zone and arrival horizon (0 to 12 hours ahead), displaying the ML forecast, baseline comparison, conservative safety margin, and historical diurnal curve.
+1. **Occupancy Map:** Live real-time operations deck displaying all bays across Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype with Drive Aisles, live capacity KPIs, dynamic ticking PST clock, and in-place `@st.fragment` database row inspection.
+2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, and historical diurnal curve.
 3. **Model Performance:** Model diagnostics dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Holdout Validation Sample Count, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.

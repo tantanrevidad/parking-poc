@@ -7,9 +7,10 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 ## 🚀 Key Highlights & Current State
 
 - **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity (48 Mall bays, 24 Office bays, 16 Residential bays).
-- **Direct Click-to-Inspect Parking Blocks:** Every parking stall block is an interactive solid-color card. Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
-- **Hero Philippine Standard Time (PST) System Clock:** Centered live real-time PST clock synced with interactive calendar date and time pickers for granular simulation timeline control.
-- **Grace-Period State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs and grace periods.
+- **Zero-Page-Reload Direct Stall Inspection:** Every parking stall block is an interactive solid-color card powered by isolated fragment execution (`@st.fragment`). Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll jitter, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
+- **Dynamic Real-Time PST Hero Clock (Tab 1):** Live client-side Philippine Standard Time clock counting up seconds, minutes, and hours (`HH:MM:SS AM/PM`) dynamically with zero server overhead and a pulsing live monitoring badge.
+- **Predictive Timeline Control (Tab 2):** Dedicated future simulation interface with calendar date selection, 12-hour/minute pickers, direct time entry (`14:30`, `2:30pm`, `09:00`), and quick-step toolbar (`-1h`, `-15m`, `+15m`, `+1h`, `Live`).
+- **Stabilized Simulation State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs, grace periods, and stabilized 5-minute simulation window seeds.
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
 - **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on 28 days of 15-minute historical readings using causal feature engineering, evaluated on a chronological holdout dataset against a naive baseline.
 - **Dual Computer Vision ALPR Validation:**
@@ -70,7 +71,7 @@ The persistent relational database is stored locally in `data/parking.db`.
 ### Method A: In-Dashboard Direct Click Inspection
 1. Navigate to **Tab 1: Occupancy Map**.
 2. Click **directly on any colored parking stall block** (`M-001`, `O-001`, `R-001`, etc.).
-3. An interactive modal dialog opens displaying:
+3. An interactive modal dialog opens instantly (with zero page reload via `@st.fragment`) displaying:
    - **Active Live Telemetry** — Consolidated snapshot of state, ticket, and OCR reading.
    - **Active Occupancy State (`current_state`)** — Current status and state change timestamp.
    - **Ticketing & Settlement (`ticketing_records`)** — Assigned vehicle plate, entry time, payment settlement time.
@@ -110,8 +111,8 @@ python cv_demo.py --dataset all
 
 ## 📱 Application Modules & Tabs
 
-1. **Occupancy Map:** Interactive seat-map grid across Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger instant in-page SQLite modal inspection.
-2. **Availability Forecast:** Interactive trip planner allowing users to pick any zone and arrival horizon (0 to 12 hours ahead) to receive an ML forecast, baseline comparison, conservative safety margin, and historical trend curve.
+1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger in-place SQLite modal inspection with zero page reload.
+2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using 12-hour dropdowns, minute pickers, or direct text time inputs) to receive an ML forecast, baseline comparison, conservative safety margin, and historical trend curve.
 3. **Model Performance:** Diagnostic dashboard detailing Model MAE, Baseline MAE, Error Reduction %, Permutation Feature Importance bar chart, and Actual vs. Predicted time-series charts.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings, and match margin confirmation.
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot Dataset** and the **OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
