@@ -877,7 +877,7 @@ else:
 active_zones = zones_df[zones_df.site_id.isin(active_site_ids)]
 
 live_df = simulate.simulate_current_state(
-    st.session_state.sim_time, zones_df, slots_df, holidays, events, sites_df
+    datetime.now(), zones_df, slots_df, holidays, events, sites_df
 )
 
 
@@ -1046,7 +1046,21 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab1:
-    render_hero_clock_and_setter("tab1")
+    now_live = datetime.now()
+    live_time_str = now_live.strftime("%I:%M %p")
+    live_date_str = now_live.strftime("%A, %B %d, %Y")
+
+    st.markdown(f"""
+    <div class="hero-clock-container">
+        <div class="hero-clock-eyebrow">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10B981; margin-right:6px; box-shadow:0 0 8px #10B981;"></span>
+            PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING
+        </div>
+        <div class="hero-clock-time">{live_time_str}</div>
+        <div class="hero-clock-date">{live_date_str}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
     # ── Township High-Level KPI Summary ──
     active_slots = live_df[live_df.zone_id.isin(active_zones.zone_id)]
