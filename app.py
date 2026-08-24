@@ -1218,24 +1218,10 @@ def handle_date_change(key_prefix: str):
         st.session_state.sim_time = datetime.combine(d, st.session_state.sim_time.time())
 
 
-def handle_hour_change(key_prefix: str):
-    h = st.session_state.get(f"{key_prefix}_hour_select")
-    if h is not None:
-        st.session_state.sim_time = st.session_state.sim_time.replace(hour=int(h))
-
-
-def handle_minute_change(key_prefix: str):
-    m = st.session_state.get(f"{key_prefix}_minute_input")
-    if m is not None:
-        st.session_state.sim_time = st.session_state.sim_time.replace(minute=int(m))
-
-
-def handle_direct_time_change(key_prefix: str):
-    val = st.session_state.get(f"{key_prefix}_direct_time_str", "").strip()
-    if val:
-        parsed = parse_time_string(val)
-        if parsed:
-            st.session_state.sim_time = datetime.combine(st.session_state.sim_time.date(), parsed)
+def handle_time_change(key_prefix: str):
+    t = st.session_state.get(f"{key_prefix}_time_input")
+    if t:
+        st.session_state.sim_time = datetime.combine(st.session_state.sim_time.date(), t)
 
 
 def render_hero_clock_and_setter(key_prefix="tab1"):
@@ -1251,78 +1237,26 @@ def render_hero_clock_and_setter(key_prefix="tab1"):
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Interactive Clock & Calendar Time-Setter Interface ──
-    col_date, col_hour, col_min, col_quick = st.columns([1.5, 1.2, 1.1, 2.2])
-
-    with col_date:
-        st.date_input(
-            "Calendar Date",
-            value=st.session_state.sim_time.date(),
-            key=f"{key_prefix}_date_input",
-            on_change=handle_date_change,
-            args=(key_prefix,),
-        )
-
-    with col_hour:
-        hours_12 = [h for h in range(24)]
-        curr_h = st.session_state.sim_time.hour
-        st.selectbox(
-            "Hour",
-            options=hours_12,
-            index=curr_h,
-            format_func=lambda h: f"{12 if h % 12 == 0 else h % 12:02d} {'AM' if h < 12 else 'PM'} ({h:02d}:00)",
-            key=f"{key_prefix}_hour_select",
-            on_change=handle_hour_change,
-            args=(key_prefix,),
-        )
-
-    with col_min:
-        curr_m = st.session_state.sim_time.minute
-        st.number_input(
-            "Minute",
-            min_value=0,
-            max_value=59,
-            value=curr_m,
-            step=5,
-            key=f"{key_prefix}_minute_input",
-            on_change=handle_minute_change,
-            args=(key_prefix,),
-        )
-
-    with col_quick:
-        st.markdown("<div style='font-size:0.8rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;'>Quick Time Jump</div>", unsafe_allow_html=True)
-        q1, q2, q3, q4, q5 = st.columns(5)
-        with q1:
-            if st.button("-1h", key=f"{key_prefix}_q_m1h", use_container_width=True):
-                st.session_state.sim_time -= timedelta(hours=1)
-                st.rerun()
-        with q2:
-            if st.button("-15m", key=f"{key_prefix}_q_m15m", use_container_width=True):
-                st.session_state.sim_time -= timedelta(minutes=15)
-                st.rerun()
-        with q3:
-            if st.button("+15m", key=f"{key_prefix}_q_p15m", use_container_width=True):
-                st.session_state.sim_time += timedelta(minutes=15)
-                st.rerun()
-        with q4:
-            if st.button("+1h", key=f"{key_prefix}_q_p1h", use_container_width=True):
-                st.session_state.sim_time += timedelta(hours=1)
-                st.rerun()
-        with q5:
-            if st.button("Live", key=f"{key_prefix}_q_live", use_container_width=True, help="Reset to real-time clock"):
-                st.session_state.sim_time = datetime.now().replace(microsecond=0)
-                st.rerun()
-
-    # Direct Text Entry row
-    t_col, _ = st.columns([2.5, 3.5])
-    with t_col:
-        st.text_input(
-            "Direct Time Input (e.g. 14:30, 2:30pm, 09:00)",
-            placeholder="Type time e.g. 14:30 or 2:30pm and press Enter...",
-            key=f"{key_prefix}_direct_time_str",
-            on_change=handle_direct_time_change,
-            args=(key_prefix,),
-        )
+    # ── Clean Centered Date & Time Selectors ──
+    _, center_col, _ = st.columns([1, 2, 1])
+    with center_col:
+        col_date, col_time = st.columns(2)
+        with col_date:
+            st.date_input(
+                "Date",
+                value=st.session_state.sim_time.date(),
+                key=f"{key_prefix}_date_input",
+                on_change=handle_date_change,
+                args=(key_prefix,),
+            )
+        with col_time:
+            st.time_input(
+                "Time",
+                value=st.session_state.sim_time.time(),
+                key=f"{key_prefix}_time_input",
+                on_change=handle_time_change,
+                args=(key_prefix,),
+            )
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
