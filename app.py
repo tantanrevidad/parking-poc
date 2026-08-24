@@ -997,10 +997,27 @@ div[data-testid="stButton"] button p {{
     color: var(--text-primary) !important;
 }}
 
-/* Preserve parking stall button colors - override generic button styling */
-.zone-card div[data-testid="stButton"] button {{
-    background-color: unset !important;
-    border: unset !important;
+/* Preserve parking stall button colors & enforce crisp white text in BOTH Dark & Light modes */
+.stApp .zone-card div[data-testid="stButton"] button,
+.stApp .zone-card div[data-testid="stButton"] button *,
+.stApp .zone-card div[data-testid="stButton"] button p,
+.stApp .zone-card div[data-testid="stButton"] button span,
+.stApp .zone-card div[data-testid="stButton"] button div,
+.zone-card div[data-testid="stButton"] button,
+.zone-card div[data-testid="stButton"] button *,
+.zone-card div[data-testid="stButton"] button p,
+.zone-card div[data-testid="stButton"] button span,
+.zone-card div[data-testid="stButton"] button div,
+.zone-card button,
+.zone-card button *,
+.zone-card button p,
+.zone-card button span {{
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }}
 
 /* ── st.code Block ── */
