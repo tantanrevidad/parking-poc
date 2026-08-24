@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -1052,37 +1053,131 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 # ═══════════════════════════════════════════════════════════════════════════
 
 with tab1:
-    now_live = datetime.now()
-    live_time_str = now_live.strftime("%I:%M:%S %p")
-    live_date_str = now_live.strftime("%A, %B %d, %Y")
+    is_dark = st.session_state.theme_mode == "dark"
+    bg_card = "#1A1C23" if is_dark else "#FFFFFF"
+    border_color = "#282C37" if is_dark else "#CBD5E1"
+    text_primary = "#F8FAFC" if is_dark else "#0F172A"
+    text_muted = "#94A3B8" if is_dark else "#64748B"
+    accent_blue = "#38BDF8" if is_dark else "#0284C7"
 
-    st.markdown(f"""
-    <div class="hero-clock-container">
+    clock_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+      * {{
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }}
+      body {{
+        background: transparent;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        user-select: none;
+        overflow: hidden;
+      }}
+      .hero-clock-container {{
+        text-align: center;
+        background: {bg_card};
+        border: 1px solid {border_color};
+        border-radius: 16px;
+        padding: 16px 20px 14px 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+      }}
+      .hero-clock-container::before {{
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, #38BDF8, #818CF8, #C084FC);
+      }}
+      .hero-clock-eyebrow {{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: {text_muted};
+        margin-bottom: 2px;
+      }}
+      .live-dot {{
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        display: inline-block;
+        box-shadow: 0 0 8px #10B981;
+        animation: pulse-green 1.5s infinite;
+      }}
+      @keyframes pulse-green {{
+        0% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }}
+        70% {{ transform: scale(1.15); opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }}
+        100% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
+      }}
+      .hero-clock-time {{
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: {text_primary};
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin: 2px 0;
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+      }}
+      .hero-clock-date {{
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: {accent_blue};
+        letter-spacing: -0.01em;
+      }}
+    </style>
+    </head>
+    <body>
+      <div class="hero-clock-container">
         <div class="hero-clock-eyebrow">
-            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10B981; margin-right:6px; box-shadow:0 0 8px #10B981; animation: pulse-green 1.5s infinite;"></span>
-            PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING
+          <span class="live-dot"></span>
+          PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING
         </div>
-        <div id="live-hero-clock-time" class="hero-clock-time">{live_time_str}</div>
-        <div id="live-hero-clock-date" class="hero-clock-date">{live_date_str}</div>
-        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="display:none;" onload="(function(){{
-            function updateLiveClock(){{
-                var elTime = document.getElementById('live-hero-clock-time') || (window.parent && window.parent.document.getElementById('live-hero-clock-time'));
-                var elDate = document.getElementById('live-hero-clock-date') || (window.parent && window.parent.document.getElementById('live-hero-clock-date'));
-                var now = new Date();
-                if(elTime){{
-                    elTime.innerText = now.toLocaleTimeString('en-US', {{ timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }});
-                }}
-                if(elDate){{
-                    elDate.innerText = now.toLocaleDateString('en-US', {{ timeZone: 'Asia/Manila', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }});
-                }}
-            }}
-            updateLiveClock();
-            if(window._liveHeroClockInterval) clearInterval(window._liveHeroClockInterval);
-            window._liveHeroClockInterval = setInterval(updateLiveClock, 1000);
-        }})()" onerror="this.onload()">
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+        <div id="live-time" class="hero-clock-time">--:--:-- --</div>
+        <div id="live-date" class="hero-clock-date">--------, ------ --, ----</div>
+      </div>
+
+      <script>
+        function tick() {{
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('en-US', {{
+            timeZone: 'Asia/Manila',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          }});
+          const dateStr = now.toLocaleDateString('en-US', {{
+            timeZone: 'Asia/Manila',
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }});
+          document.getElementById('live-time').innerText = timeStr;
+          document.getElementById('live-date').innerText = dateStr;
+        }}
+        tick();
+        setInterval(tick, 1000);
+      </script>
+    </body>
+    </html>
+    """
+    components.html(clock_html, height=136)
+    st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
 
     # ── Township High-Level KPI Summary ──
     active_slots = live_df[live_df.zone_id.isin(active_zones.zone_id)]
