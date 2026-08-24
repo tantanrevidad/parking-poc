@@ -203,7 +203,7 @@ section[data-testid="stSidebar"] {{
     100% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
 }}
 
-/* ── Segmented Tab Bar Navigation (Pill Style) ── */
+/* ── Segmented Tab Bar Navigation (Bulletproof Contrast in Light & Dark) ── */
 .stTabs [data-baseweb="tab-list"] {{
     gap: 6px !important;
     background-color: {tab_bg} !important;
@@ -219,19 +219,6 @@ section[data-testid="stSidebar"] {{
 .stTabs [data-baseweb="tab-border"] {{
     display: none !important;
 }}
-.stTabs [data-baseweb="tab-list"] button,
-.stTabs [data-baseweb="tab-list"] button *,
-.stTabs [data-baseweb="tab"],
-.stTabs [data-baseweb="tab"] *,
-button[data-baseweb="tab"],
-button[data-baseweb="tab"] * {{
-    color: {tab_text_color} !important;
-    -webkit-text-fill-color: {tab_text_color} !important;
-    font-weight: 700 !important;
-    font-size: 0.86rem !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}}
 .stTabs [data-baseweb="tab"] {{
     height: 38px !important;
     border-radius: 8px !important;
@@ -243,24 +230,81 @@ button[data-baseweb="tab"] * {{
     align-items: center !important;
     justify-content: center !important;
 }}
-.stTabs [data-baseweb="tab"]:hover {{
-    background-color: var(--bg-card-hover) !important;
-}}
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"],
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] *,
-.stTabs [data-baseweb="tab"][aria-selected="true"],
-.stTabs [data-baseweb="tab"][aria-selected="true"] *,
-button[data-baseweb="tab"][aria-selected="true"],
-button[data-baseweb="tab"][aria-selected="true"] * {{
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    background-color: {tab_active_bg} !important;
+
+/* Unselected Inactive Tabs */
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]),
+.stTabs button[data-baseweb="tab"][aria-selected="false"],
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]),
+.stTabs [data-baseweb="tab"][aria-selected="false"] {{
+    background-color: transparent !important;
+    color: { "#94A3B8" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     font-weight: 800 !important;
     opacity: 1 !important;
 }}
-.stTabs [aria-selected="true"] {{
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) *,
+.stTabs button[data-baseweb="tab"][aria-selected="false"] *,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) *,
+.stTabs [data-baseweb="tab"][aria-selected="false"] *,
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) p,
+.stTabs button[data-baseweb="tab"][aria-selected="false"] p,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) p,
+.stTabs [data-baseweb="tab"][aria-selected="false"] p,
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) div,
+.stTabs button[data-baseweb="tab"][aria-selected="false"] div,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) div,
+.stTabs [data-baseweb="tab"][aria-selected="false"] div,
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) span,
+.stTabs button[data-baseweb="tab"][aria-selected="false"] span,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) span,
+.stTabs [data-baseweb="tab"][aria-selected="false"] span {{
+    color: { "#94A3B8" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
+    font-weight: 800 !important;
+    font-size: 0.88rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}}
+
+/* Hover on Inactive Tab */
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover {{
+    background-color: var(--bg-card-hover) !important;
+}}
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover *,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover *,
+.stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover p,
+.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover p {{
+    color: { "#FFFFFF" if is_dark else "#000000" } !important;
+    -webkit-text-fill-color: { "#FFFFFF" if is_dark else "#000000" } !important;
+}}
+
+/* Selected Active Tab */
+.stTabs button[data-baseweb="tab"][aria-selected="true"],
+.stTabs [data-baseweb="tab"][aria-selected="true"],
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {{
     background-color: {tab_active_bg} !important;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+}}
+.stTabs button[data-baseweb="tab"][aria-selected="true"] *,
+.stTabs [data-baseweb="tab"][aria-selected="true"] *,
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] *,
+.stTabs button[data-baseweb="tab"][aria-selected="true"] p,
+.stTabs [data-baseweb="tab"][aria-selected="true"] p,
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] p,
+.stTabs button[data-baseweb="tab"][aria-selected="true"] div,
+.stTabs [data-baseweb="tab"][aria-selected="true"] div,
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] div {{
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 0.88rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }}
 
 /* ── Streamlit Form Controls Adaptation ── */
