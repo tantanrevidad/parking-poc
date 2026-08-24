@@ -203,61 +203,92 @@ section[data-testid="stSidebar"] {{
     100% {{ transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
 }}
 
-/* ── Segmented Tab Bar Navigation (Bulletproof Contrast in Light & Dark) ── */
-.stTabs [data-baseweb="tab-list"] {{
-    gap: 6px !important;
-    background-color: {tab_bg} !important;
+/* ═══════════════════════════════════════════════════════════════════════
+   SEGMENTED TAB BAR NAVIGATION (BULLETPROOF CONTRAST IN LIGHT & DARK)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 1. Tab Bar Container Strip */
+div[data-testid="stTabs"] [data-baseweb="tab-list"],
+.stTabs [data-baseweb="tab-list"],
+div[data-baseweb="tab-list"] {{
+    gap: 8px !important;
+    background-color: { "#111827" if is_dark else "#E2E8F0" } !important;
+    background: { "#111827" if is_dark else "#E2E8F0" } !important;
     padding: 6px !important;
     border-radius: 12px !important;
-    border: 1px solid var(--border-color) !important;
-    margin-bottom: 20px !important;
-    display: inline-flex !important;
+    border: 1px solid { "#1F2937" if is_dark else "#CBD5E1" } !important;
+    margin-bottom: 24px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
     width: 100% !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: { "0 4px 16px rgba(0,0,0,0.3)" if is_dark else "0 1px 3px rgba(0,0,0,0.06)" } !important;
 }}
+
+/* Hide default underline bar */
+div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+div[data-testid="stTabs"] [data-baseweb="tab-border"],
 .stTabs [data-baseweb="tab-highlight"],
-.stTabs [data-baseweb="tab-border"] {{
+.stTabs [data-baseweb="tab-border"],
+div[data-baseweb="tab-highlight"],
+div[data-baseweb="tab-border"] {{
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    height: 0 !important;
 }}
-.stTabs [data-baseweb="tab"] {{
-    height: 38px !important;
+
+/* 2. Base Tab Button Style */
+div[data-testid="stTabs"] button,
+.stTabs button[data-baseweb="tab"],
+button[data-baseweb="tab"],
+button[role="tab"] {{
+    height: 40px !important;
     border-radius: 8px !important;
     border: none !important;
-    padding: 0px 16px !important;
-    background-color: transparent !important;
+    padding: 0px 18px !important;
     transition: all 0.15s ease !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    cursor: pointer !important;
 }}
 
-/* Unselected Inactive Tabs */
+/* 3. UNSELECTED / INACTIVE TABS */
+div[data-testid="stTabs"] button:not([aria-selected="true"]),
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]),
+button[data-baseweb="tab"]:not([aria-selected="true"]),
+button[role="tab"]:not([aria-selected="true"]),
+div[data-testid="stTabs"] button[aria-selected="false"],
 .stTabs button[data-baseweb="tab"][aria-selected="false"],
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]),
-.stTabs [data-baseweb="tab"][aria-selected="false"] {{
-    background-color: transparent !important;
-    color: { "#94A3B8" if is_dark else "#0F172A" } !important;
-    -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
-    font-weight: 800 !important;
-    opacity: 1 !important;
+button[data-baseweb="tab"][aria-selected="false"],
+button[role="tab"][aria-selected="false"] {{
+    background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
+    background: { "transparent" if is_dark else "#FFFFFF" } !important;
+    border: 1px solid { "transparent" if is_dark else "#CBD5E1" } !important;
+    box-shadow: { "none" if is_dark else "0 1px 2px rgba(0, 0, 0, 0.05)" } !important;
 }}
+
+/* Force Text Color on Unselected Tabs */
+div[data-testid="stTabs"] button:not([aria-selected="true"]) *,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) *,
+button[data-baseweb="tab"]:not([aria-selected="true"]) *,
+button[role="tab"]:not([aria-selected="true"]) *,
+div[data-testid="stTabs"] button[aria-selected="false"] *,
 .stTabs button[data-baseweb="tab"][aria-selected="false"] *,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) *,
-.stTabs [data-baseweb="tab"][aria-selected="false"] *,
+button[data-baseweb="tab"][aria-selected="false"] *,
+button[role="tab"][aria-selected="false"] *,
+div[data-testid="stTabs"] button:not([aria-selected="true"]) p,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) p,
-.stTabs button[data-baseweb="tab"][aria-selected="false"] p,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) p,
-.stTabs [data-baseweb="tab"][aria-selected="false"] p,
+button[data-baseweb="tab"]:not([aria-selected="true"]) p,
+button[role="tab"]:not([aria-selected="true"]) p,
+div[data-testid="stTabs"] button:not([aria-selected="true"]) div,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) div,
-.stTabs button[data-baseweb="tab"][aria-selected="false"] div,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) div,
-.stTabs [data-baseweb="tab"][aria-selected="false"] div,
+button[data-baseweb="tab"]:not([aria-selected="true"]) div,
+button[role="tab"]:not([aria-selected="true"]) div,
+div[data-testid="stTabs"] button:not([aria-selected="true"]) span,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]) span,
-.stTabs button[data-baseweb="tab"][aria-selected="false"] span,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]) span,
-.stTabs [data-baseweb="tab"][aria-selected="false"] span {{
+button[data-baseweb="tab"]:not([aria-selected="true"]) span,
+button[role="tab"]:not([aria-selected="true"]) span {{
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     font-weight: 800 !important;
@@ -266,39 +297,53 @@ section[data-testid="stSidebar"] {{
     visibility: visible !important;
 }}
 
-/* Hover on Inactive Tab */
+/* 4. HOVER ON UNSELECTED TABS */
+div[data-testid="stTabs"] button:not([aria-selected="true"]):hover,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover {{
-    background-color: var(--bg-card-hover) !important;
+button[data-baseweb="tab"]:not([aria-selected="true"]):hover,
+button[role="tab"]:not([aria-selected="true"]):hover {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    border-color: { "#334155" if is_dark else "#94A3B8" } !important;
 }}
+div[data-testid="stTabs"] button:not([aria-selected="true"]):hover *,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover *,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover *,
+button[data-baseweb="tab"]:not([aria-selected="true"]):hover *,
+button[role="tab"]:not([aria-selected="true"]):hover *,
+div[data-testid="stTabs"] button:not([aria-selected="true"]):hover p,
 .stTabs button[data-baseweb="tab"]:not([aria-selected="true"]):hover p,
-.stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover p {{
+button[data-baseweb="tab"]:not([aria-selected="true"]):hover p,
+button[role="tab"]:not([aria-selected="true"]):hover p {{
     color: { "#FFFFFF" if is_dark else "#000000" } !important;
     -webkit-text-fill-color: { "#FFFFFF" if is_dark else "#000000" } !important;
 }}
 
-/* Selected Active Tab */
+/* 5. ACTIVE / SELECTED TAB */
+div[data-testid="stTabs"] button[aria-selected="true"],
 .stTabs button[data-baseweb="tab"][aria-selected="true"],
-.stTabs [data-baseweb="tab"][aria-selected="true"],
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {{
-    background-color: {tab_active_bg} !important;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    font-weight: 800 !important;
-    opacity: 1 !important;
+button[data-baseweb="tab"][aria-selected="true"],
+button[role="tab"][aria-selected="true"] {{
+    background-color: #2563EB !important;
+    background: #2563EB !important;
+    border: 1px solid #1D4ED8 !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4) !important;
 }}
+div[data-testid="stTabs"] button[aria-selected="true"] *,
 .stTabs button[data-baseweb="tab"][aria-selected="true"] *,
-.stTabs [data-baseweb="tab"][aria-selected="true"] *,
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] *,
+button[data-baseweb="tab"][aria-selected="true"] *,
+button[role="tab"][aria-selected="true"] *,
+div[data-testid="stTabs"] button[aria-selected="true"] p,
 .stTabs button[data-baseweb="tab"][aria-selected="true"] p,
-.stTabs [data-baseweb="tab"][aria-selected="true"] p,
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] p,
+button[data-baseweb="tab"][aria-selected="true"] p,
+button[role="tab"][aria-selected="true"] p,
+div[data-testid="stTabs"] button[aria-selected="true"] div,
 .stTabs button[data-baseweb="tab"][aria-selected="true"] div,
-.stTabs [data-baseweb="tab"][aria-selected="true"] div,
-.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] div {{
+button[data-baseweb="tab"][aria-selected="true"] div,
+button[role="tab"][aria-selected="true"] div,
+div[data-testid="stTabs"] button[aria-selected="true"] span,
+.stTabs button[data-baseweb="tab"][aria-selected="true"] span,
+button[data-baseweb="tab"][aria-selected="true"] span,
+button[role="tab"][aria-selected="true"] span {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
