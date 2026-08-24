@@ -1983,8 +1983,8 @@ with tab2:
 
     # ── Forecast Insights & Data Provenance Section ──
     st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-title'>Forecast Insights & Data Provenance</div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-desc'>Key operational drivers, historical telemetry origin, and prediction methodology powering this availability estimate.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Forecast Intelligence & Methodology</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-desc'>Operational profile, telemetry provenance, and analytical parameters for the selected parking zone.</div>", unsafe_allow_html=True)
 
     ic1, ic2, ic3 = st.columns(3)
     
@@ -1993,16 +1993,16 @@ with tab2:
     site_name = sites_df.loc[sites_df.site_id == zone_info["site_id"], "name"].iloc[0]
     
     type_descriptions = {
-        "mall": ("Commercial / Retail", "Peaks on evenings (6–9 PM) & weekends due to dining, cinema, and retail foot-traffic."),
-        "office": ("Corporate / BPO", "Rapid morning inflow (7:30–9:30 AM), midday lunch dip, and steady evening egress (5–8 PM)."),
-        "residential": ("Residential Deck", "High overnight occupancy (8 PM–7 AM) with daytime turnover as residents commute."),
+        "mall": ("Commercial / Retail", "Peak volume occurs during evening hours (6:00–9:00 PM) and weekends driven by retail and dining traffic."),
+        "office": ("Corporate / Commercial", "Inflow concentrates during morning hours (7:30–9:30 AM) with consistent egress between 5:00–8:00 PM."),
+        "residential": ("Residential Deck", "Sustained overnight occupancy (8:00 PM–7:00 AM) with steady turnover during daytime hours."),
     }
-    type_title, type_desc = type_descriptions.get(zone_type, ("Standard Deck", "Standard commercial daily distribution."))
+    type_title, type_desc = type_descriptions.get(zone_type, ("Standard Deck", "Standard operational distribution."))
 
     with ic1:
         st.markdown(f"""
         <div class='metric-card'>
-            <div class='metric-label'>📍 Zone Profile & Behavior</div>
+            <div class='metric-label'>Zone Classification</div>
             <div style='font-size:1.05rem; font-weight:800; color:var(--text-primary); margin: 4px 0;'>{type_title}</div>
             <div style='font-size:0.78rem; color:var(--text-secondary); line-height:1.4;'>{type_desc}</div>
         </div>
@@ -2011,56 +2011,48 @@ with tab2:
     with ic2:
         st.markdown(f"""
         <div class='metric-card'>
-            <div class='metric-label'>📊 Dataset & Telemetry Origin</div>
+            <div class='metric-label'>Telemetry Source</div>
             <div style='font-size:1.05rem; font-weight:800; color:var(--text-primary); margin: 4px 0;'>4-Week Historical Window</div>
-            <div style='font-size:0.78rem; color:var(--text-secondary); line-height:1.4;'>Trained on <strong>2,688 intervals</strong> (15-min sampling) across {site_name}'s barrier gate telemetry & CV slots.</div>
+            <div style='font-size:0.78rem; color:var(--text-secondary); line-height:1.4;'>Calibrated on <strong>2,688 observations</strong> (15-minute intervals) from {site_name} ingress telemetry and bay sensors.</div>
         </div>
         """, unsafe_allow_html=True)
 
     with ic3:
         st.markdown(f"""
         <div class='metric-card'>
-            <div class='metric-label'>⚙️ Algorithm Architecture</div>
+            <div class='metric-label'>Prediction Engine</div>
             <div style='font-size:1.05rem; font-weight:800; color:var(--text-primary); margin: 4px 0;'>HistGradientBoosting</div>
-            <div style='font-size:0.78rem; color:var(--text-secondary); line-height:1.4;'>Tree ensemble evaluating non-linear interactions across hour, weekday/weekend, and causal rolling averages.</div>
+            <div style='font-size:0.78rem; color:var(--text-secondary); line-height:1.4;'>Gradient-boosted decision tree ensemble modeling temporal interactions, day-of-week trends, and rolling baselines.</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    with st.expander("📖 Deep Dive: How the Forecast Model Computes Availability", expanded=False):
+    with st.expander("Model Specification & Analytical Details", expanded=False):
         b_val = f"{result['baseline_estimate']*100:.0f}%"
         m_val = f"{result['trained_estimate']*100:.0f}%"
         a_val = f"{result['adjusted_estimate']*100:.0f}%"
         st.markdown(f"""
-        ### 1. Where Does the Data Come From?
-        - **Telemetry Pipeline:** Historical occupancy data is collected every **15 minutes** across all active Megaworld parking decks.
-        - **Real-World Calibration:** Daily occupancy patterns reflect Philippine urban mobility trends — distinguishing corporate office traffic in Bonifacio Global City and Eastwood from weekend retail surges.
-        - **Time-Series Integrity:** Training strictly employs chronological holdout splitting (the latest 20% of historical data) without future data leakage.
+        **1. Data Provenance & Ingestion**
+        - Telemetry is recorded at 15-minute intervals across all monitored parking decks.
+        - Training uses a chronological holdout split (the final 20% of historical data) to eliminate future data leakage.
 
-        ---
+        **2. Engineered Predictive Signals**
+        - **Hour of Day (`hour`):** Captures daily traffic progression (0–23).
+        - **Day of Week (`day_of_week`):** Encodes day-specific variance across business and weekend schedules.
+        - **Weekend Indicator (`is_weekend`):** Differentiates corporate vs. retail demand profiles.
+        - **Historical Rolling Baseline (`rolling_avg_same_hour`):** Causal moving average for the matching hour across preceding periods.
+        - **Zone Identifier (`zone_id`):** Incorporates spatial capacity limits and level accessibility factors.
 
-        ### 2. Feature Engineering & Signal Inputs
-        The machine learning model (`HistGradientBoostingRegressor`) consumes the following predictive signals:
-        - `hour` (0–23): Time of day capturing diurnal traffic rhythms.
-        - `day_of_week` (0–6): Day-specific commercial trends (e.g., Friday evening dinner rushes vs. Tuesday mornings).
-        - `is_weekend` (0/1): Binary indicator capturing lifestyle shifts between workdays and weekends.
-        - `rolling_avg_same_hour`: Causal rolling historical mean for the exact zone and hour over preceding days.
-        - `zone_id`: Spatial deck embeddings encoding unique ingress capacity and level positioning.
+        **3. Forecast Outputs**
+        - **Baseline Heuristic ({b_val}):** Historical mean occupancy for the matching day-of-week and time slot.
+        - **ML Model Estimate ({m_val}):** Multi-variable gradient boosted regression reflecting non-linear interactions.
+        - **Adjusted Value ({a_val}):** Incorporates a dynamic safety margin to prevent over-allocation during peak demand.
 
-        ---
-
-        ### 3. Understanding the 3 Forecast Estimates
-        1. **Baseline Heuristic ({b_val}):** The historical average occupancy rate for this exact day-of-week and time slot. Serves as a reliable cold-start fallback.
-        2. **ML Model Forecast ({m_val}):** Non-linear gradient boosted tree regression output that accounts for multivariate interactions and momentum trends.
-        3. **Adjusted Estimate ({a_val}):** Applies an adaptive conservative safety margin to prevent over-promising parking availability during high-demand or high-variance periods.
-
-        ---
-
-        ### 4. Availability Classification Thresholds
-        - 🟢 **Likely available (< 60% Occupancy):** High parking bay availability; minimal search time expected.
-        - 🟡 **Uncertain — may be tight (60% – 85% Occupancy):** Moderate to high demand; recommended to check live vacancy upon arrival.
-        - 🔴 **Unlikely to have space (> 85% Occupancy):** Near peak capacity; drivers should consider adjacent decks or alternate parking levels.
+        **4. Availability Thresholds**
+        - **Likely Available (< 60% Occupancy):** Ample parking capacity available.
+        - **Uncertain — May Be Tight (60% – 85% Occupancy):** Moderate to high demand.
+        - **Unlikely to Have Space (> 85% Occupancy):** Near capacity; alternate parking zones recommended.
         """)
 
 
