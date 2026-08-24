@@ -366,52 +366,48 @@ div[data-testid="stNumberInput"] input {{
     font-weight: 600 !important;
 }}
 
-/* Selectbox Dropdown Box (Targeting all BaseWeb nested wrappers) */
-div[data-testid="stSelectbox"] div[data-baseweb="select"],
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div > div,
+/* ── Selectbox Dropdown Box (Trigger, Inputs & All Wrappers) ── */
+div[data-testid="stSelectbox"],
+div[data-testid="stSelectbox"] *,
+div[data-testid="stSelectbox"] div,
+div[data-testid="stSelectbox"] [data-baseweb="select"],
+div[data-testid="stSelectbox"] [data-baseweb="select"] *,
+div[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+div[data-testid="stSelectbox"] [data-baseweb="select"] input,
 div[data-baseweb="select"],
-div[data-baseweb="select"] > div {{
+div[data-baseweb="select"] *,
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] input {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
-    border-radius: 8px !important;
-}}
-
-/* Selectbox Text & Arrow Fill */
-div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
-div[data-baseweb="select"] *,
-div[data-baseweb="select"] p,
-div[data-baseweb="select"] div,
-div[data-baseweb="select"] span {{
-    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    fill: { "#94A3B8" if is_dark else "#475569" } !important;
-    font-weight: 600 !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
-/* Selectbox Open Popover Menu (Options List) — Nuclear Override
-   BaseWeb renders popovers as body-level portals OUTSIDE .stApp.
-   Inline styles are applied by JS. We use extremely broad selectors
-   with !important to override them. */
+div[data-testid="stSelectbox"] svg,
+div[data-baseweb="select"] svg {{
+    fill: { "#94A3B8" if is_dark else "#475569" } !important;
+    color: { "#94A3B8" if is_dark else "#475569" } !important;
+}}
+
+/* ── Selectbox Open Popover Menu & Option List Items ── */
 [data-baseweb="popover"],
 [data-baseweb="popover"] *,
-[data-baseweb="layer"] [data-baseweb="popover"],
-[data-baseweb="layer"] [data-baseweb="popover"] *,
-body [data-baseweb="popover"],
-body [data-baseweb="popover"] > div,
-body [data-baseweb="popover"] > div > div,
-body [data-baseweb="popover"] > div > div > div,
+[data-baseweb="popover"] div,
+[data-baseweb="popover"] ul,
+[data-baseweb="popover"] li,
 [data-baseweb="menu"],
 [data-baseweb="menu"] *,
-body [data-baseweb="menu"],
-body [data-baseweb="menu"] > ul,
-body ul[role="listbox"],
-body ul[role="listbox"] > li,
-body li[role="option"],
-body li[role="option"] > div,
-body li[role="option"] > div > div {{
+[data-baseweb="menu"] div,
+[data-baseweb="menu"] ul,
+[data-baseweb="menu"] li,
+ul[role="listbox"],
+ul[role="listbox"] *,
+ul[role="listbox"] > li,
+li[role="option"],
+li[role="option"] *,
+li[role="option"] > div {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -419,12 +415,15 @@ body li[role="option"] > div > div {{
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
 }}
 
-body ul[role="listbox"] li[role="option"]:hover,
-body ul[role="listbox"] li[role="option"]:hover *,
-body ul[role="listbox"] li[role="option"][aria-selected="true"],
-body ul[role="listbox"] li[role="option"][aria-selected="true"] *,
-body [data-baseweb="menu"] li:hover,
-body [data-baseweb="menu"] li:hover * {{
+/* Popover Item Hover & Selected States */
+ul[role="listbox"] li[role="option"]:hover,
+ul[role="listbox"] li[role="option"]:hover *,
+ul[role="listbox"] li[role="option"][aria-selected="true"],
+ul[role="listbox"] li[role="option"][aria-selected="true"] *,
+li[role="option"]:hover,
+li[role="option"]:hover *,
+li[role="option"][aria-selected="true"],
+li[role="option"][aria-selected="true"] * {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
@@ -1287,14 +1286,19 @@ with ctrl_col:
             key="global_site_select",
         )
     with t_col2:
-        theme_val = st.segmented_control(
+        def handle_theme_toggle():
+            val = st.session_state.get("theme_toggle_ctrl")
+            if val:
+                st.session_state.theme_mode = "dark" if val == "Dark" else "light"
+
+        st.segmented_control(
             "Theme",
             options=["Dark", "Light"],
             default="Dark" if st.session_state.theme_mode == "dark" else "Light",
             label_visibility="collapsed",
             key="theme_toggle_ctrl",
+            on_change=handle_theme_toggle,
         )
-        st.session_state.theme_mode = "dark" if theme_val == "Dark" else "light"
 
 # Inject dynamic CSS based on active theme
 st.markdown(get_theme_css(st.session_state.theme_mode), unsafe_allow_html=True)
