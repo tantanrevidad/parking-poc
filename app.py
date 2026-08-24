@@ -442,11 +442,9 @@ div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {{
     gap: 4px !important;
 }}
 
-/* Inactive Segmented Button */
-div[data-testid="stSegmentedControl"] button:not([aria-checked="true"]):not([aria-pressed="true"]):not([aria-selected="true"]),
-div[data-testid="stSegmentedControl"] button[aria-checked="false"],
-div[data-testid="stSegmentedControl"] button[aria-pressed="false"],
-div[data-testid="stSegmentedControl"] button[aria-selected="false"] {{
+/* Base Segmented Button (Default Inactive) */
+div[data-testid="stSegmentedControl"] button,
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button {{
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     background: { "transparent" if is_dark else "#FFFFFF" } !important;
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
@@ -454,19 +452,20 @@ div[data-testid="stSegmentedControl"] button[aria-selected="false"] {{
     border-radius: 6px !important;
     font-weight: 700 !important;
 }}
-div[data-testid="stSegmentedControl"] button:not([aria-checked="true"]):not([aria-pressed="true"]):not([aria-selected="true"]) *,
-div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
-div[data-testid="stSegmentedControl"] button[aria-pressed="false"] *,
-div[data-testid="stSegmentedControl"] button[aria-selected="false"] * {{
+div[data-testid="stSegmentedControl"] button *,
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button * {{
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     font-weight: 700 !important;
 }}
 
-/* Active Segmented Button */
+/* Active Segmented Button (Selected) */
 div[data-testid="stSegmentedControl"] button[aria-checked="true"],
 div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
-div[data-testid="stSegmentedControl"] button[aria-selected="true"] {{
+div[data-testid="stSegmentedControl"] button[aria-selected="true"],
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="true"],
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"],
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-selected="true"] {{
     background-color: #2563EB !important;
     background: #2563EB !important;
     color: #FFFFFF !important;
@@ -477,7 +476,10 @@ div[data-testid="stSegmentedControl"] button[aria-selected="true"] {{
 }}
 div[data-testid="stSegmentedControl"] button[aria-checked="true"] *,
 div[data-testid="stSegmentedControl"] button[aria-pressed="true"] *,
-div[data-testid="stSegmentedControl"] button[aria-selected="true"] * {{
+div[data-testid="stSegmentedControl"] button[aria-selected="true"] *,
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-checked="true"] *,
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"] *,
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-selected="true"] * {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
@@ -886,24 +888,39 @@ div[role="alert"] {{
 }}
 
 /* ── Expander ── */
-div[data-testid="stExpander"] {{
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+div[data-testid="stExpander"],
+div[data-testid="stExpander"] details,
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] summary > div,
+div[data-testid="stExpander"] summary:hover,
+div[data-testid="stExpander"] summary:focus,
+div[data-testid="stExpander"] summary:active {{
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    background: { "#111827" if is_dark else "#FFFFFF" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
     border-radius: 12px !important;
 }}
+
 div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] summary *,
 div[data-testid="stExpander"] summary span,
 div[data-testid="stExpander"] summary p {{
-    color: var(--text-primary) !important;
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     font-weight: 700 !important;
 }}
+
 div[data-testid="stExpander"] summary svg {{
-    fill: var(--text-secondary) !important;
-    color: var(--text-secondary) !important;
+    fill: { "#94A3B8" if is_dark else "#475569" } !important;
+    color: { "#94A3B8" if is_dark else "#475569" } !important;
 }}
+
 div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
 div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] * {{
-    color: var(--text-primary) !important;
+    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
+    background: { "#111827" if is_dark else "#FFFFFF" } !important;
+    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
 }}
 
 /* ── Slider ── */
@@ -1507,8 +1524,8 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 
 with tab1:
     is_dark = st.session_state.theme_mode == "dark"
-    bg_card = "#1A1C23" if is_dark else "#FFFFFF"
-    border_color = "#282C37" if is_dark else "#CBD5E1"
+    bg_card = "#111827" if is_dark else "#FFFFFF"
+    border_color = "#1F2937" if is_dark else "#CBD5E1"
     text_primary = "#F8FAFC" if is_dark else "#0F172A"
     text_muted = "#94A3B8" if is_dark else "#64748B"
     accent_blue = "#38BDF8" if is_dark else "#0284C7"
