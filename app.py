@@ -356,7 +356,7 @@ button[role="tab"][aria-selected="true"] span {{
 div[data-testid="stDateInput"] input,
 div[data-testid="stTimeInput"] input,
 div[data-testid="stTextInput"] input,
-div[data-testid="stNumberInput"] input {
+div[data-testid="stNumberInput"] input {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -364,32 +364,32 @@ div[data-testid="stNumberInput"] input {
     border: 1px solid { "#1F2937" if is_dark else "#CBD5E1" } !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
-}
+}}
 
 /* Selectbox Dropdown Box (Targeting all BaseWeb nested wrappers) */
 div[data-testid="stSelectbox"] div[data-baseweb="select"],
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div > div,
 div[data-baseweb="select"],
-div[data-baseweb="select"] > div {
+div[data-baseweb="select"] > div {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
     border-radius: 8px !important;
-}
+}}
 
 /* Selectbox Text & Arrow Fill */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
 div[data-baseweb="select"] *,
 div[data-baseweb="select"] p,
 div[data-baseweb="select"] div,
-div[data-baseweb="select"] span {
+div[data-baseweb="select"] span {{
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     fill: { "#94A3B8" if is_dark else "#475569" } !important;
     font-weight: 600 !important;
-}
+}}
 
 /* Selectbox Open Popover Menu (Options List) */
 div[data-baseweb="popover"],
@@ -398,68 +398,68 @@ div[data-baseweb="menu"],
 div[data-baseweb="menu"] > ul,
 ul[role="listbox"],
 ul[role="listbox"] > li,
-li[role="option"] {
+li[role="option"] {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
-}
+}}
 
-ul[role="listbox"] li[role="option"] * {
+ul[role="listbox"] li[role="option"] * {{
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     font-weight: 600 !important;
-}
+}}
 
 ul[role="listbox"] li[role="option"]:hover,
-ul[role="listbox"] li[role="option"][aria-selected="true"] {
+ul[role="listbox"] li[role="option"][aria-selected="true"] {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
-}
+}}
 ul[role="listbox"] li[role="option"]:hover *,
-ul[role="listbox"] li[role="option"][aria-selected="true"] * {
+ul[role="listbox"] li[role="option"][aria-selected="true"] * {{
     color: { "#38BDF8" if is_dark else "#0284C7" } !important;
     -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
-}
+}}
 
 /* ── Segmented Control Switcher (Theme / View Mode) ── */
 div[data-testid="stSegmentedControl"],
 div[data-testid="stSegmentedControl"] > div,
-div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {
+div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {{
     background-color: { "#111827" if is_dark else "#E2E8F0" } !important;
     background: { "#111827" if is_dark else "#E2E8F0" } !important;
     border: 1px solid { "#1F2937" if is_dark else "#CBD5E1" } !important;
     border-radius: 8px !important;
     padding: 3px !important;
     gap: 4px !important;
-}
+}}
 
 /* Inactive Segmented Button */
 div[data-testid="stSegmentedControl"] button:not([aria-checked="true"]):not([aria-pressed="true"]):not([aria-selected="true"]),
 div[data-testid="stSegmentedControl"] button[aria-checked="false"],
 div[data-testid="stSegmentedControl"] button[aria-pressed="false"],
-div[data-testid="stSegmentedControl"] button[aria-selected="false"] {
+div[data-testid="stSegmentedControl"] button[aria-selected="false"] {{
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     background: { "transparent" if is_dark else "#FFFFFF" } !important;
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     border: 1px solid { "transparent" if is_dark else "#CBD5E1" } !important;
     border-radius: 6px !important;
     font-weight: 700 !important;
-}
+}}
 div[data-testid="stSegmentedControl"] button:not([aria-checked="true"]):not([aria-pressed="true"]):not([aria-selected="true"]) *,
 div[data-testid="stSegmentedControl"] button[aria-checked="false"] *,
 div[data-testid="stSegmentedControl"] button[aria-pressed="false"] *,
-div[data-testid="stSegmentedControl"] button[aria-selected="false"] * {
+div[data-testid="stSegmentedControl"] button[aria-selected="false"] * {{
     color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     -webkit-text-fill-color: { "#94A3B8" if is_dark else "#0F172A" } !important;
     font-weight: 700 !important;
-}
+}}
 
 /* Active Segmented Button */
 div[data-testid="stSegmentedControl"] button[aria-checked="true"],
 div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
-div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
+div[data-testid="stSegmentedControl"] button[aria-selected="true"] {{
     background-color: #2563EB !important;
     background: #2563EB !important;
     color: #FFFFFF !important;
@@ -467,14 +467,14 @@ div[data-testid="stSegmentedControl"] button[aria-selected="true"] {
     border-radius: 6px !important;
     font-weight: 800 !important;
     box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35) !important;
-}
+}}
 div[data-testid="stSegmentedControl"] button[aria-checked="true"] *,
 div[data-testid="stSegmentedControl"] button[aria-pressed="true"] *,
-div[data-testid="stSegmentedControl"] button[aria-selected="true"] * {
+div[data-testid="stSegmentedControl"] button[aria-selected="true"] * {{
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 800 !important;
-}
+}}
 
 /* Labels */
 div[data-testid="stDateInput"] label,
@@ -482,11 +482,11 @@ div[data-testid="stTimeInput"] label,
 div[data-testid="stTextInput"] label,
 div[data-testid="stNumberInput"] label,
 div[data-testid="stSelectbox"] label,
-div[data-testid="stSegmentedControl"] label {
+div[data-testid="stSegmentedControl"] label {{
     color: var(--text-secondary) !important;
     font-weight: 700 !important;
     font-size: 0.8rem !important;
-}
+}}
 
 /* ── Legend Strip ── */
 .legend-strip {{
