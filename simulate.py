@@ -40,7 +40,8 @@ def simulate_current_state(sim_time, zones_df, slots_df, holidays, events, sites
         slot_id, zone_id, slot_code, status, plate, ticket_id,
         read_text, confidences, match_info (dict or None)
     """
-    seed = int(sim_time.timestamp())
+    # Stable seed based on 5-minute simulation blocks so interactions don't reshuffle lot
+    seed = int(sim_time.replace(second=0, microsecond=0).timestamp()) // 300
     rng = random.Random(seed)
 
     hour_frac = sim_time.hour + sim_time.minute / 60.0

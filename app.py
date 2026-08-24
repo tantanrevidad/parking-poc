@@ -1234,91 +1234,95 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Render Township & Zone Seat-Map Sections ──
-    for _, site in sites_df.iterrows():
-        if site.site_id not in active_site_ids:
-            continue
+    # ── Render Township & Zone Seat-Map Sections with Isolated Fragment Execution ──
+    @st.fragment
+    def render_parking_deck_sections():
+        for _, site in sites_df.iterrows():
+            if site.site_id not in active_site_ids:
+                continue
 
-        site_zones = zones_df[zones_df.site_id == site.site_id]
+            site_zones = zones_df[zones_df.site_id == site.site_id]
 
-        st.markdown(
-            f"<div style='font-size:1.15rem; font-weight:800; color:var(--text-primary); margin:20px 0 12px 0; letter-spacing:-0.02em;'>"
-            f"{site['name']}</div>",
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                f"<div style='font-size:1.15rem; font-weight:800; color:var(--text-primary); margin:20px 0 12px 0; letter-spacing:-0.02em;'>"
+                f"{site['name']}</div>",
+                unsafe_allow_html=True,
+            )
 
-        # Order zones sequentially: Mall -> Office -> Residential
-        zone_order_map = {"mall": 0, "office": 1, "residential": 2}
-        site_zones = site_zones.sort_values(by="zone_type", key=lambda s: s.map(zone_order_map))
+            # Order zones sequentially: Mall -> Office -> Residential
+            zone_order_map = {"mall": 0, "office": 1, "residential": 2}
+            site_zones = site_zones.sort_values(by="zone_type", key=lambda s: s.map(zone_order_map))
 
-        for _, z in site_zones.iterrows():
-            zone_slots = live_df[live_df.zone_id == z.zone_id].sort_values("slot_code").reset_index(drop=True)
-            n_free = (zone_slots.status == sm.FREE).sum()
-            total = len(zone_slots)
-            tag_class = f"zone-tag-{z.zone_type}" if z.zone_type in ("office", "mall", "residential") else ""
-            type_label = "Mall" if z.zone_type == "mall" else ("Office" if z.zone_type == "office" else "Residential")
+            for _, z in site_zones.iterrows():
+                zone_slots = live_df[live_df.zone_id == z.zone_id].sort_values("slot_code").reset_index(drop=True)
+                n_free = (zone_slots.status == sm.FREE).sum()
+                total = len(zone_slots)
+                tag_class = f"zone-tag-{z.zone_type}" if z.zone_type in ("office", "mall", "residential") else ""
+                type_label = "Mall" if z.zone_type == "mall" else ("Office" if z.zone_type == "office" else "Residential")
 
-            st.markdown(f"""
-            <div class="zone-card">
-                <div class="zone-header">
-                    <div>
-                        <span class="zone-name">{z.label} — {z.level}</span>
-                        <span class="zone-tag {tag_class}">{type_label}</span>
+                st.markdown(f"""
+                <div class="zone-card">
+                    <div class="zone-header">
+                        <div>
+                            <span class="zone-name">{z.label} — {z.level}</span>
+                            <span class="zone-tag {tag_class}">{type_label}</span>
+                        </div>
+                        <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
                     </div>
-                    <div class="zone-avail"><strong>{n_free}</strong> / {total} bays free · <span style="font-size:0.75rem; color:var(--text-muted);">Click any stall to inspect database</span></div>
-                </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-            # Determine column count & rows based on capacity
-            row_size = 12 if total >= 24 else 8
-            num_rows = (total + row_size - 1) // row_size
+                # Determine column count & rows based on capacity
+                row_size = 12 if total >= 24 else 8
+                num_rows = (total + row_size - 1) // row_size
 
-            for r_idx in range(num_rows):
-                row_slice = zone_slots.iloc[r_idx * row_size : (r_idx + 1) * row_size]
-                lane_char = chr(65 + r_idx)
+                for r_idx in range(num_rows):
+                    row_slice = zone_slots.iloc[r_idx * row_size : (r_idx + 1) * row_size]
+                    lane_char = chr(65 + r_idx)
 
-                # Render Drive Aisle separator between facing parking rows
-                if r_idx > 0:
-                    st.markdown(
-                        f"<div class='drive-aisle'>"
-                        f"<div class='drive-aisle-line'></div>"
-                        f"<div class='drive-aisle-label'>DRIVE AISLE · LANE {lane_char} ➔</div>"
-                        f"<div class='drive-aisle-line'></div>"
-                        f"</div>",
-                        unsafe_allow_html=True,
-                    )
+                    # Render Drive Aisle separator between facing parking rows
+                    if r_idx > 0:
+                        st.markdown(
+                            f"<div class='drive-aisle'>"
+                            f"<div class='drive-aisle-line'></div>"
+                            f"<div class='drive-aisle-label'>DRIVE AISLE · LANE {lane_char} ➔</div>"
+                            f"<div class='drive-aisle-line'></div>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
 
-                cols = st.columns(row_size)
-                for c_idx, (_, row) in enumerate(row_slice.iterrows()):
-                    with cols[c_idx]:
-                        if row.status == sm.FREE:
-                            marker_class = "slot-free"
-                            ind_text = "OPEN"
-                        elif row.status == sm.OCCUPIED_UNPAID:
-                            marker_class = "slot-occupied"
-                            ind_text = "BUSY"
-                        elif row.status == sm.OCCUPIED_PENDING_MATCH:
-                            marker_class = "slot-pending"
-                            ind_text = "MATCH"
-                        else:
-                            marker_class = "slot-vacating"
-                            ind_text = "LEAVING"
+                    cols = st.columns(row_size)
+                    for c_idx, (_, row) in enumerate(row_slice.iterrows()):
+                        with cols[c_idx]:
+                            if row.status == sm.FREE:
+                                marker_class = "slot-free"
+                                ind_text = "OPEN"
+                            elif row.status == sm.OCCUPIED_UNPAID:
+                                marker_class = "slot-occupied"
+                                ind_text = "BUSY"
+                            elif row.status == sm.OCCUPIED_PENDING_MATCH:
+                                marker_class = "slot-pending"
+                                ind_text = "MATCH"
+                            else:
+                                marker_class = "slot-vacating"
+                                ind_text = "LEAVING"
 
-                        # Slot status marker for guaranteed CSS :has column targeting
-                        st.markdown(f"<span class='slot-marker {marker_class}'></span>", unsafe_allow_html=True)
+                            # Slot status marker for guaranteed CSS :has column targeting
+                            st.markdown(f"<span class='slot-marker {marker_class}'></span>", unsafe_allow_html=True)
 
-                        # Direct Solid-Color Clickable Parking Stall Block
-                        if st.button(
-                            f"{row.slot_code}\n{ind_text}",
-                            key=f"stall_btn_{row.slot_id}",
-                            help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
-                            use_container_width=True,
-                        ):
-                            st.session_state.selected_slot_id = int(row.slot_id)
-                            st.session_state.selected_slot_code = str(row.slot_code)
-                            inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
+                            # Direct Solid-Color Clickable Parking Stall Block
+                            if st.button(
+                                f"{row.slot_code}\n{ind_text}",
+                                key=f"stall_btn_{row.slot_id}",
+                                help=f"Inspect SQLite database row for {row.slot_code} (Slot ID: {row.slot_id})",
+                                use_container_width=True,
+                            ):
+                                st.session_state.selected_slot_id = int(row.slot_id)
+                                st.session_state.selected_slot_code = str(row.slot_code)
+                                inspect_slot_dialog(int(row.slot_id), str(row.slot_code), row.to_dict())
 
-            st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    render_parking_deck_sections()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
