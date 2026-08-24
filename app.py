@@ -1110,6 +1110,9 @@ div[data-testid="stMultiSelect"] div[data-baseweb="select"] * {{
 }}
 
 /* ── Date/Time Picker Calendar Popover ── */
+[data-baseweb="popover"],
+[data-baseweb="popover"] *,
+[data-baseweb="popover"] div,
 div[data-baseweb="calendar"],
 div[data-baseweb="calendar"] *,
 div[data-baseweb="calendar"] div,
@@ -1123,15 +1126,7 @@ div[data-baseweb="calendar"] [role="row"] *,
 div[data-baseweb="calendar"] [role="gridcell"],
 div[data-baseweb="calendar"] [role="gridcell"] *,
 div[data-baseweb="calendar"] [role="presentation"],
-div[data-baseweb="calendar"] [role="presentation"] *,
-div[data-baseweb="calendar"] [aria-disabled="true"],
-div[data-baseweb="calendar"] [aria-disabled="true"] *,
-div[data-baseweb="calendar"] [aria-hidden="true"],
-div[data-baseweb="calendar"] [aria-hidden="true"] *,
-div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]),
-div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]) *,
-[data-baseweb="popover"] [data-baseweb="calendar"],
-[data-baseweb="popover"] [data-baseweb="calendar"] * {{
+div[data-baseweb="calendar"] [role="presentation"] * {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
     color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
@@ -1142,12 +1137,17 @@ div[data-baseweb="popover"]:has(div[data-baseweb="calendar"]) *,
 /* Empty filler day slots (before start of month / after end of month) */
 div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)),
 div[data-baseweb="calendar"] [role="gridcell"]:not(:has(button)) *,
-div[data-baseweb="calendar"] [aria-disabled="true"],
-div[data-baseweb="calendar"] [aria-disabled="true"] * {{
-    background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
-    background: { "#111827" if is_dark else "#FFFFFF" } !important;
+div[data-baseweb="calendar"] [aria-disabled="true"]:not(:has(button)),
+div[data-baseweb="calendar"] [aria-disabled="true"]:not(:has(button)) *,
+[data-baseweb="popover"] [aria-disabled="true"]:not(:has(button)),
+[data-baseweb="popover"] [aria-disabled="true"]:not(:has(button)) * {{
+    background-color: transparent !important;
+    background: transparent !important;
     border: none !important;
+    border-color: transparent !important;
     box-shadow: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }}
 
 div[data-baseweb="calendar"] [role="columnheader"],
@@ -1161,6 +1161,8 @@ div[data-baseweb="calendar"] button {{
     -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
     background-color: { "transparent" if is_dark else "#FFFFFF" } !important;
     border-radius: 6px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }}
 div[data-baseweb="calendar"] button:hover {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
