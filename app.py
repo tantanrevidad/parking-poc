@@ -2374,7 +2374,7 @@ with tab5:
 
     dataset_choice = st.radio(
         "Select Dataset",
-        options=["Philippine Parking Lot Dataset (Metro Manila)", "Academic ALPR Benchmark (OpenALPR)"],
+        options=["🇵🇭 Philippine License Plates (Roboflow Universe / LTO)", "🌍 Academic ALPR Benchmark (OpenALPR)"],
         horizontal=True,
         label_visibility="collapsed"
     )
