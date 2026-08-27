@@ -1930,6 +1930,15 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
+    # Philippine National Holiday Notice
+    if result.get("is_holiday") and result.get("holiday_name"):
+        st.markdown(f"""
+        <div class="banner-warning" style="margin: 10px 0 16px 0; border-left: 4px solid #F59E0B;">
+            <strong>Philippine National Holiday: {result['holiday_name']}</strong><br>
+            <span style="font-size:0.82rem;">The AI forecast automatically integrates holiday demand adjustments (elevated commercial/retail traffic and reduced corporate office influx).</span>
+        </div>
+        """, unsafe_allow_html=True)
+
     # Metric row
     m1, m2, m3 = st.columns(3)
     for col, (label, value, sub) in zip(
@@ -2124,10 +2133,12 @@ with tab3:
             texttemplate="%{x:.1f}%",
             textposition="outside",
         )
+        max_pct = float(display_imp_df["importance_pct"].max())
         fig_imp.update_layout(
             yaxis={"categoryorder": "total ascending"},
             xaxis_title="Relative Influence on Predictions (%)",
-            xaxis=dict(ticksuffix="%"),
+            xaxis=dict(ticksuffix="%", range=[0, min(100, max_pct * 1.18)]),
+            margin=dict(r=40),
         )
         apply_plotly_theme(fig_imp)
         st.plotly_chart(fig_imp, width="stretch")

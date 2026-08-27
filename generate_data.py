@@ -152,20 +152,31 @@ def daily_occupancy_curve(hour_frac, is_weekend, zone_type="mall"):
     return float(np.clip(base, 0.03, 0.97))
 
 
+import ph_holidays
+
 def build_calendar(start_date, num_days, sites):
-    """A small synthetic holidays/events calendar within the data window."""
+    """Builds a real Philippine holidays calendar and synthetic township events."""
     holidays = []
     events = []
-    # one synthetic public holiday about 2/3 through the window
-    holiday_date = start_date + timedelta(days=int(num_days * 0.65))
-    holidays.append({"date": holiday_date.date().isoformat(), "name": "Synthetic Public Holiday"})
 
-    # Spread events across sites
+    # Populate all official Philippine holidays within the simulation date window (plus future buffer)
+    for day_offset in range(-7, num_days + 60):
+        cur_d = (start_date + timedelta(days=day_offset)).date()
+        h_info = ph_holidays.get_ph_holiday_info(cur_d)
+        if h_info:
+            h_name, h_type = h_info
+            holidays.append({
+                "date": cur_d.isoformat(),
+                "name": h_name,
+                "type": h_type,
+            })
+
+    # Spread realistic township events across sites
     for i, site in enumerate(sites):
         event_day_offset = int(num_days * (0.35 + 0.2 * i))
         event_start = start_date + timedelta(days=event_day_offset, hours=18)
         events.append({
-            "site": site["name"], "name": f"Synthetic Concert Night — {site['name']}",
+            "site": site["name"], "name": f"Megaworld Live Concert Series — {site['name']}",
             "starts_at": event_start.isoformat(),
             "ends_at": (event_start + timedelta(hours=4)).isoformat(),
             "impact": "high",
@@ -173,7 +184,7 @@ def build_calendar(start_date, num_days, sites):
         bazaar_day = int(num_days * (0.75 + 0.1 * i))
         bazaar_start = start_date + timedelta(days=bazaar_day, hours=11)
         events.append({
-            "site": site["name"], "name": f"Synthetic Weekend Bazaar — {site['name']}",
+            "site": site["name"], "name": f"Township Weekend Fair & Bazaar — {site['name']}",
             "starts_at": bazaar_start.isoformat(),
             "ends_at": (bazaar_start + timedelta(hours=8)).isoformat(),
             "impact": "medium",
@@ -193,11 +204,9 @@ def event_multiplier(ts, events, site_name=None):
     return mult
 
 
-def holiday_multiplier(ts, holidays):
-    for h in holidays:
-        if ts.date().isoformat() == h["date"]:
-            return 1.3
-    return 1.0
+def holiday_multiplier(ts, holidays, zone_type="mall"):
+    """Applies zone-differentiated Philippine holiday mobility multipliers."""
+    return ph_holidays.get_holiday_occupancy_factor(ts, zone_type)
 
 
 # ---------------------------------------------------------------------------
@@ -286,10 +295,10 @@ def main():
         for zi, z in enumerate(ZONES, start=1):
             site_name = SITES[z["site_idx"]]["name"]
             base_rate = daily_occupancy_curve(hour_frac, is_weekend, z["zone_type"])
-            mult = event_multiplier(ts, events, site_name) * holiday_multiplier(ts, holidays)
+            mult = event_multiplier(ts, events, site_name) * holiday_multiplier(ts, holidays, z["zone_type"])
             rate = float(np.clip(base_rate * mult + np.random.normal(0, 0.04), 0.0, 1.0))
             occ_count = int(round(rate * z["capacity"]))
-            is_hol = 1 if any(h["date"] == ts.date().isoformat() for h in holidays) else 0
+            is_hol = 1 if ph_holidays.is_ph_holiday(ts) else 0
             is_evt = 1 if event_multiplier(ts, events, site_name) > 1.0 else 0
             hist_rows.append((ts.isoformat(), zi, occ_count, z["capacity"], is_hol, is_evt, rate))
     cur.executemany(
@@ -307,7 +316,9 @@ def main():
     is_weekend_now = now.weekday() >= 5
 
     for zi, z in enumerate(ZONES, start=1):
-        base_rate = daily_occupancy_curve(hour_frac_now, is_weekend_now, z["zone_type"])
+        site_name = SITES[z["site_idx"]]["name"]
+        live_mult = event_multiplier(now, events, site_name) * holiday_multiplier(now, holidays, z["zone_type"])
+        base_rate = float(np.clip(daily_occupancy_curve(hour_frac_now, is_weekend_now, z["zone_type"]) * live_mult, 0.0, 1.0))
         n_occupied = int(round(base_rate * z["capacity"]))
         zone_slot_ids = [row[0] for row in slot_rows if row[1] == zi]
         occupied_slots = random.sample(zone_slot_ids, min(n_occupied, len(zone_slot_ids)))

@@ -126,14 +126,17 @@ def train_model(df):
     return model, metrics, importance_df, holdout_result
 
 
+import ph_holidays
+
 def predict_for_timestamp(model, baseline_lookup, df_history, zone_id, target_ts):
-    """Returns {baseline_estimate, trained_estimate, label} for a future timestamp."""
+    """Returns {baseline_estimate, trained_estimate, label, is_holiday, holiday_name} for a future timestamp."""
     hour = target_ts.hour
     dow = target_ts.dayofweek if hasattr(target_ts, "dayofweek") else target_ts.weekday()
     is_weekend = int(dow >= 5)
 
-    # naive holiday/event flags for the POC: user-entered or default 0
-    is_holiday = 0
+    # Automatic Philippine National Holiday detection
+    is_holiday = 1 if ph_holidays.is_ph_holiday(target_ts) else 0
+    holiday_name = ph_holidays.get_ph_holiday_name(target_ts)
     is_event = 0
 
     same_hour_hist = df_history[
@@ -172,4 +175,6 @@ def predict_for_timestamp(model, baseline_lookup, df_history, zone_id, target_ts
         "trained_estimate": round(trained_pred, 3),
         "adjusted_estimate": round(adjusted, 3),
         "label": label,
+        "is_holiday": bool(is_holiday),
+        "holiday_name": holiday_name,
     }

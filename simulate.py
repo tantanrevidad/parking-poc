@@ -59,7 +59,7 @@ def simulate_current_state(sim_time, zones_df, slots_df, holidays, events, sites
             if len(site_row):
                 site_name = site_row.iloc[0]["name"]
         base_rate = gd.daily_occupancy_curve(hour_frac, is_weekend, zone_type)
-        mult = gd.event_multiplier(sim_time, events, site_name) * gd.holiday_multiplier(sim_time, holidays)
+        mult = gd.event_multiplier(sim_time, events, site_name) * gd.holiday_multiplier(sim_time, holidays, zone_type)
         rate = float(np.clip(base_rate * mult, 0.0, 1.0))
         n_occupied = int(round(rate * len(zone_slots)))
         occupied_ids = set(rng.sample(list(zone_slots.slot_id), min(n_occupied, len(zone_slots))))
