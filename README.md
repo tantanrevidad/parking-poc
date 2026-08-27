@@ -6,14 +6,16 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 
 ## 🚀 Key Highlights & Current State
 
-- **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity across 3 townships (Uptown Bonifacio, Eastwood City, McKinley Hill).
+- **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity across 3 Megaworld townships (**Uptown Bonifacio**, **Eastwood City**, and **McKinley Hill / Venice Grand Canal Mall**).
 - **Zero-Page-Reload Direct Stall Inspection:** Every parking stall block is an interactive solid-color card powered by isolated fragment execution (`@st.fragment`). Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll jitter, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
 - **Dynamic Real-Time PST Hero Clock (Tab 1):** Live client-side Philippine Standard Time clock counting up seconds, minutes, and hours (`HH:MM:SS AM/PM`) dynamically with zero server overhead and a pulsing live monitoring badge.
 - **Streamlined Date & Time Controls (Tab 2):** Dedicated future simulation interface featuring clean, centered Date and Time selectors for rapid predictive scenario analysis across any future timestamp.
+- **Real-World External Data Pipeline (`real_data_pipeline.py`):** Ingests live empirical Google Places foot-traffic curves (0–100 index), real-time Metro Manila weather telemetry from Open-Meteo API, Megaworld mall sales/events calendars, and arterial road delay estimates.
+- **Philippine National Holidays Calendar (`ph_holidays.py`):** Automated statutory calendar (2024–2028) modeling zone-differentiated holiday mobility curves (commercial mall surges vs. corporate office dips).
 - **Forecast Intelligence & Methodology (Tab 2):** Integrated analytical intelligence providing zone behavioral classification (Mall vs. Office vs. Residential), 4-week telemetry dataset provenance (2,688 intervals at 15-minute resolution), and detailed model specifications.
 - **Stabilized Simulation State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs, grace periods, and stabilized 5-minute simulation window seeds.
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
-- **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on 28 days of 15-minute historical readings using causal feature engineering, evaluated on a chronological holdout dataset against a naive baseline.
+- **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on historical readings using causal feature engineering enriched with Google busyness, weather, events, and holiday signals.
 - **Dual Computer Vision ALPR Validation:**
   1. **Philippine CCTV Parking Lot & Gate Dataset:** 20 real-world surveillance video frames from multi-level decks, boom barriers, and low-light basement checkpoints.
   2. **Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
@@ -157,7 +159,9 @@ parking-poc/
 ├── generate_data.py              # Synthetic database & time-series generator
 ├── matcher.py                    # Confidence-weighted fuzzy matching algorithm
 ├── parking_detector.py           # 5-phase space occupancy & vehicle detection engine
+├── ph_holidays.py                # Philippine National Holidays calendar & mobility modifiers
 ├── predictor.py                  # ML forecasting engine (HistGradientBoosting)
+├── real_data_pipeline.py         # Real-world Google foot-traffic, weather, and events connector
 ├── requirements.txt              # Project dependencies
 ├── simulate.py                   # Real-time state simulation helper
 ├── slots_config.json             # Calibrated slot ROI polygon configurations

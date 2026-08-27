@@ -318,17 +318,18 @@ If two candidate plates are tied (e.g., `ABC-123` vs `ABC-128` with ambiguous re
 - **Loss Function:** Least Absolute Deviation (L1 loss / MAE optimization)
 - **Hyperparameters:** `max_iter=150`, `max_depth=6`, `learning_rate=0.08`, `min_samples_leaf=20`.
 
-### 7.2 Causal Feature Engineering
-To prevent lookahead data leakage in time-series training, features are engineered strictly causally:
+### 7.2 Causal Feature Engineering & External Telemetry Ingestion
+To prevent lookahead data leakage in time-series training, features are engineered strictly causally and joined with real-world external signals:
 
 1. `hour`: Discrete hour of the day $[0, 23]$.
 2. `day_of_week`: Day index $[0 = \text{Monday}, \dots, 6 = \text{Sunday}]$.
 3. `is_weekend`: Binary flag ($\text{day\_of\_week} \ge 5$).
-4. `is_holiday`: Boolean flag joined from Philippine statutory calendar table.
-5. `is_event`: Township event flag (e.g., Mall Mega Sale, Concert).
-6. `rolling_avg_same_hour`: Historical expanding mean occupancy for the specific $(\text{zone\_id}, \text{hour})$ calculated across prior days:
+4. `is_holiday`: Automated Philippine National Holiday flag from [`ph_holidays.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/ph_holidays.py) (Regular and Special Non-Working Holidays, 2024–2028).
+5. `is_event`: Megaworld promotional event, 3-day sale, or concert flag from [`real_data_pipeline.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/real_data_pipeline.py).
+6. `google_busyness`: Empirical Google Places Popular Times foot-traffic index $[0, 100]$ derived from mobile GPS telemetry across Venice Grand Canal Mall, Uptown Mall, and Eastwood Mall.
+7. `rolling_avg_same_hour`: Historical expanding mean occupancy for the specific $(\text{zone\_id}, \text{hour})$ calculated strictly across prior days:
    $$\mu_{\text{causal}}(z, h, t) = \frac{1}{|D_{<t}|} \sum_{d \in D_{<t}} O(z, h, d)$$
-7. `zone_id`: Categorical zone encoding.
+8. `zone_id`: Categorical deck location and layout encoding across all 9 zones.
 
 ### 7.3 Validation & Performance
 The model is trained and validated on a strict **80/20 chronological time-split** (never random K-fold shuffling).
@@ -519,8 +520,8 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
    - Full dynamic theme coverage across BaseWeb calendars, popover dropdowns, segmented controls, number/time inputs, and auto-adapting Plotly charts.
 
 ### 10.2 Dedicated Functional Tabs:
-1. **Occupancy Map:** Live real-time operations deck displaying all bays across Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype with Drive Aisles, live capacity KPIs, dynamic ticking PST clock, and in-place `@st.fragment` database row inspection.
-2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, historical diurnal curve, and Forecast Intelligence breakdown.
+1. **Occupancy Map:** Live real-time operations deck displaying all bays across Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype with Drive Aisles, live capacity KPIs, dynamic ticking PST clock, and in-place `@st.fragment` database row inspection.
+2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, historical diurnal curve, and live external telemetry cards (Google Popular Times foot-traffic, Open-Meteo live weather, active Megaworld sales/events, and arterial road delays).
 3. **Model Performance:** Diagnostic validation dashboard detailing AI Prediction Error %, Standard Baseline Guess Error %, Accuracy Advantage %, Permutation Feature Importance with plain-English signal labels, Actual vs. Forecasted time-series tracking, and an Operational Executive Summary for non-technical stakeholders.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
