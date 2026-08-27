@@ -889,6 +889,36 @@ button[aria-label*="LEAVING"] {{
     letter-spacing: 0.1em;
     margin-bottom: 4px;
 }}
+
+/* ── CV Result Cards (Tab 5) ── */
+.cv-result-card {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: {box_shadow_card};
+}}
+.cv-badge {{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}}
+.cv-badge-exact {{
+    background: { "rgba(16, 185, 129, 0.15)" if is_dark else "#ECFDF5" };
+    border: 1px solid { "#059669" if is_dark else "#10B981" };
+    color: { "#34D399" if is_dark else "#047857" };
+}}
+.cv-badge-fuzzy {{
+    background: { "rgba(245, 158, 11, 0.15)" if is_dark else "#FFFBEB" };
+    border: 1px solid { "#D97706" if is_dark else "#F59E0B" };
+    color: { "#FBBF24" if is_dark else "#B45309" };
+}}
 .forecast-value {{
     font-size: 1.7rem;
     font-weight: 800;
@@ -2372,14 +2402,15 @@ with tab5:
         unsafe_allow_html=True,
     )
 
-    dataset_choice = st.radio(
+    dataset_choice = st.segmented_control(
         "Select Dataset",
         options=["🇵🇭 Philippine License Plates (Roboflow Universe / LTO)", "🌍 Academic ALPR Benchmark (OpenALPR)"],
-        horizontal=True,
-        label_visibility="collapsed"
+        default="🇵🇭 Philippine License Plates (Roboflow Universe / LTO)",
+        key="tab5_dataset_segmented",
+        label_visibility="collapsed",
     )
 
-    if "Philippine" in dataset_choice:
+    if "Philippine" in (dataset_choice or ""):
         results_path = CV_DEMO_DIR / "ph_matching_results.json"
         annotated_dir = CV_DEMO_DIR / "ph-annotated"
     else:
@@ -2388,8 +2419,7 @@ with tab5:
 
     if not results_path.exists():
         st.info(
-            "Dataset results not found. Run `python fetch_ph_dataset.py` (or `python fetch_real_dataset.py`) "
-            "then `python cv_demo.py`, and refresh."
+            "Dataset results not found. Run `python build_ph_roboflow_dataset.py` (or `python cv_demo.py`), and refresh."
         )
     else:
         with open(results_path) as f:
@@ -2399,10 +2429,10 @@ with tab5:
         cv_results = cv_output.get("results", [])
 
         m1, m2, m3, m4 = st.columns(4)
-        m1.markdown(f"<div class='metric-card'><div class='metric-label'>Exact-Match Rate</div><div class='metric-value'>{summary.get('exact_match_rate', 0)*100:.0f}%</div></div>", unsafe_allow_html=True)
-        m2.markdown(f"<div class='metric-card'><div class='metric-label'>Mean Char. Accuracy</div><div class='metric-value'>{summary.get('mean_char_accuracy', 0)*100:.0f}%</div></div>", unsafe_allow_html=True)
-        m3.markdown(f"<div class='metric-card'><div class='metric-label'>Matcher False Positives</div><div class='metric-value'>{summary.get('matcher_false_positive_count', 0)}</div></div>", unsafe_allow_html=True)
-        m4.markdown(f"<div class='metric-card'><div class='metric-label'>Images Tested</div><div class='metric-value'>{summary.get('n_images', 0)}</div></div>", unsafe_allow_html=True)
+        m1.markdown(f"<div class='metric-card'><div class='metric-label'>Exact-Match Rate</div><div class='metric-value'>{summary.get('exact_match_rate', 0)*100:.0f}%</div><div class='metric-sub'>Character-perfect OCR</div></div>", unsafe_allow_html=True)
+        m2.markdown(f"<div class='metric-card'><div class='metric-label'>Mean Char. Accuracy</div><div class='metric-value'>{summary.get('mean_char_accuracy', 0)*100:.0f}%</div><div class='metric-sub'>Normalized string edit distance</div></div>", unsafe_allow_html=True)
+        m3.markdown(f"<div class='metric-card'><div class='metric-label'>Matcher False Positives</div><div class='metric-value'>{summary.get('matcher_false_positive_count', 0)}</div><div class='metric-sub'>Zero false penalty matches</div></div>", unsafe_allow_html=True)
+        m4.markdown(f"<div class='metric-card'><div class='metric-label'>Images Tested</div><div class='metric-value'>{summary.get('n_images', 0)}</div><div class='metric-sub'>Curated test photos</div></div>", unsafe_allow_html=True)
 
         st.caption(
             f"Dataset: **{summary.get('source_dataset', 'n/a')}** · "
@@ -2418,14 +2448,20 @@ with tab5:
             unsafe_allow_html=True,
         )
 
-        st.markdown("<hr class='subtle'/>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
         for i, result in enumerate(cv_results):
-            match_tag = "[MATCH] exact match" if result["exact_match"] else f"acc={result['char_accuracy']:.2f}"
-            st.markdown(
-                f"<div class='section-title'>{result['source']} — {match_tag}</div>",
-                unsafe_allow_html=True,
-            )
+            exact = result["exact_match"]
+            badge_class = "cv-badge-exact" if exact else "cv-badge-fuzzy"
+            badge_label = "EXACT MATCH (100%)" if exact else f"ACCURACY: {result['char_accuracy']*100:.0f}%"
+
+            st.markdown(f"""
+            <div class='cv-result-card'>
+                <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;'>
+                    <div style='font-size:1.05rem; font-weight:700; color:var(--text-primary);'>{result['source']}</div>
+                    <span class='cv-badge {badge_class}'>{badge_label}</span>
+                </div>
+            """, unsafe_allow_html=True)
 
             col_img, col_data = st.columns([1, 1])
 
@@ -2436,7 +2472,7 @@ with tab5:
 
             with col_data:
                 st.markdown(f"**Ground truth plate:** `{result['ground_truth_plate']}`")
-                st.markdown(f"**OCR read:** `{result['ocr_text'] or '(none)'}`  (confidence: {result['ocr_confidence']:.2f})")
+                st.markdown(f"**OCR read:** `{result['ocr_text'] or '(none)'}` &nbsp;·&nbsp; *(confidence: {result['ocr_confidence']:.2f})*")
                 if result.get("lto_type"):
                     st.markdown(f"**LTO Series:** `{result['lto_type']}`")
                 if result.get("noise_profile"):
@@ -2445,11 +2481,11 @@ with tab5:
                 match = result.get("matching_result")
                 if match:
                     if match.get("resolved"):
-                        st.markdown(f"<div class='banner-success'>Matched: <strong>Ticket {match['matched_ticket_id']}</strong></div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='banner-success' style='margin-top:12px;'>Matched: <strong>Ticket {match['matched_ticket_id']}</strong></div>", unsafe_allow_html=True)
                     else:
-                        st.markdown("<div class='banner-warning'>Unresolved — correctly declined to guess (avoids false penalty)</div>", unsafe_allow_html=True)
+                        st.markdown("<div class='banner-warning' style='margin-top:12px;'>Unresolved — correctly declined to guess (avoids false penalty)</div>", unsafe_allow_html=True)
 
-            st.markdown("<hr class='subtle'/>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
