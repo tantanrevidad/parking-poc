@@ -1,7 +1,7 @@
 # Smart Parking System — Comprehensive Architecture & Technical Specification
 
 > **Project:** Smart Parking System Proof-of-Concept (POC)  
-> **Target Deployments:** Megaworld Townships (Uptown Bonifacio, Eastwood City)  
+> **Target Deployments:** Megaworld Townships (Uptown Bonifacio, Eastwood City, McKinley Hill / Venice Grand Canal Mall)  
 > **Document Version:** 2.0.0 (Production Blueprint)  
 > **Status:** Verified & Operational  
 
@@ -33,7 +33,7 @@ Modern commercial and mixed-use townships encounter severe parking congestion du
 
 ### 1.2 The Proof-of-Concept Solution
 This system provides an end-to-end, enterprise-grade architecture that integrates:
-- **Heterogeneous Zone Simulation:** Distinct daily occupancy curves for **Office**, **Mall**, and **Residential** zones across multiple townships (Uptown Bonifacio, Eastwood City).
+- **Heterogeneous Zone Simulation:** Distinct daily occupancy curves for **Office**, **Mall**, and **Residential** zones across multiple townships (Uptown Bonifacio, Eastwood City, McKinley Hill).
 - **Grace-Period Aware State Machine:** 4-state slot tracking (`FREE`, `OCCUPIED_UNPAID`, `OCCUPIED_PAID`, `OCCUPIED_LIKELY_VACATING`).
 - **Confidence-Weighted Fuzzy Matching:** An ALPR-to-ticket matching algorithm featuring confusable character substitution costs ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$) and strict margin verification to guarantee zero false positives.
 - **Gradient-Boosted ML Forecasting:** A `HistGradientBoostingRegressor` trained on historical time-series data, outperforming baseline heuristics with causal rolling window features.

@@ -37,17 +37,22 @@ DB_PATH = "data/parking.db"
 SITES = [
     {"name": "Uptown Bonifacio"},
     {"name": "Eastwood City"},
+    {"name": "McKinley Hill"},
 ]
 
 ZONES = [
     # Uptown Bonifacio (site_idx=0) — Ordered sequentially: Mall -> Office -> Residential
-    {"site_idx": 0, "level": "Ground & Level 1",  "label": "Mall Grand Wing",     "zone_type": "mall",        "capacity": 48},
-    {"site_idx": 0, "level": "Basement 1",         "label": "Office Tower Alpha",  "zone_type": "office",      "capacity": 24},
-    {"site_idx": 0, "level": "Podium 2",           "label": "Residential Deck",    "zone_type": "residential", "capacity": 16},
+    {"site_idx": 0, "level": "Ground & Level 1",  "label": "Mall Grand Wing",           "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 0, "level": "Basement 1",         "label": "Office Tower Alpha",        "zone_type": "office",      "capacity": 24},
+    {"site_idx": 0, "level": "Podium 2",           "label": "Residential Deck",          "zone_type": "residential", "capacity": 16},
     # Eastwood City (site_idx=1) — Ordered sequentially: Mall -> Office -> Residential
-    {"site_idx": 1, "level": "Ground & Level 1",  "label": "Mall Main Plaza",     "zone_type": "mall",        "capacity": 48},
-    {"site_idx": 1, "level": "Basement 2",         "label": "Office Annex Deck",   "zone_type": "office",      "capacity": 24},
-    {"site_idx": 1, "level": "Podium 1",           "label": "Residential Tower",   "zone_type": "residential", "capacity": 16},
+    {"site_idx": 1, "level": "Ground & Level 1",  "label": "Mall Main Plaza",           "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 1, "level": "Basement 2",         "label": "Office Annex Deck",         "zone_type": "office",      "capacity": 24},
+    {"site_idx": 1, "level": "Podium 1",           "label": "Residential Tower",         "zone_type": "residential", "capacity": 16},
+    # McKinley Hill (site_idx=2) — Ordered sequentially: Mall -> Office -> Residential
+    {"site_idx": 2, "level": "Piazza & Canal Level", "label": "Venice Grand Canal Mall",   "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 2, "level": "Basement 1",         "label": "Commerce & Industry Plaza", "zone_type": "office",      "capacity": 24},
+    {"site_idx": 2, "level": "Podium 3",           "label": "Viceroy & Morgan Deck",     "zone_type": "residential", "capacity": 16},
 ]
 
 HISTORY_DAYS = 28          # weeks of synthetic historical data
@@ -268,7 +273,7 @@ def main():
     for zi, z in enumerate(ZONES, start=1):
         site_id = z["site_idx"] + 1  # 1-indexed
         zone_rows.append((zi, site_id, z["level"], z["label"], z["zone_type"], z["capacity"]))
-        prefix = z["label"][0]  # first letter of label as slot prefix
+        prefix = z["zone_type"][0].upper()  # M for Mall, O for Office, R for Residential
         for s in range(1, z["capacity"] + 1):
             code = f"{prefix}-{s:03d}"
             slot_rows.append((slot_id, zi, code))

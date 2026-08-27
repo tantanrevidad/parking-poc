@@ -1,12 +1,12 @@
 # Smart Parking Management System — Proof of Concept (POC)
 
-An enterprise-grade Streamlit application demonstrating every layer of the Smart Parking system end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, interactive direct-click SQLite database telemetry inspection, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio & Eastwood City).
+An enterprise-grade Streamlit application demonstrating every layer of the Smart Parking system end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, interactive direct-click SQLite database telemetry inspection, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio, Eastwood City, and McKinley Hill / Venice Grand Canal Mall).
 
 ---
 
 ## 🚀 Key Highlights & Current State
 
-- **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity (48 Mall bays, 24 Office bays, 16 Residential bays).
+- **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity across 3 townships (Uptown Bonifacio, Eastwood City, McKinley Hill).
 - **Zero-Page-Reload Direct Stall Inspection:** Every parking stall block is an interactive solid-color card powered by isolated fragment execution (`@st.fragment`). Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll jitter, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
 - **Dynamic Real-Time PST Hero Clock (Tab 1):** Live client-side Philippine Standard Time clock counting up seconds, minutes, and hours (`HH:MM:SS AM/PM`) dynamically with zero server overhead and a pulsing live monitoring badge.
 - **Streamlined Date & Time Controls (Tab 2):** Dedicated future simulation interface featuring clean, centered Date and Time selectors for rapid predictive scenario analysis across any future timestamp.
@@ -112,7 +112,7 @@ python cv_demo.py --dataset all
 
 ## 📱 Application Modules & Tabs
 
-1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio and Eastwood City zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger in-place SQLite modal inspection with zero page reload.
+1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger in-place SQLite modal inspection with zero page reload.
 2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using clean centered Date & Time pickers) to receive an ML forecast, baseline comparison, conservative safety margin, historical trend curve, and an in-depth Forecast Intelligence & Methodology analysis breakdown.
 3. **Model Performance:** Diagnostic validation dashboard detailing AI Prediction Error %, Standard Baseline Guess Error %, Accuracy Advantage %, Permutation Feature Importance with plain-English signal labels, Actual vs. Forecasted time-series tracking, and an Operational Executive Summary for non-technical stakeholders.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings, and match margin confirmation.
