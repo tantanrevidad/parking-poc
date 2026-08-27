@@ -1911,8 +1911,15 @@ with tab2:
         key="tab2_forecast_zone_select",
     )
 
+    zone_info = zones_df[zones_df.zone_id == zone_choice].iloc[0]
+    site_info = sites_df.loc[sites_df.site_id == zone_info["site_id"]].iloc[0]
+    mall_label = zone_info["label"]
+    site_name = site_info["name"]
+
     target_ts = pd.Timestamp(st.session_state.sim_time)
-    result = predictor.predict_for_timestamp(model, baseline_lookup, history_df, zone_choice, target_ts)
+    result = predictor.predict_for_timestamp(
+        model, baseline_lookup, history_df, zone_choice, target_ts, mall_label=mall_label, site_name=site_name
+    )
 
     # Forecast banner
     is_dark = st.session_state.theme_mode == "dark"
@@ -1939,6 +1946,16 @@ with tab2:
         </div>
         """, unsafe_allow_html=True)
 
+    # Active Megaworld Event / Sale Banner
+    active_evt = result.get("event")
+    if active_evt:
+        st.markdown(f"""
+        <div class="banner-success" style="margin: 10px 0 16px 0; border-left: 4px solid #10B981;">
+            <strong>Active Event: {active_evt['title']} ({active_evt['type']})</strong><br>
+            <span style="font-size:0.82rem;">{active_evt['description']} (Anticipated parking traffic impact: +{int((active_evt['traffic_impact_factor']-1)*100)}%).</span>
+        </div>
+        """, unsafe_allow_html=True)
+
     # Metric row
     m1, m2, m3 = st.columns(3)
     for col, (label, value, sub) in zip(
@@ -1957,7 +1974,47 @@ with tab2:
                 unsafe_allow_html=True,
             )
 
-    st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+
+    # Real-World External Telemetry Signals Row
+    w_info = result.get("weather", {})
+    t_info = result.get("traffic", {})
+    busyness_idx = result.get("google_busyness", 50)
+
+    e1, e2, e3 = st.columns(3)
+    with e1:
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div class='metric-label'>Google Foot-Traffic Index</div>
+            <div class='metric-value' style='font-size:1.35rem;'>{busyness_idx} / 100</div>
+            <div class='metric-sub'>Popular Times live curve</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with e2:
+        temp_c = w_info.get("temperature_c", 30)
+        cond = w_info.get("condition", "Partly Cloudy")
+        rain_mm = w_info.get("rainfall_mm", 0)
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div class='metric-label'>Live Weather (Open-Meteo)</div>
+            <div class='metric-value' style='font-size:1.35rem;'>{temp_c:.1f}°C · {cond}</div>
+            <div class='metric-sub'>Rainfall: {rain_mm:.1f} mm</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with e3:
+        delay_min = t_info.get("delay_minutes", 5)
+        t_status = t_info.get("status", "Normal Flow")
+        st.markdown(f"""
+        <div class='metric-card'>
+            <div class='metric-label'>Arterial Road Delay</div>
+            <div class='metric-value' style='font-size:1.35rem;'>+{delay_min} mins</div>
+            <div class='metric-sub'>{t_status}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
     # Area chart
     dow = target_ts.dayofweek
@@ -2102,6 +2159,7 @@ with tab3:
 
         feature_display_map = {
             "rolling_avg_same_hour": "Recent Demand Trend (Past Days)",
+            "google_busyness": "Google Popular Times Foot-Traffic",
             "hour": "Time of Day (Hour)",
             "day_of_week": "Day of the Week",
             "zone_id": "Deck Location & Layout",
