@@ -926,6 +926,44 @@ button[aria-label*="LEAVING"] {{
     letter-spacing: -0.02em;
 }}
 
+/* ── Custom Theme-Adaptive Data Table ── */
+.styled-table-wrap {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 12px 0 16px 0;
+    box-shadow: {box_shadow_card};
+}}
+.styled-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    text-align: left;
+}}
+.styled-table th {{
+    background: { "#1E293B" if is_dark else "#F1F5F9" };
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-color);
+}}
+.styled-table td {{
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    vertical-align: middle;
+}}
+.styled-table tr:last-child td {{
+    border-bottom: none;
+}}
+.styled-table tr:hover td {{
+    background: { "rgba(255, 255, 255, 0.03)" if is_dark else "rgba(0, 0, 0, 0.02)" };
+}}
+
 /* ── Dialog Inspector Modal ── */
 div[data-testid="stDialog"] div[role="dialog"] {{
     background-color: var(--bg-card) !important;
@@ -1538,6 +1576,82 @@ def fetch_slot_db_records(slot_id: int):
         conn.close()
 
 
+def render_html_table(df):
+    if df is None or df.empty:
+        st.info("No records available.")
+        return
+    headers = "".join(f"<th>{col}</th>" for col in df.columns)
+    rows = []
+    for _, row in df.iterrows():
+        cells = "".join(f"<td>{str(val) if pd.notna(val) else '—'}</td>" for val in row)
+        rows.append(f"<tr>{cells}</tr>")
+    table_html = f"""
+    <div class="styled-table-wrap">
+        <table class="styled-table">
+            <thead>
+                <tr>{headers}</tr>
+            </thead>
+            <tbody>
+                {''.join(rows)}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
+def render_styled_match_table(ranked_df, top_resolved_ticket=None):
+    if ranked_df is None or ranked_df.empty:
+        st.info("No candidates available in zone matching pool.")
+        return
+    
+    rows_html = []
+    for idx, row in ranked_df.iterrows():
+        is_top = (idx == 0) and (top_resolved_ticket is not None)
+        try:
+            score_val = float(row["Score"])
+        except Exception:
+            score_val = 0.0
+        
+        if is_top:
+            score_pill = f"<span style='background:rgba(16, 185, 129, 0.15); color:#34D399; border:1px solid #059669; padding:3px 10px; border-radius:12px; font-weight:700; font-family:monospace;'>{score_val:.4f}</span>"
+            row_bg = "background:rgba(16, 185, 129, 0.05);"
+            badge_icon = " <span style='color:#10B981; font-weight:800; font-size:0.75rem; margin-left:6px;'>TOP MATCH</span>"
+        else:
+            score_pill = f"<span style='font-family:monospace; color:var(--text-secondary); font-weight:600;'>{score_val:.4f}</span>"
+            row_bg = ""
+            badge_icon = ""
+
+        ticket_badge = f"<code style='font-family:monospace; font-weight:700;'>{row['Ticket']}</code>"
+        plate_badge = f"<span style='background:var(--bg-app); color:var(--text-primary); padding:3px 8px; border-radius:6px; font-weight:800; letter-spacing:0.05em; font-family:monospace; border:1px solid var(--border-color);'>{row['Plate']}</span>"
+        
+        rows_html.append(f"""
+        <tr style="{row_bg}">
+            <td style="font-weight:600;">{ticket_badge}{badge_icon}</td>
+            <td>{plate_badge}</td>
+            <td style="text-align:right;">{score_pill}</td>
+        </tr>
+        """)
+        
+    table_html = f"""
+    <div class="styled-table-wrap">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th style="width:40%;">Ticket</th>
+                    <th style="width:35%;">Plate</th>
+                    <th style="width:25%; text-align:right;">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(rows_html)}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
 @st.dialog("Parking Bay Database Record", width="large")
 def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
     slot_info, state_info, ticket_info, plate_info = fetch_slot_db_records(slot_id)
@@ -1570,7 +1684,7 @@ def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
             "site_id": "Township Site ID",
         }
         df_live_renamed = df_live.rename(columns={k: v for k, v in rename_map.items() if k in df_live.columns})
-        st.dataframe(df_live_renamed, hide_index=True, width="stretch")
+        render_html_table(df_live_renamed)
 
     with tab_state:
         st.markdown("##### Active Bay Occupancy State (`current_state` Table)")
@@ -1580,7 +1694,7 @@ def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
                 "status": "Current Occupancy Status",
                 "updated_at": "Last State Timestamp",
             })
-            st.dataframe(df_state_renamed, hide_index=True, width="stretch")
+            render_html_table(df_state_renamed)
         else:
             st.info("No active occupancy state found in `current_state` table.")
 
@@ -1594,7 +1708,7 @@ def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
                 "payment_settled_at": "Payment Settlement Time",
                 "slot_id": "Assigned Slot ID",
             })
-            st.dataframe(df_ticket_renamed, hide_index=True, width="stretch")
+            render_html_table(df_ticket_renamed)
         else:
             st.info("Bay is currently vacant — no active ticketing or billing record on file.")
 
@@ -1608,7 +1722,7 @@ def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
                 "char_confidences": "Per-Character Confidence Vector",
                 "true_plate": "Ground Truth Plate",
             })
-            st.dataframe(df_plate_renamed, hide_index=True, width="stretch")
+            render_html_table(df_plate_renamed)
         else:
             st.info("No optical camera plate capture record associated with this parking bay.")
 
@@ -1624,7 +1738,7 @@ def inspect_slot_dialog(slot_id: int, slot_code: str, live_row_dict: dict):
                 "site_name": "Township Site Name",
                 "capacity": "Total Zone Capacity",
             })
-            st.dataframe(df_slot_renamed, hide_index=True, width="stretch")
+            render_html_table(df_slot_renamed)
         else:
             st.info("No slot infrastructure metadata found.")
 
@@ -2401,7 +2515,7 @@ with tab4:
 
         st.markdown("<div class='section-title'>Match Scoring</div>", unsafe_allow_html=True)
         ranked = pd.DataFrame(result["ranked_candidates"], columns=["Ticket", "Plate", "Score"])
-        st.dataframe(ranked, width="stretch", hide_index=True)
+        render_styled_match_table(ranked, top_resolved_ticket=result["matched_ticket_id"] if result["resolved"] else None)
 
         if result["resolved"]:
             st.markdown(f"<div class='banner-success'>Matched — ticket <strong>{result['matched_ticket_id']}</strong>, clear margin above threshold.</div>", unsafe_allow_html=True)
@@ -2722,7 +2836,7 @@ with tab6:
 
                     display_df = df_bays[["slot_id", "slot_name", "zone", "status_badge", "ioa_pct", "conf_pct", "veh_type", "quality"]].copy()
                     display_df.columns = ["Slot ID", "Bay Name", "Zone", "Status", "IoA Overlap", "Confidence", "Vehicle Class", "Quality Flag"]
-                    st.dataframe(display_df, width="stretch", hide_index=True)
+                    render_html_table(display_df)
 
             with tab_algo:
                 st.markdown(f"""
