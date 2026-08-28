@@ -1094,6 +1094,26 @@ div[data-testid="column"]:has(.slot-marker) button p {{
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
 }}
 
+/* ── Inline Code Elements (Fixes Solid White Bars in Dark Mode) ── */
+code,
+p code,
+li code,
+div code,
+span code,
+[data-testid="stMarkdownContainer"] code,
+.stMarkdown code {{
+    background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    background: { "#1E293B" if is_dark else "#F1F5F9" } !important;
+    color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    padding: 2px 7px !important;
+    border-radius: 6px !important;
+    border: 1px solid { "#334155" if is_dark else "#CBD5E1" } !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+    font-size: 0.88em !important;
+    font-weight: 700 !important;
+}}
+
 /* ── st.code Block ── */
 div[data-testid="stCode"],
 div[data-testid="stCode"] pre,

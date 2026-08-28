@@ -21,10 +21,10 @@ PH_GT_PATH = os.path.join(CV_DEMO_DIR, "ph_ground_truth.json")
 GROUND_TRUTH_DATA = [
     {
         "image_file": "ph_roboflow_01_PETRON.jpg",
-        "plate": "PETRON",
-        "lto_type": "LTO Yellow Commercial / Fleet Series",
-        "environment": "Philippine commercial delivery vehicle (Roboflow Universe)",
-        "noise_profile": "Yellow commercial fleet typography, front bumper alignment"
+        "plate": "LHA482",
+        "lto_type": "LTO Legacy White Private Series (3 Letters + 3 Digits)",
+        "environment": "Philippine urban crossover vehicle (Roboflow Universe)",
+        "noise_profile": "Green-on-white legacy Rizal plate, angled front bumper mount"
     },
     {
         "image_file": "ph_roboflow_02_MAT2357.jpg",

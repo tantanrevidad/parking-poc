@@ -121,24 +121,28 @@ def char_accuracy(ocr_text, ground_truth):
 _yolo_model = None
 
 def detect_vehicle_bbox(img):
-    """Returns (x1,y1,x2,y2, used_fallback: bool)."""
+    """Returns (x1,y1,x2,y2, used_fallback: bool). Prioritizes prominent foreground vehicles over distant background cars."""
     h, w = img.shape[:2]
     global _yolo_model
     if YOLO_AVAILABLE:
         try:
-            global _yolo_model
             if _yolo_model is None:
                 _yolo_model = YOLO("yolov8n.pt")
             results = _yolo_model(img, verbose=False)[0]
             best = None
+            best_score = -1.0
             for box in results.boxes:
                 cls = int(box.cls[0])
                 conf = float(box.conf[0])
-                if cls in (2, 5, 7) and conf > 0.35:  # car, bus, truck
-                    if best is None or conf > best[4]:
-                        x1, y1, x2, y2 = map(int, box.xyxy[0])
-                        best = (x1, y1, x2, y2, conf)
-            if best:
+                if cls in (2, 5, 7) and conf > 0.20:  # car, bus, truck
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    area_frac = (x2 - x1) * (y2 - y1) / float(w * h)
+                    # Heavily prioritize primary foreground vehicles (large area)
+                    score = (area_frac ** 0.5) * conf
+                    if score > best_score:
+                        best_score = score
+                        best = (x1, y1, x2, y2)
+            if best and best_score > 0.10:
                 return best[0], best[1], best[2], best[3], False
         except Exception as e:
             print(f"  YOLO detection failed ({e}), falling back to full frame.")
@@ -152,25 +156,10 @@ def detect_vehicle_bbox(img):
 def localize_plate(vehicle_crop):
     """
     Returns (x, y, w, h, used_fallback: bool) in vehicle_crop coordinates.
-
-    Classical ANPR preprocessing, using vertical-edge density rather than
-    plain Canny contours: a license plate's characters produce a dense band
-    of vertical edges, so a Sobel-X gradient + Otsu threshold + wide
-    morphological CLOSE merges that character band into one solid blob
-    distinct from surrounding bodywork/glass — this is the standard
-    textbook classical-ANPR localization method, and noticeably more
-    reliable than raw Canny+contour, which tends to lock onto whatever
-    high-contrast rectangle is largest (e.g. a windshield reflection)
-    rather than anything plate-shaped.
-
-    Candidates are additionally scored by aspect-ratio closeness to a
-    real plate's ~2.5:1–3:1 ratio and by vertical position (plates are
-    virtually never in the upper third of a vehicle photo, which rules out
-    windshields/sunroofs without hardcoding a single fixed crop region).
     """
     h_img, w_img = vehicle_crop.shape[:2]
     if h_img < 10 or w_img < 10:
-        return 0, int(h_img * 0.6), w_img, int(h_img * 0.35), True
+        return 0, int(h_img * 0.55), w_img, int(h_img * 0.35), True
 
     gray = cv2.cvtColor(vehicle_crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -194,16 +183,14 @@ def localize_plate(vehicle_crop):
         y_center_frac = (y + h / 2.0) / float(h_img)
 
         # Plates are wide rectangles, modest relative size, and essentially
-        # never in the top third of the frame (that's windshield/hood territory).
+        # never in the top third of the frame.
         if 1.5 <= aspect <= 6.5 and 0.003 <= area_frac <= 0.25 and y_center_frac > 0.30:
             aspect_score = -abs(aspect - 2.7)     # closer to a real plate ratio is better
             position_score = y_center_frac * 1.5  # lower in frame is better
             candidates.append((x, y, w, h, aspect_score + position_score))
 
     if not candidates:
-        # Fallback: plates are usually in the lower-middle portion of a
-        # vehicle photo. Flagged honestly as a fallback in the results.
-        return int(w_img * 0.2), int(h_img * 0.55), int(w_img * 0.6), int(h_img * 0.35), True
+        return int(w_img * 0.15), int(h_img * 0.50), int(w_img * 0.70), int(h_img * 0.40), True
 
     candidates.sort(key=lambda t: t[4], reverse=True)
     x, y, w, h, _ = candidates[0]
@@ -220,11 +207,9 @@ def clean_plate_text(raw_text):
     """Normalizes raw OCR string into clean alphanumeric uppercase plate text."""
     if not raw_text:
         return ""
-    # Filter out common timestamp patterns (e.g. 2014-06-16, 14:20:16)
     import re
     if re.search(r'\d{4}-\d{2}-\d{2}', raw_text) or re.search(r'\d{2}:\d{2}:\d{2}', raw_text):
         return ""
-    # Filter phone numbers
     if re.search(r'\d{3}-\d{3}-\d{4}', raw_text):
         return ""
     cleaned = "".join(ch for ch in raw_text.upper() if ch.isalnum())
@@ -239,8 +224,8 @@ def is_likely_plate(text):
     # Known noise/headers/tire brands
     ignore_words = {
         "WASHINGTON", "SUNTRUP", "LAMBORGHINI", "METRO", "HEATINOACOOAING",
-        "KELENGS", "JAMESLJOHNSON", "DUNLOP", "OUNLOR", "OUNLOP", "MICHELIN",
-        "BRIDGESTONE", "GOODYEAR", "TURBO", "AMBORGHINI", "SNEATLABDETILCNERIL"
+        "KELENGS", "JAMESLJOHNSON", "DUNLOP", "OUNLOR", "MICHELIN",
+        "BRIDGESTONE", "GOODYEAR", "TURBO", "AMBORGHINI", "PETRON", "SHELL", "CALTEX"
     }
     if cleaned in ignore_words:
         return False
@@ -248,42 +233,43 @@ def is_likely_plate(text):
 
 
 def ocr_plate(plate_crop_bgr):
-    """Fallback single-crop OCR."""
+    """Fallback single-crop OCR with multi-pass adaptive contrast."""
     global _rapid_ocr_engine
     if plate_crop_bgr is None or plate_crop_bgr.size == 0:
         return "", 0.0
-    if pytesseract is not None:
-        try:
-            gray = cv2.cvtColor(plate_crop_bgr, cv2.COLOR_BGR2GRAY)
-            gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
-            gray = cv2.equalizeHist(gray)
-            _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            config = "--psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            data = pytesseract.image_to_data(thresh, config=config, output_type=pytesseract.Output.DICT)
-            texts = [t for t in data["text"] if t.strip()]
-            confs = [float(c) for c, t in zip(data["conf"], data["text"]) if t.strip() and float(c) >= 0]
-            raw_text = "".join(texts).upper()
-            cleaned = "".join(ch for ch in raw_text if ch.isalnum())
-            avg_conf = (sum(confs) / len(confs) / 100.0) if confs else 0.0
-            if cleaned:
-                return cleaned, avg_conf
-        except Exception:
-            pass
 
     if RAPID_OCR_AVAILABLE:
         try:
             if _rapid_ocr_engine is None:
                 _rapid_ocr_engine = RapidOCR()
+            
+            # Pass 1: Direct
             res, _ = _rapid_ocr_engine(plate_crop_bgr)
             if res:
-                candidates = []
                 for item in res:
                     text_clean = clean_plate_text(item[1])
                     if text_clean and is_likely_plate(text_clean):
-                        candidates.append((text_clean, float(item[2])))
-                if candidates:
-                    candidates.sort(key=lambda c: (len(c[0]) >= 4, c[1]), reverse=True)
-                    return candidates[0][0], round(candidates[0][1], 3)
+                        return text_clean, round(float(item[2]), 3)
+
+            # Pass 2: Adaptive CLAHE (Crucial for older green-on-white Philippine plates)
+            gray = cv2.cvtColor(plate_crop_bgr, cv2.COLOR_BGR2GRAY)
+            clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
+            enhanced = clahe.apply(gray)
+            res_clahe, _ = _rapid_ocr_engine(enhanced)
+            if res_clahe:
+                for item in res_clahe:
+                    text_clean = clean_plate_text(item[1])
+                    if text_clean and is_likely_plate(text_clean):
+                        return text_clean, round(float(item[2]), 3)
+
+            # Pass 3: 2x Upscale + Unsharp mask
+            scaled = cv2.resize(plate_crop_bgr, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
+            res_scale, _ = _rapid_ocr_engine(scaled)
+            if res_scale:
+                for item in res_scale:
+                    text_clean = clean_plate_text(item[1])
+                    if text_clean and is_likely_plate(text_clean):
+                        return text_clean, round(float(item[2]), 3)
         except Exception:
             pass
 
@@ -303,27 +289,45 @@ def localize_and_ocr(img, vx1, vy1, vx2, vy2):
     # 1. Classical Edge/Contour candidate localization
     px, py, pw, ph, fallback = localize_plate(vehicle_crop)
 
-    # 2. Advanced OCR with candidate disambiguation (RapidOCR or Tesseract)
+    # 2. Multi-Pass OCR with Candidate Scoring (RapidOCR)
     if RAPID_OCR_AVAILABLE:
         try:
             if _rapid_ocr_engine is None:
                 _rapid_ocr_engine = RapidOCR()
 
-            # Run on vehicle crop
-            res, _ = _rapid_ocr_engine(vehicle_crop)
-            # If no candidate inside vehicle crop, search full frame
-            offset_x, offset_y = 0, 0
-            search_h, search_w = vh, vw
-            if not res or not any(is_likely_plate(r[1]) for r in res):
-                res_full, _ = _rapid_ocr_engine(img)
-                if res_full and any(is_likely_plate(r[1]) for r in res_full):
-                    res = res_full
-                    offset_x, offset_y = -vx1, -vy1
-                    search_h, search_w = img.shape[:2]
+            # Multi-Pass Inferences
+            passes = []
+            
+            # Pass A: Vehicle Crop Direct
+            res_a, _ = _rapid_ocr_engine(vehicle_crop)
+            if res_a:
+                passes.append((res_a, 0, 0))
 
-            if res:
-                plate_candidates = []
-                for item in res:
+            # Pass B: Lower-Half Vehicle Crop with CLAHE (Handles older green/white plates & shadow)
+            if vh > 40:
+                lower_crop = vehicle_crop[int(vh * 0.4):, :]
+                clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
+                gray_lower = cv2.cvtColor(lower_crop, cv2.COLOR_BGR2GRAY)
+                enhanced_lower = clahe.apply(gray_lower)
+                res_b, _ = _rapid_ocr_engine(enhanced_lower)
+                if res_b:
+                    passes.append((res_b, 0, int(vh * 0.4)))
+
+            # Pass C: Upscaled Crop
+            if vh > 20 and vw > 20:
+                scaled_crop = cv2.resize(vehicle_crop, None, fx=1.8, fy=1.8, interpolation=cv2.INTER_CUBIC)
+                res_c, _ = _rapid_ocr_engine(scaled_crop)
+                if res_c:
+                    # Rescale coordinates back
+                    scaled_res = []
+                    for item in res_c:
+                        box_orig = [[pt[0] / 1.8, pt[1] / 1.8] for pt in item[0]]
+                        scaled_res.append([box_orig, item[1], item[2]])
+                    passes.append((scaled_res, 0, 0))
+
+            plate_candidates = []
+            for res_list, offset_x, offset_y in passes:
+                for item in res_list:
                     box, raw_text, conf = item[0], item[1], float(item[2])
                     cleaned = clean_plate_text(raw_text)
                     if not cleaned or not is_likely_plate(cleaned):
@@ -337,30 +341,32 @@ def localize_and_ocr(img, vx1, vy1, vx2, vy2):
                     bw = max(1, bx2 - bx1)
                     bh = max(1, by2 - by1)
 
-                    # Position score
+                    # Geometry & Position scoring
                     y_center_frac = (by1 + bh / 2.0) / float(vh) if vh > 0 else 0.5
                     x_center_dist = abs((bx1 + bw / 2.0) / float(vw) - 0.5) if vw > 0 else 0.5
 
-                    # Composite score
+                    # Philippine LTO structure scoring:
+                    # e.g. 3 Letters + 3 or 4 Digits (LHA 482, MAT 2357, NDU 6211)
                     has_digits_and_letters = any(c.isdigit() for c in cleaned) and any(c.isalpha() for c in cleaned)
-                    mix_bonus = 0.5 if has_digits_and_letters else 0.0
+                    is_standard_lto = (len(cleaned) in (6, 7) and cleaned[:3].isalpha() and cleaned[3:].isdigit())
+                    
+                    lto_bonus = 1.0 if is_standard_lto else (0.4 if has_digits_and_letters else 0.0)
                     len_score = 0.3 if 5 <= len(cleaned) <= 8 else 0.0
-                    pos_score = (y_center_frac * 0.3) - (x_center_dist * 0.2)
+                    pos_score = (y_center_frac * 0.4) - (x_center_dist * 0.2)
 
-                    score = conf + mix_bonus + len_score + pos_score
+                    score = conf + lto_bonus + len_score + pos_score
                     plate_candidates.append((cleaned, conf, bx1, by1, bw, bh, score))
 
-                if plate_candidates:
-                    plate_candidates.sort(key=lambda c: c[6], reverse=True)
-                    best_clean, best_conf, bx, by, bw, bh, _ = plate_candidates[0]
-                    # Expand box slightly for visualization
-                    pad_x = int(bw * 0.08)
-                    pad_y = int(bh * 0.15)
-                    fx = max(0, bx - pad_x)
-                    fy = max(0, by - pad_y)
-                    fw = min(vw - fx, bw + 2 * pad_x) if vw > 0 else bw
-                    fh = min(vh - fy, bh + 2 * pad_y) if vh > 0 else bh
-                    return best_clean, round(best_conf, 3), fx, fy, fw, fh, False
+            if plate_candidates:
+                plate_candidates.sort(key=lambda c: c[6], reverse=True)
+                best_clean, best_conf, bx, by, bw, bh, _ = plate_candidates[0]
+                pad_x = int(bw * 0.08)
+                pad_y = int(bh * 0.15)
+                fx = max(0, bx - pad_x)
+                fy = max(0, by - pad_y)
+                fw = min(vw - fx, bw + 2 * pad_x) if vw > 0 else bw
+                fh = min(vh - fy, bh + 2 * pad_y) if vh > 0 else bh
+                return best_clean, round(best_conf, 3), fx, fy, fw, fh, False
         except Exception as e:
             print(f"  OCR error: {e}")
 
