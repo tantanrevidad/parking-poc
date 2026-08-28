@@ -1585,18 +1585,8 @@ def render_html_table(df):
     for _, row in df.iterrows():
         cells = "".join(f"<td>{str(val) if pd.notna(val) else '—'}</td>" for val in row)
         rows.append(f"<tr>{cells}</tr>")
-    table_html = f"""
-    <div class="styled-table-wrap">
-        <table class="styled-table">
-            <thead>
-                <tr>{headers}</tr>
-            </thead>
-            <tbody>
-                {''.join(rows)}
-            </tbody>
-        </table>
-    </div>
-    """
+    rows_str = "".join(rows)
+    table_html = f"<div class='styled-table-wrap'><table class='styled-table'><thead><tr>{headers}</tr></thead><tbody>{rows_str}</tbody></table></div>"
     st.markdown(table_html, unsafe_allow_html=True)
 
 
@@ -1605,7 +1595,7 @@ def render_styled_match_table(ranked_df, top_resolved_ticket=None):
         st.info("No candidates available in zone matching pool.")
         return
     
-    rows_html = []
+    rows = []
     for idx, row in ranked_df.iterrows():
         is_top = (idx == 0) and (top_resolved_ticket is not None)
         try:
@@ -1615,40 +1605,20 @@ def render_styled_match_table(ranked_df, top_resolved_ticket=None):
         
         if is_top:
             score_pill = f"<span style='background:rgba(16, 185, 129, 0.15); color:#34D399; border:1px solid #059669; padding:3px 10px; border-radius:12px; font-weight:700; font-family:monospace;'>{score_val:.4f}</span>"
-            row_bg = "background:rgba(16, 185, 129, 0.05);"
+            row_style = "style='background:rgba(16, 185, 129, 0.06);'"
             badge_icon = " <span style='color:#10B981; font-weight:800; font-size:0.75rem; margin-left:6px;'>TOP MATCH</span>"
         else:
             score_pill = f"<span style='font-family:monospace; color:var(--text-secondary); font-weight:600;'>{score_val:.4f}</span>"
-            row_bg = ""
+            row_style = ""
             badge_icon = ""
 
-        ticket_badge = f"<code style='font-family:monospace; font-weight:700;'>{row['Ticket']}</code>"
+        ticket_badge = f"<span style='font-family:monospace; font-weight:700; background:rgba(56, 189, 248, 0.12); color:var(--accent-blue); padding:3px 8px; border-radius:5px; border:1px solid rgba(56, 189, 248, 0.25);'>{row['Ticket']}</span>"
         plate_badge = f"<span style='background:var(--bg-app); color:var(--text-primary); padding:3px 8px; border-radius:6px; font-weight:800; letter-spacing:0.05em; font-family:monospace; border:1px solid var(--border-color);'>{row['Plate']}</span>"
         
-        rows_html.append(f"""
-        <tr style="{row_bg}">
-            <td style="font-weight:600;">{ticket_badge}{badge_icon}</td>
-            <td>{plate_badge}</td>
-            <td style="text-align:right;">{score_pill}</td>
-        </tr>
-        """)
+        rows.append(f"<tr {row_style}><td style='font-weight:600;'>{ticket_badge}{badge_icon}</td><td>{plate_badge}</td><td style='text-align:right;'>{score_pill}</td></tr>")
         
-    table_html = f"""
-    <div class="styled-table-wrap">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th style="width:40%;">Ticket</th>
-                    <th style="width:35%;">Plate</th>
-                    <th style="width:25%; text-align:right;">Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {''.join(rows_html)}
-            </tbody>
-        </table>
-    </div>
-    """
+    rows_str = "".join(rows)
+    table_html = f"<div class='styled-table-wrap'><table class='styled-table'><thead><tr><th style='width:40%;'>Ticket</th><th style='width:35%;'>Plate</th><th style='width:25%; text-align:right;'>Score</th></tr></thead><tbody>{rows_str}</tbody></table></div>"
     st.markdown(table_html, unsafe_allow_html=True)
 
 
