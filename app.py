@@ -1691,6 +1691,23 @@ def fetch_slot_db_records(slot_id: int):
         conn.close()
 
 
+def format_cell_value(val):
+    if val is None:
+        return "—"
+    if isinstance(val, (list, tuple)):
+        return ", ".join(f"{x:.2f}" if isinstance(x, float) else str(x) for x in val)
+    if isinstance(val, dict):
+        return json.dumps(val)
+    try:
+        # Check for scalar NA without triggering array truth value evaluation
+        if pd.isna(val):
+            return "—"
+    except Exception:
+        pass
+    val_str = str(val)
+    return val_str if val_str.strip() not in ("", "nan", "None", "NaN") else "—"
+
+
 def render_html_table(df):
     if df is None or df.empty:
         st.info("No records available.")
@@ -1698,7 +1715,7 @@ def render_html_table(df):
     headers = "".join(f"<th>{col}</th>" for col in df.columns)
     rows = []
     for _, row in df.iterrows():
-        cells = "".join(f"<td>{str(val) if pd.notna(val) else '—'}</td>" for val in row)
+        cells = "".join(f"<td>{format_cell_value(val)}</td>" for val in row)
         rows.append(f"<tr>{cells}</tr>")
     rows_str = "".join(rows)
     table_html = f"<div class='styled-table-wrap'><table class='styled-table'><thead><tr>{headers}</tr></thead><tbody>{rows_str}</tbody></table></div>"
