@@ -4,7 +4,7 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 
 ---
 
-## 🚀 Key Highlights & Current State
+## Key Highlights & Current State
 
 - **Township Deck Layout & Sequential Ordering:** Realistic township architectural scheme organized sequentially by commercial archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**) with labeled Drive Aisles (Lane A, Lane B, Lane C) and expanded capacity across 3 Megaworld townships (**Uptown Bonifacio**, **Eastwood City**, and **McKinley Hill / Venice Grand Canal Mall**).
 - **Zero-Page-Reload Direct Stall Inspection:** Every parking stall block is an interactive solid-color card powered by isolated fragment execution (`@st.fragment`). Clicking directly on any block instantly opens the **SQLite Database Row Inspector modal (`@st.dialog`)** with zero page reload or scroll jitter, displaying real-time telemetry, tickets, OCR reads, and raw SQL queries.
@@ -17,14 +17,14 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
 - **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on historical readings using causal feature engineering enriched with Google busyness, weather, events, and holiday signals.
 - **Dual Computer Vision ALPR Validation:**
-  1. **🇵🇭 Philippine License Plates Dataset (Roboflow Universe / LTO):** 20 authentic Philippine vehicle frames (`lpr-mgcu6/philippine-license-plates-wmxlq`) spanning LTO 2014/2018/2020 Private series (`MAT-2357`, `CAX-3200`, `LAN-3138`, `MAN-4684`, `NDU-6211`, `CBC-2080`), Legacy Rizal/Matatag series (`LHA-482`, `LEN-918`, `LGT-635`), and commercial fleet plates evaluated via multi-pass CLAHE contrast enhancement and prominence-weighted vehicle scoring.
-  2. **🌍 Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
+  1. **Philippine License Plates Dataset (Roboflow Universe / LTO):** 20 authentic Philippine vehicle frames (`lpr-mgcu6/philippine-license-plates-wmxlq`) spanning LTO 2014/2018/2020 Private series (`MAT-2357`, `CAX-3200`, `LAN-3138`, `MAN-4684`, `NDU-6211`, `CBC-2080`), Legacy Rizal/Matatag series (`LHA-482`, `LEN-918`, `LGT-635`), and commercial fleet plates evaluated via multi-pass CLAHE contrast enhancement and prominence-weighted vehicle scoring.
+  2. **Academic ALPR Benchmark (OpenALPR):** 14 curated international benchmark photographs with hand-verified ground truth plates.
 - **5-Phase Computer Vision Space Detection Engine:** YOLOv8n vehicle detector with adaptive low-light CLAHE contrast enhancement, true perspective polygon ROI calibration (`slots_config.json`), Intersection over Area (IoA) occupancy scoring with centroid containment, and 5-frame temporal sliding-window state debouncing ($\ge 60\%$ consensus).
 - **Enterprise Dark & Light Mode Theme Engine:** Dynamic theme switcher with bulletproof contrast across all widgets, BaseWeb calendars, popover dropdowns, custom unindented HTML tables (`render_styled_match_table`), custom inline code badges, and adaptive Plotly charts.
 
 ---
 
-## 📊 What's Real vs. Simulated
+## What's Real vs. Simulated
 
 | Component | Status | Implementation Details |
 |---|---|---|
@@ -39,7 +39,7 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 
 ---
 
-## 🛠️ Quickstart & Setup
+## Quickstart & Setup
 
 ### 1. Prerequisites
 - **Python 3.10+** (Python 3.10–3.14 supported)
@@ -67,7 +67,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ---
 
-## 🗄️ Inspecting SQLite Database Records
+## Inspecting SQLite Database Records
 
 The persistent relational database is stored locally in `data/parking.db`.
 
@@ -84,7 +84,7 @@ The persistent relational database is stored locally in `data/parking.db`.
 
 ---
 
-## 👁️ Computer Vision Feasibility Demo
+## Computer Vision Feasibility Demo
 
 The CV demo evaluates vehicle detection and plate recognition against **real-world images with hand-verified ground truth**:
 
@@ -101,18 +101,18 @@ python cv_demo.py --dataset all
 
 ---
 
-## 📱 Application Modules & Tabs
+## Application Modules & Tabs
 
-1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (🟢 Available, 🔴 Occupied, 🟡 Pending Match, 🔵 Vacating) that trigger in-place SQLite modal inspection with zero page reload.
+1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (Available, Occupied, Pending Match, Vacating) that trigger in-place SQLite modal inspection with zero page reload.
 2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using clean centered Date & Time pickers) to receive an ML forecast, baseline comparison, conservative safety margin, historical trend curve, and an in-depth Forecast Intelligence & Methodology analysis breakdown.
 3. **Model Performance:** Diagnostic validation dashboard detailing AI Prediction Error %, Standard Baseline Guess Error %, Accuracy Advantage %, Permutation Feature Importance with plain-English signal labels, Actual vs. Forecasted time-series tracking, and an Operational Executive Summary for non-technical stakeholders.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings via theme-adaptive tables, and match margin confirmation.
-5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine License Plates (Roboflow Universe)** and the **🌍 Academic OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine License Plates (Roboflow Universe)** and the **Academic OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
 6. **Space Detection (CV):** Enterprise computer vision parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing a **5-Phase Occupancy Detection Algorithm**: (1) Dual Native ROI Calibration from `slots_config.json`, (2) YOLOv8n vehicle inference with Adaptive Low-Light CLAHE Boost, (3) Intersection over Area (IoA) spatial occupancy calculation with Centroid Containment, (4) temporal sliding-window state debouncing (5-frame history, $\ge 60\%$ consensus), and (5) standardized JSON output payload generation with real-time overlays, capacity KPIs, and telemetry.
 
 ---
 
-## 🏢 Zone Archetypes
+## Zone Archetypes
 
 - **Office Zones:** Morning surge (08:00–09:30), slight midday dip (12:00–13:00), evening drain after 17:30. Minimal weekend volume.
 - **Mall Zones:** Gradual morning volume, sustained afternoon build, peak evening traffic (18:00–21:30), +35% higher traffic on weekends.
@@ -120,7 +120,7 @@ python cv_demo.py --dataset all
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 parking-poc/

@@ -557,7 +557,7 @@ def list_available_camera_angles() -> List[Dict[str, str]]:
     empty_path = os.path.join(DATASET_DIR, "empty lot.jpg")
     if os.path.exists(empty_path):
         meta = angles.get("empty lot.jpg", {
-            "name": "📷 Master Reference Feed — Empty Lot Calibration",
+            "name": "Master Reference Feed — Empty Lot Calibration",
             "description": "Full-resolution un-occluded parking lot baseline with true perspective trapezoids (12 bays)"
         })
         available.append({
@@ -589,7 +589,7 @@ def list_available_camera_angles() -> List[Dict[str, str]]:
         if os.path.exists(fpath):
             available.append({
                 "filename": fname,
-                "display_name": f"📷 Time-Series Row Feed Frame #{i:02d}",
+                "display_name": f"Time-Series Row Feed Frame #{i:02d}",
                 "type": "Time-Series Row Feed",
                 "description": f"Fixed surveillance camera monitoring bay row transitions #{i:02d} (12 bays)",
                 "path": fpath,

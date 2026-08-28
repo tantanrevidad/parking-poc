@@ -2,10 +2,10 @@
 vacating_simulator.py — Real-Time Vacating Feature Simulation Engine
 ===================================================================
 Powers the interactive 3-Way Split-Screen Vacating Simulator in Tab 1:
-  Stage 1: Occupied — Unpaid (🔴 Vehicle Parked, Customer Shopping)
-  Stage 2: Occupied — Likely Vacating Soon (🔵 Kiosk Payment Settled, 15-min Grace Period)
-  Stage 3: Vehicle Egress in Progress (🚗 Camera / Sensor Detects Movement & Traversal)
-  Stage 4: Available (🟢 Bay Released, Capacity +1, Digital Signage Updated)
+  Stage 1: Occupied — Unpaid (Vehicle Parked, Customer Shopping)
+  Stage 2: Occupied — Likely Vacating Soon (Kiosk Payment Settled, 15-min Grace Period)
+  Stage 3: Vehicle Egress in Progress (Camera / Sensor Detects Movement & Traversal)
+  Stage 4: Available (Bay Released, Capacity +1, Digital Signage Updated)
 """
 
 import sqlite3
@@ -25,7 +25,7 @@ STAGE_META = {
     STAGE_PARKED_UNPAID: {
         "step_num": 1,
         "title": "Stage 1: Vehicle Parked (Unpaid)",
-        "badge": "🔴 OCCUPIED — UNPAID",
+        "badge": "OCCUPIED — UNPAID",
         "color": "#EF4444",
         "bg_color": "rgba(239, 68, 68, 0.15)",
         "border_color": "#DC2626",
@@ -36,7 +36,7 @@ STAGE_META = {
     STAGE_PAYMENT_GRACE: {
         "step_num": 2,
         "title": "Stage 2: Payment Confirmed (Grace Period)",
-        "badge": "🔵 LIKELY VACATING SOON",
+        "badge": "LIKELY VACATING SOON",
         "color": "#38BDF8",
         "bg_color": "rgba(56, 189, 248, 0.18)",
         "border_color": "#0284C7",
@@ -47,7 +47,7 @@ STAGE_META = {
     STAGE_DEPARTING: {
         "step_num": 3,
         "title": "Stage 3: Vehicle Egress in Progress",
-        "badge": "🟡 DEPARTURE DETECTED",
+        "badge": "DEPARTURE DETECTED",
         "color": "#FBBF24",
         "bg_color": "rgba(245, 158, 11, 0.18)",
         "border_color": "#D97706",
@@ -58,7 +58,7 @@ STAGE_META = {
     STAGE_RELEASED: {
         "step_num": 4,
         "title": "Stage 4: Bay Released & Vacant",
-        "badge": "🟢 AVAILABLE (FREE)",
+        "badge": "AVAILABLE (FREE)",
         "color": "#34D399",
         "bg_color": "rgba(16, 185, 129, 0.18)",
         "border_color": "#059669",

@@ -2046,7 +2046,7 @@ with tab1:
     """, unsafe_allow_html=True)
 
     # ── Interactive Vacating Feature Simulator (Options 1 & 3) ──
-    with st.expander("⚡ Interactive Vacating Feature Simulator (Mall Kiosk POS ↔ Parking Deck ↔ SQLite Database)", expanded=False):
+    with st.expander("Interactive Vacating Feature Simulator (Mall Kiosk POS / Parking Deck / SQLite Database)", expanded=False):
         st.markdown(
             "<div class='section-desc' style='margin-bottom:12px;'>Simulate the complete end-to-end departure lifecycle: "
             "from mall kiosk payment and 15-minute grace period activation to sensor vehicle egress and automated stall release.</div>",
@@ -2128,7 +2128,7 @@ with tab1:
 
                 is_paid = st.session_state.sim_stage in (vs.STAGE_PAYMENT_GRACE, vs.STAGE_DEPARTING, vs.STAGE_RELEASED)
 
-                if st.button("💳 Settle Parking Fee at Kiosk", disabled=is_paid, width="stretch", key="sim_btn_pay"):
+                if st.button("Settle Parking Fee at Kiosk", disabled=is_paid, width="stretch", key="sim_btn_pay"):
                     event = vs.execute_stage_transition(
                         slot_id=st.session_state.sim_slot_id,
                         target_stage=vs.STAGE_PAYMENT_GRACE,
@@ -2170,7 +2170,7 @@ with tab1:
                         if s_idx == current_step:
                             st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:{stage_info['bg_color']}; border:1px solid {stage_info['border_color']}; font-weight:800; font-size:0.75rem; color:{stage_info['color']};'>{step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
                         elif s_idx < current_step:
-                            st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:var(--bg-app); border:1px solid var(--border-color); font-weight:700; font-size:0.75rem; color:#34D399;'>✓ {step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:var(--bg-app); border:1px solid var(--border-color); font-weight:700; font-size:0.75rem; color:#34D399;'>[OK] {step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
                         else:
                             st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:var(--bg-app); border:1px solid var(--border-color); font-weight:600; font-size:0.75rem; color:var(--text-muted);'>{step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
 
@@ -2198,32 +2198,32 @@ with tab1:
                 
                 with btn_col1:
                     if st.session_state.sim_stage == vs.STAGE_PARKED_UNPAID:
-                        if st.button("➡️ Settle Kiosk Fee", width="stretch", key="sim_adv_1"):
+                        if st.button("Settle Kiosk Fee", width="stretch", key="sim_adv_1"):
                             event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PAYMENT_GRACE, sim_ticket, sim_plate)
                             st.session_state.sim_stage = vs.STAGE_PAYMENT_GRACE
                             st.session_state.sim_telemetry_events.append(event)
                             st.rerun()
                     elif st.session_state.sim_stage == vs.STAGE_PAYMENT_GRACE:
-                        if st.button("🚗 Vehicle Reversing", width="stretch", key="sim_adv_2"):
+                        if st.button("Vehicle Reversing", width="stretch", key="sim_adv_2"):
                             event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_DEPARTING, sim_ticket, sim_plate)
                             st.session_state.sim_stage = vs.STAGE_DEPARTING
                             st.session_state.sim_telemetry_events.append(event)
                             st.rerun()
                     elif st.session_state.sim_stage == vs.STAGE_DEPARTING:
-                        if st.button("🟢 Release Bay", width="stretch", key="sim_adv_3"):
+                        if st.button("Release Bay", width="stretch", key="sim_adv_3"):
                             event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_RELEASED, sim_ticket, sim_plate)
                             st.session_state.sim_stage = vs.STAGE_RELEASED
                             st.session_state.sim_telemetry_events.append(event)
                             st.rerun()
                     else:
-                        if st.button("🔄 Re-Park Vehicle", width="stretch", key="sim_adv_4"):
+                        if st.button("Re-Park Vehicle", width="stretch", key="sim_adv_4"):
                             event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PARKED_UNPAID, sim_ticket, sim_plate)
                             st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
                             st.session_state.sim_telemetry_events.append(event)
                             st.rerun()
 
                 with btn_col2:
-                    if st.button("▶️ Auto-Play Demo", width="stretch", key="sim_btn_autoplay"):
+                    if st.button("Auto-Play Demo", width="stretch", key="sim_btn_autoplay"):
                         stages_seq = [vs.STAGE_PARKED_UNPAID, vs.STAGE_PAYMENT_GRACE, vs.STAGE_DEPARTING, vs.STAGE_RELEASED]
                         prog_bar = st.progress(0, text="Starting Vacating Lifecycle Simulation...")
                         for s_i, stg in enumerate(stages_seq):
@@ -2237,7 +2237,7 @@ with tab1:
                         st.rerun()
 
                 with btn_col3:
-                    if st.button("🔄 Reset Bay", width="stretch", key="sim_btn_reset"):
+                    if st.button("Reset Bay", width="stretch", key="sim_btn_reset"):
                         event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PARKED_UNPAID, sim_ticket, sim_plate)
                         st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
                         st.session_state.sim_telemetry_events.append(event)
@@ -2321,7 +2321,7 @@ with tab1:
                         st.markdown(
                             f"<div class='drive-aisle'>"
                             f"<div class='drive-aisle-line'></div>"
-                            f"<div class='drive-aisle-label'>DRIVE AISLE · LANE {lane_char} ➔</div>"
+                            f"<div class='drive-aisle-label'>DRIVE AISLE · LANE {lane_char} &rarr;</div>"
                             f"<div class='drive-aisle-line'></div>"
                             f"</div>",
                             unsafe_allow_html=True,
@@ -2849,8 +2849,8 @@ with tab5:
 
     dataset_choice = st.segmented_control(
         "Select Dataset",
-        options=["🇵🇭 Philippine License Plates (Roboflow Universe / LTO)", "🌍 Academic ALPR Benchmark (OpenALPR)"],
-        default="🇵🇭 Philippine License Plates (Roboflow Universe / LTO)",
+        options=["Philippine License Plates (Roboflow Universe / LTO)", "Academic ALPR Benchmark (OpenALPR)"],
+        default="Philippine License Plates (Roboflow Universe / LTO)",
         key="tab5_dataset_segmented",
         label_visibility="collapsed",
     )

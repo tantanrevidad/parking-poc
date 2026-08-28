@@ -273,10 +273,10 @@ stateDiagram-v2
 
 | State | UI Representation | Operational Meaning | Available for Routing? |
 |---|---|---|---|
-| **`FREE`** | 🟢 Green | Slot is empty and immediately available. | **Yes** |
-| **`OCCUPIED_UNPAID`** | 🔴 Red | Vehicle is parked; parking ticket is unpaid. | No |
-| **`OCCUPIED_PAID`** | 🟡 Amber | Ticket has been paid at the kiosk. Standard 15-min egress grace period active. | No |
-| **`OCCUPIED_LIKELY_VACATING`** | 🔵 Cyan | Vehicle has paid and $t_{\text{elapsed}} \ge 10\text{ min}$. Driver is at car; bay will free within 2–5 minutes. | **Yes (Predictive Allocation)** |
+| **`FREE`** | Green | Slot is empty and immediately available. | **Yes** |
+| **`OCCUPIED_UNPAID`** | Red | Vehicle is parked; parking ticket is unpaid. | No |
+| **`OCCUPIED_PAID`** | Amber | Ticket has been paid at the kiosk. Standard 15-min egress grace period active. | No |
+| **`OCCUPIED_LIKELY_VACATING`** | Cyan | Vehicle has paid and $t_{\text{elapsed}} \ge 10\text{ min}$. Driver is at car; bay will free within 2–5 minutes. | **Yes (Predictive Allocation)** |
 
 ---
 
@@ -357,8 +357,8 @@ The simulation engine coordinates state updates across discrete 15-minute clock 
 
 ### 9.1 Multi-Stage Detection Pipeline
 The CV demo evaluates sensing feasibility against two independent datasets:
-1. **🇵🇭 Philippine License Plates Dataset (Roboflow Universe / LTO):** Authentic Philippine vehicle captures curated from Roboflow Universe (`lpr-mgcu6/philippine-license-plates-wmxlq`) spanning LTO 2014/2018/2020 Private series (`MAT-2357`, `CAX-3200`, `LAN-3138`, `MAN-4684`, `NDU-6211`, `CBC-2080`), Legacy Rizal/Matatag series (`LHA-482`, `LEN-918`, `LGT-635`), and commercial fleet plates under real Philippine road and parking conditions.
-2. **🌍 Academic ALPR Benchmark ([`openalpr/benchmarks`](https://github.com/openalpr/benchmarks)):** 14 curated international vehicle frames with hand-verified ground-truth plates.
+1. **Philippine License Plates Dataset (Roboflow Universe / LTO):** Authentic Philippine vehicle captures curated from Roboflow Universe (`lpr-mgcu6/philippine-license-plates-wmxlq`) spanning LTO 2014/2018/2020 Private series (`MAT-2357`, `CAX-3200`, `LAN-3138`, `MAN-4684`, `NDU-6211`, `CBC-2080`), Legacy Rizal/Matatag series (`LHA-482`, `LEN-918`, `LGT-635`), and commercial fleet plates under real Philippine road and parking conditions.
+2. **Academic ALPR Benchmark ([`openalpr/benchmarks`](https://github.com/openalpr/benchmarks)):** 14 curated international vehicle frames with hand-verified ground-truth plates.
 
 ```mermaid
 flowchart LR
@@ -378,7 +378,7 @@ flowchart LR
 4. **Theme-Adaptive Visual Tables:** Implemented custom unindented HTML table formatting (`render_styled_match_table`) to deliver rich contrast across Dark and Light modes.
 
 ### 9.3 Benchmark Results Comparison: Academic vs. Philippine Roboflow Dataset
-| Metric | Academic OpenALPR Benchmark | 🇵🇭 Philippine License Plates (Roboflow Universe) |
+| Metric | Academic OpenALPR Benchmark | Philippine License Plates (Roboflow Universe) |
 |---|---|---|
 | **Images Tested** | 14 curated photos | **20 authentic Philippine vehicle photos** |
 | **Exact OCR Match Rate** | **57.1% (8/14)** | **60.0% (12/20)** |
@@ -426,7 +426,7 @@ flowchart TD
     subgraph P4["Phase 4: Temporal Filtering & Edge Cases"]
         J --> L[TemporalStateDebouncer\nSliding Window Buffer N=5]
         K --> L
-        L --> M[Debounced Slot State\nOccupied 🔴 / Vacant 🟢]
+        L --> M[Debounced Slot State\nOccupied / Vacant]
     end
 
     subgraph P5["Phase 5: Output Structuring"]
@@ -457,7 +457,7 @@ flowchart TD
    - **Centroid Containment & Coverage Reinforcement Rules:**
      $$\text{Effective IoA} = \begin{cases} \max(\text{Raw IoA}, 0.60) & \text{if vehicle centroid } (c_x, c_y) \in \text{Slot Polygon} \\ \max(\text{Raw IoA}, 0.55) & \text{if vehicle coverage } \frac{\text{Area}(\text{Slot} \cap \text{Car})}{\text{Area}(\text{Car})} \ge 0.35 \\ \max(\text{Raw IoA}, 0.50) & \text{if tire ground point } (c_x, y_2) \in \text{Slot Polygon} \text{ and } \text{Raw IoA} \ge 0.10 \\ \text{Raw IoA} & \text{otherwise} \end{cases}$$
    - **Decision Boundary:**
-     $$\text{Status}(\text{Slot}_k) = \begin{cases} \text{Occupied (🔴)} & \text{if } \max_{v \in \mathcal{V}} \text{Effective IoA}(\text{Slot}_k, v) \ge \tau_{\text{ioa}} \\ \text{Vacant (🟢)} & \text{otherwise} \end{cases}$$
+     $$\text{Status}(\text{Slot}_k) = \begin{cases} \text{Occupied} & \text{if } \max_{v \in \mathcal{V}} \text{Effective IoA}(\text{Slot}_k, v) \ge \tau_{\text{ioa}} \\ \text{Vacant} & \text{otherwise} \end{cases}$$
    - **Low-Confidence Quality Flag:** A review flag `low_confidence_flag = True` is triggered whenever $|\text{Effective IoA} - \tau_{\text{ioa}}| \le 0.05$, enabling human-in-the-loop review for edge cases.
 
 4. **Phase 4 — Temporal Filtering & Edge-Case Handling (`TemporalStateDebouncer`):**
@@ -492,7 +492,7 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
 
 1. **Township Deck Map & Sequential Hierarchy:**
    - Zones are strictly ordered according to commercial parking schemes: **Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**.
-   - Facing rows are separated by realistic labeled **Drive Aisles** (`DRIVE AISLE · LANE A ➔`, `LANE B`, `LANE C`).
+   - Facing rows are separated by realistic labeled **Drive Aisles** (`DRIVE AISLE · LANE A &rarr;`, `LANE B`, `LANE C`).
    - Expanded parking bay capacity modeling (48 Mall bays, 24 Office bays, 16 Residential bays).
 
 2. **Interactive Click-to-Inspect Parking Blocks (`@st.fragment` & `@st.dialog`):**
@@ -508,7 +508,7 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
 
 3. **Dynamic Real-Time PST Hero Clock (Tab 1):**
    - Centered client-side Philippine Standard Time (PST) clock displaying hours, minutes, and continuous ticking seconds (`HH:MM:SS AM/PM`) with zero backend reload overhead.
-   - Features a pulsing green status indicator (`🟢 PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING`).
+   - Features a pulsing green status indicator (`PHILIPPINE STANDARD TIME (PST) · REAL-TIME LIVE OCCUPANCY MONITORING`).
 
 4. **Streamlined Predictive Timeline Controls & Forecast Intelligence (Tab 2):**
    - Clean, centered Date and Time selectors for rapid predictive scenario analysis across any future timestamp.
@@ -524,7 +524,7 @@ Built with Streamlit and powered by a dual **Light & Dark Theme Engine** (`#1214
 2. **Availability Forecast:** Dedicated future planning tool allowing operators and visitors to pick any zone, date, and future arrival time to receive the ML forecast, baseline comparison, conservative safety margin, historical diurnal curve, and live external telemetry cards (Google Popular Times foot-traffic, Open-Meteo live weather, active Megaworld sales/events, and arterial road delays).
 3. **Model Performance:** Diagnostic validation dashboard detailing AI Prediction Error %, Standard Baseline Guess Error %, Accuracy Advantage %, Permutation Feature Importance with plain-English signal labels, Actual vs. Forecasted time-series tracking, and an Operational Executive Summary for non-technical stakeholders.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying per-character confidence scores, ranked candidate tickets, and match margin validation with optical confusable-pair handling ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$).
-5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **🇵🇭 Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **🌍 Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
+5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine Parking Lot CCTV Dataset** (20 surveillance video frames) and the **Academic OpenALPR Benchmark** (14 photos), inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
 6. **Space Detection (CV):** Enterprise parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing the 5-Phase ROI-IoA algorithm with interactive $\tau_{\text{conf}}$ and $\tau_{\text{ioa}}$ sliders, temporal smoothing toggles, live capacity KPIs, annotated/raw/JSON feed tabs, and slot-by-slot telemetry.
 
 ---
