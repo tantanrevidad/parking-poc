@@ -1048,33 +1048,90 @@ div[data-testid="stExpander"] summary svg {{
     color: { "#94A3B8" if is_dark else "#475569" } !important;
 }}
 
-div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
-div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] * {{
+div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {{
     background-color: { "#111827" if is_dark else "#FFFFFF" } !important;
     background: { "#111827" if is_dark else "#FFFFFF" } !important;
-    color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
-    -webkit-text-fill-color: { "#F8FAFC" if is_dark else "#0F172A" } !important;
+    border-color: { "#1F2937" if is_dark else "#CBD5E1" } !important;
+    padding: 16px !important;
+    border-radius: 0 0 12px 12px !important;
 }}
 
-/* ── Slider ── */
+/* ── Slider Full Theme Support (Dark & Light) ── */
 div[data-testid="stSlider"] label,
 div[data-testid="stSlider"] label * {{
     color: var(--text-secondary) !important;
     font-weight: 700 !important;
-}}
-div[data-testid="stSlider"] div[data-baseweb="slider"] div {{
-    color: var(--text-primary) !important;
-}}
-div[data-testid="stSlider"] [data-testid="stThumbValue"],
-div[data-testid="stSlider"] [data-testid="stTickBarMin"],
-div[data-testid="stSlider"] [data-testid="stTickBarMax"] {{
-    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
 }}
 
-/* ── Toggle / Checkbox ── */
+/* Slider Track Base */
+div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child,
+div[data-testid="stSlider"] div[role="slider"] ~ div {{
+    background: { "#334155" if is_dark else "#CBD5E1" } !important;
+}}
+
+/* Slider Filled / Active Range Bar */
+div[data-testid="stSlider"] [data-baseweb="slider"] div[style*="background"] {{
+    background-color: #0EA5E9 !important;
+}}
+
+/* Slider Thumb (Circle Handle) */
+div[data-testid="stSlider"] [role="slider"] {{
+    background-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    border: 2px solid { "#0B0F19" if is_dark else "#FFFFFF" } !important;
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.6) !important;
+    width: 18px !important;
+    height: 18px !important;
+}}
+
+/* Slider Min/Max/Current Value Numbers */
+div[data-testid="stSlider"] [data-testid="stThumbValue"],
+div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stTickBarMax"],
+div[data-testid="stSlider"] [data-testid="stSliderTickBar"] * {{
+    color: var(--text-secondary) !important;
+    -webkit-text-fill-color: var(--text-secondary) !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+}}
+
+/* ── Toggle Switch Full Theme Support (Dark & Light) ── */
+div[data-testid="stToggle"],
+div[data-testid="stToggle"] label {{
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}}
+div[data-testid="stToggle"] label span,
+div[data-testid="stToggle"] label p {{
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+}}
+
+/* Inactive Toggle Track */
+div[data-testid="stToggle"] [aria-checked="false"] > div:first-child,
+div[data-testid="stToggle"] div[data-baseweb="toggle"][aria-checked="false"] {{
+    background-color: { "#334155" if is_dark else "#CBD5E1" } !important;
+}}
+
+/* Active Toggle Track */
+div[data-testid="stToggle"] [aria-checked="true"] > div:first-child,
+div[data-testid="stToggle"] div[data-baseweb="toggle"][aria-checked="true"] {{
+    background-color: #0EA5E9 !important;
+}}
+
+/* Toggle Circle Handle */
+div[data-testid="stToggle"] [data-baseweb="toggle"] div {{
+    background-color: #FFFFFF !important;
+}}
+
+/* ── Checkbox ── */
 div[data-testid="stCheckbox"] label span,
 div[data-testid="stCheckbox"] label p {{
     color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
     font-weight: 600 !important;
 }}
 
@@ -1090,20 +1147,28 @@ div[data-testid="stRadio"] div[role="radiogroup"] label p {{
     font-weight: 600 !important;
 }}
 
-/* ── Regular Buttons (Quick Jump, Sidebar, etc.) ── */
+/* ── Regular Buttons (Quick Jump, Sidebar, Action Buttons) ── */
 div[data-testid="stButton"] button {{
     background-color: { "#1E293B" if is_dark else "#F1F5F9" } !important;
     color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
     border: 1px solid { "#334155" if is_dark else "#CBD5E1" } !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
+    box-shadow: { "none" if is_dark else "0 1px 2px rgba(0,0,0,0.05)" } !important;
+    transition: all 0.15s ease !important;
 }}
 div[data-testid="stButton"] button:hover {{
     background-color: { "#334155" if is_dark else "#E2E8F0" } !important;
     border-color: { "#475569" if is_dark else "#94A3B8" } !important;
+    color: { "#38BDF8" if is_dark else "#0284C7" } !important;
+    -webkit-text-fill-color: { "#38BDF8" if is_dark else "#0284C7" } !important;
 }}
-div[data-testid="stButton"] button p {{
-    color: var(--text-primary) !important;
+div[data-testid="stButton"] button p,
+div[data-testid="stButton"] button span,
+div[data-testid="stButton"] button div {{
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
 }}
 
 /* Preserve parking stall button colors & enforce crisp white text in BOTH Dark & Light modes */
