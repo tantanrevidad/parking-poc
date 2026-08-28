@@ -13,6 +13,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import time
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
@@ -24,6 +25,7 @@ import simulate
 import predictor
 import state_machine as sm
 import parking_detector as pd_engine
+import vacating_simulator as vs
 import cv2
 
 st.set_page_config(
@@ -962,6 +964,54 @@ button[aria-label*="LEAVING"] {{
 }}
 .styled-table tr:hover td {{
     background: { "rgba(255, 255, 255, 0.03)" if is_dark else "rgba(0, 0, 0, 0.02)" };
+}}
+
+/* ── Vacating Simulator Studio CSS ── */
+.sim-studio-container {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0 24px 0;
+    box-shadow: {box_shadow_card};
+}}
+.sim-panel-box {{
+    background: { "#0B0F19" if is_dark else "#F8FAFC" };
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    height: 100%;
+}}
+.sim-stall-display {{
+    border-radius: 16px;
+    padding: 22px 16px;
+    text-align: center;
+    margin: 12px 0;
+    transition: all 0.3s ease;
+}}
+.sim-timer-pill {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-top: 10px;
+}}
+.sim-receipt-box {{
+    background: { "#000000" if is_dark else "#F1F5F9" };
+    border: 1px dashed { "#334155" if is_dark else "#94A3B8" };
+    color: { "#38BDF8" if is_dark else "#0369A1" };
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.74rem;
+    padding: 10px 12px;
+    border-radius: 8px;
+    line-height: 1.35;
+    white-space: pre;
+    margin-top: 10px;
+    overflow-x: auto;
 }}
 
 /* ── Dialog Inspector Modal ── */
@@ -1994,6 +2044,232 @@ with tab1:
         <div class="legend-entry"><div class="dot" style="background:{sm.STATUS_COLORS[sm.OCCUPIED_LIKELY_VACATING]};"></div> Vacating</div>
     </div>
     """, unsafe_allow_html=True)
+
+    # ── Interactive Vacating Feature Simulator (Options 1 & 3) ──
+    with st.expander("⚡ Interactive Vacating Feature Simulator (Mall Kiosk POS ↔ Parking Deck ↔ SQLite Database)", expanded=False):
+        st.markdown(
+            "<div class='section-desc' style='margin-bottom:12px;'>Simulate the complete end-to-end departure lifecycle: "
+            "from mall kiosk payment and 15-minute grace period activation to sensor vehicle egress and automated stall release.</div>",
+            unsafe_allow_html=True,
+        )
+
+        sim_slots = vs.fetch_candidate_simulation_slots()
+        if not sim_slots:
+            st.warning("No candidate simulation slots found in database.")
+        else:
+            if "sim_slot_id" not in st.session_state:
+                st.session_state.sim_slot_id = sim_slots[0]["slot_id"]
+            if "sim_stage" not in st.session_state:
+                st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
+            if "sim_payment_method" not in st.session_state:
+                st.session_state.sim_payment_method = "GCash"
+            if "sim_telemetry_events" not in st.session_state:
+                st.session_state.sim_telemetry_events = []
+
+            # Top Control & Slot Selector Bar
+            sel_col1, sel_col2, sel_col3 = st.columns([2.5, 1.5, 2])
+            
+            slot_options = {s["slot_id"]: f"{s['slot_code']} ({s['site_name']} - {s['zone_name']})" for s in sim_slots}
+            with sel_col1:
+                current_idx = list(slot_options.keys()).index(st.session_state.sim_slot_id) if st.session_state.sim_slot_id in slot_options else 0
+                chosen_slot_id = st.selectbox(
+                    "Target Parking Bay to Simulate",
+                    options=list(slot_options.keys()),
+                    format_func=lambda sid: slot_options.get(sid, str(sid)),
+                    index=current_idx,
+                    key="sim_slot_selector",
+                )
+                if chosen_slot_id != st.session_state.sim_slot_id:
+                    st.session_state.sim_slot_id = chosen_slot_id
+                    st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
+                    st.session_state.sim_telemetry_events = []
+
+            current_sim_slot = next((s for s in sim_slots if s["slot_id"] == st.session_state.sim_slot_id), sim_slots[0])
+            sim_plate = current_sim_slot.get("plate") or "MAT-2357"
+            sim_ticket = current_sim_slot.get("ticket_id") or f"SIM-TKT-{current_sim_slot['slot_id']:03d}"
+            
+            with sel_col2:
+                st.markdown(f"<div style='padding-top:28px;'><span style='font-size:0.75rem; color:var(--text-muted); font-weight:800; text-transform:uppercase;'>Registered Plate:</span><br/><span style='font-family:monospace; font-weight:800; color:var(--text-primary); font-size:1.05rem;'>{sim_plate}</span></div>", unsafe_allow_html=True)
+                
+            with sel_col3:
+                st.markdown(f"<div style='padding-top:28px;'><span style='font-size:0.75rem; color:var(--text-muted); font-weight:800; text-transform:uppercase;'>Ticket Reference:</span><br/><code style='font-weight:800; font-size:0.95rem;'>{sim_ticket}</code></div>", unsafe_allow_html=True)
+
+            st.markdown("<hr class='subtle' style='margin:12px 0 16px 0;'/>", unsafe_allow_html=True)
+
+            # 3-Way Split Screen Columns
+            panel1, panel2, panel3 = st.columns([1.1, 1.4, 1.1])
+
+            # ──────── PANEL 1: Mall Kiosk POS Simulator ────────
+            with panel1:
+                st.markdown("<div style='font-size:0.95rem; font-weight:800; color:var(--accent-blue); margin-bottom:8px;'>1. Mall Payment Kiosk (POS)</div>", unsafe_allow_html=True)
+                
+                fee_info = vs.calculate_parking_fee(park_duration_minutes=135)
+                
+                st.markdown(f"""
+                <div class="sim-panel-box">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:var(--text-secondary); font-size:0.82rem;">Stay Duration:</span>
+                        <strong style="color:var(--text-primary); font-size:0.9rem;">{fee_info['duration_str']}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:var(--text-secondary); font-size:0.82rem;">Parking Fee:</span>
+                        <strong style="color:#34D399; font-size:1.15rem; font-family:monospace;">{fee_info['total_fee_str']}</strong>
+                    </div>
+                    <div style="font-size:0.74rem; color:var(--text-muted); margin-bottom:12px;">{fee_info['breakdown']}</div>
+                """, unsafe_allow_html=True)
+
+                pay_method = st.segmented_control(
+                    "Payment Method",
+                    options=["GCash", "Maya", "Credit Card", "Cash"],
+                    default="GCash",
+                    key="sim_pay_method_control",
+                    label_visibility="collapsed",
+                )
+
+                is_paid = st.session_state.sim_stage in (vs.STAGE_PAYMENT_GRACE, vs.STAGE_DEPARTING, vs.STAGE_RELEASED)
+
+                if st.button("💳 Settle Parking Fee at Kiosk", disabled=is_paid, width="stretch", key="sim_btn_pay"):
+                    event = vs.execute_stage_transition(
+                        slot_id=st.session_state.sim_slot_id,
+                        target_stage=vs.STAGE_PAYMENT_GRACE,
+                        ticket_id=sim_ticket,
+                        plate=sim_plate,
+                        payment_method=pay_method or "GCash",
+                    )
+                    st.session_state.sim_stage = vs.STAGE_PAYMENT_GRACE
+                    st.session_state.sim_payment_method = pay_method or "GCash"
+                    st.session_state.sim_telemetry_events.append(event)
+                    st.rerun()
+
+                if is_paid:
+                    receipt_text = vs.generate_simulated_receipt(
+                        plate=sim_plate,
+                        ticket_id=sim_ticket,
+                        duration_str=fee_info["duration_str"],
+                        fee_str=fee_info["total_fee_str"],
+                        payment_method=st.session_state.sim_payment_method,
+                    )
+                    st.markdown(f"<div class='sim-receipt-box'>{receipt_text}</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='font-size:0.75rem; color:var(--text-muted); text-align:center; padding:12px 0;'>Awaiting customer payment to activate 15-min departure grace window.</div>", unsafe_allow_html=True)
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            # ──────── PANEL 2: Driver Journey & Parking Deck Stepper ────────
+            with panel2:
+                st.markdown("<div style='font-size:0.95rem; font-weight:800; color:var(--accent-blue); margin-bottom:8px;'>2. Visual Driver Journey & Deck Stepper</div>", unsafe_allow_html=True)
+                
+                stage_info = vs.STAGE_META[st.session_state.sim_stage]
+                current_step = stage_info["step_num"]
+
+                # Visual 4-Step Stepper Bar
+                s_cols = st.columns(4)
+                step_titles = ["1. Parked", "2. Paid", "3. Reversing", "4. Vacant"]
+                for s_idx, scol in enumerate(s_cols, start=1):
+                    with scol:
+                        if s_idx == current_step:
+                            st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:{stage_info['bg_color']}; border:1px solid {stage_info['border_color']}; font-weight:800; font-size:0.75rem; color:{stage_info['color']};'>{step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
+                        elif s_idx < current_step:
+                            st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:var(--bg-app); border:1px solid var(--border-color); font-weight:700; font-size:0.75rem; color:#34D399;'>✓ {step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"<div style='text-align:center; padding:6px 2px; border-radius:8px; background:var(--bg-app); border:1px solid var(--border-color); font-weight:600; font-size:0.75rem; color:var(--text-muted);'>{step_titles[s_idx-1]}</div>", unsafe_allow_html=True)
+
+                # Central Glowing Parking Stall Simulation Widget
+                stall_color = stage_info["color"]
+                stall_bg = stage_info["bg_color"]
+                stall_border = stage_info["border_color"]
+                
+                st.markdown(f"""
+                <div class="sim-panel-box" style="margin-top:10px;">
+                    <div class="sim-stall-display" style="background:{stall_bg}; border:2px solid {stall_border};">
+                        <div style="font-size:0.8rem; font-weight:800; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase;">PARKING BAY {current_sim_slot['slot_code']}</div>
+                        <div style="font-size:2.2rem; font-weight:800; color:{stall_color}; margin:6px 0;">{current_sim_slot['slot_code']}</div>
+                        <span style="background:{stall_bg}; color:{stall_color}; border:1px solid {stall_border}; padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:800; letter-spacing:0.04em;">
+                            {stage_info['badge']}
+                        </span>
+                        <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:12px; line-height:1.4;">
+                            {stage_info['description']}
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+                # Stepper Actions & Auto-Play Controls
+                btn_col1, btn_col2, btn_col3 = st.columns([1.2, 1, 1])
+                
+                with btn_col1:
+                    if st.session_state.sim_stage == vs.STAGE_PARKED_UNPAID:
+                        if st.button("➡️ Settle Kiosk Fee", width="stretch", key="sim_adv_1"):
+                            event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PAYMENT_GRACE, sim_ticket, sim_plate)
+                            st.session_state.sim_stage = vs.STAGE_PAYMENT_GRACE
+                            st.session_state.sim_telemetry_events.append(event)
+                            st.rerun()
+                    elif st.session_state.sim_stage == vs.STAGE_PAYMENT_GRACE:
+                        if st.button("🚗 Vehicle Reversing", width="stretch", key="sim_adv_2"):
+                            event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_DEPARTING, sim_ticket, sim_plate)
+                            st.session_state.sim_stage = vs.STAGE_DEPARTING
+                            st.session_state.sim_telemetry_events.append(event)
+                            st.rerun()
+                    elif st.session_state.sim_stage == vs.STAGE_DEPARTING:
+                        if st.button("🟢 Release Bay", width="stretch", key="sim_adv_3"):
+                            event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_RELEASED, sim_ticket, sim_plate)
+                            st.session_state.sim_stage = vs.STAGE_RELEASED
+                            st.session_state.sim_telemetry_events.append(event)
+                            st.rerun()
+                    else:
+                        if st.button("🔄 Re-Park Vehicle", width="stretch", key="sim_adv_4"):
+                            event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PARKED_UNPAID, sim_ticket, sim_plate)
+                            st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
+                            st.session_state.sim_telemetry_events.append(event)
+                            st.rerun()
+
+                with btn_col2:
+                    if st.button("▶️ Auto-Play Demo", width="stretch", key="sim_btn_autoplay"):
+                        stages_seq = [vs.STAGE_PARKED_UNPAID, vs.STAGE_PAYMENT_GRACE, vs.STAGE_DEPARTING, vs.STAGE_RELEASED]
+                        prog_bar = st.progress(0, text="Starting Vacating Lifecycle Simulation...")
+                        for s_i, stg in enumerate(stages_seq):
+                            event = vs.execute_stage_transition(st.session_state.sim_slot_id, stg, sim_ticket, sim_plate)
+                            st.session_state.sim_stage = stg
+                            st.session_state.sim_telemetry_events.append(event)
+                            pct = int((s_i + 1) / len(stages_seq) * 100)
+                            prog_bar.progress(pct, text=f"Simulating: {vs.STAGE_META[stg]['title']}")
+                            time.sleep(1.2)
+                        prog_bar.empty()
+                        st.rerun()
+
+                with btn_col3:
+                    if st.button("🔄 Reset Bay", width="stretch", key="sim_btn_reset"):
+                        event = vs.execute_stage_transition(st.session_state.sim_slot_id, vs.STAGE_PARKED_UNPAID, sim_ticket, sim_plate)
+                        st.session_state.sim_stage = vs.STAGE_PARKED_UNPAID
+                        st.session_state.sim_telemetry_events.append(event)
+                        st.rerun()
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            # ──────── PANEL 3: SQLite Database & Event Bus Telemetry ────────
+            with panel3:
+                st.markdown("<div style='font-size:0.95rem; font-weight:800; color:var(--accent-blue); margin-bottom:8px;'>3. Live SQLite & Event Bus Stream</div>", unsafe_allow_html=True)
+                
+                slot_info, state_info, ticket_info, _ = fetch_slot_db_records(st.session_state.sim_slot_id)
+                
+                st.markdown("""<div class="sim-panel-box">""", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;'>SQLite <code>current_state</code>:</div>", unsafe_allow_html=True)
+                if not state_info.empty:
+                    render_html_table(state_info)
+                
+                st.markdown("<div style='font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin:10px 0 4px 0;'>SQLite <code>ticketing_records</code>:</div>", unsafe_allow_html=True)
+                if not ticket_info.empty:
+                    render_html_table(ticket_info)
+                else:
+                    st.caption("No active ticketing record.")
+
+                if st.session_state.sim_telemetry_events:
+                    latest_event = st.session_state.sim_telemetry_events[-1]
+                    st.markdown("<div style='font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin:10px 0 4px 0;'>Outbound Signage Event:</div>", unsafe_allow_html=True)
+                    st.code(json.dumps(latest_event, indent=2), language="json")
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
 
     # ── Render Township & Zone Seat-Map Sections with Isolated Fragment Execution ──
     @st.fragment
