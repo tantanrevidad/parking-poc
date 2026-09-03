@@ -3412,7 +3412,7 @@ with tab6:
             x=hours_labels,
             y=z_labels,
             colorscale="Viridis" if is_dark else "YlGnBu",
-            colorbar=dict(title="₱ / Hour", titleside="right"),
+            colorbar=dict(title=dict(text="₱ / Hour", side="right")),
             hoverongaps=False,
             hovertemplate="Zone: %{y}<br>Time: %{x}<br>Estimated Revenue: ₱%{z:,.2f}<extra></extra>",
         ))
