@@ -11,10 +11,8 @@ Real-world external data ingestion pipeline for Megaworld Townships:
 import json
 import urllib.request
 import urllib.error
-from datetime import datetime, date, timedelta
-from typing import Dict, Any, List, Optional
-import pandas as pd
-import numpy as np
+from datetime import datetime
+from typing import Dict, Any, Optional
 
 # Coordinates for Megaworld Townships in Metro Manila
 TOWNSHIP_COORDINATES = {

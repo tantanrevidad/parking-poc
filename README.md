@@ -146,7 +146,6 @@ parking-poc/
 ├── build_ph_roboflow_dataset.py  # Authentic Philippine Roboflow dataset ingest & benchmark
 ├── calibrate.html                # Interactive browser-based polygon annotation tool
 ├── cv_demo.py                    # Computer Vision & ALPR evaluation pipeline
-├── fetch_ph_dataset.py           # CCTV surveillance dataset extractor
 ├── fetch_real_dataset.py         # OpenALPR benchmark dataset downloader
 ├── generate_data.py              # Synthetic database & time-series generator
 ├── matcher.py                    # Confidence-weighted fuzzy matching algorithm

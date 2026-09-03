@@ -19,7 +19,6 @@ from collections import deque
 
 import cv2
 import numpy as np
-import pandas as pd
 from shapely.geometry import Polygon as ShapelyPoly, Point as ShapelyPoint, box as ShapelyBox
 from ultralytics import YOLO
 

@@ -62,7 +62,6 @@ except ImportError:
 
 try:
     import cv2
-    import numpy as np
 except ImportError:
     print("OpenCV is required: pip install opencv-python-headless")
     sys.exit(1)

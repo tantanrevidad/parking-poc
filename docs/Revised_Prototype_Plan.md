@@ -7,14 +7,14 @@ This supersedes both prior plans. It keeps what's already built and working
 would trade away things we already have working for no clear net gain.
 
 **Status of all components:**
-- ✅ **Component 1 (Synthetic Data Generator):** Multi-township (Uptown, Eastwood), 3 zone types (Office, Mall, Residential) with diurnal curves.
-- ✅ **Component 2 (ML Forecasting Model):** Gradient-boosted model training live with holdout evaluation and feature importance.
-- ✅ **Component 3 (CV Feasibility Pipeline):** YOLOv8n + plate localization + OCR + zero false-positive matcher on dual datasets (Academic OpenALPR & Philippine CCTV surveillance).
-- ✅ **Component 4 (Enterprise Web App):** 5-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and CV gallery.
+- **Component 1 (Synthetic Data Generator):** Multi-township (Uptown, Eastwood), 3 zone types (Office, Mall, Residential) with diurnal curves.
+- **Component 2 (ML Forecasting Model):** Gradient-boosted model training live with holdout evaluation and feature importance.
+- **Component 3 (CV Feasibility Pipeline):** YOLOv8n + plate localization + OCR + zero false-positive matcher on dual datasets (Academic OpenALPR & Philippine CCTV surveillance).
+- **Component 4 (Enterprise Web App):** 5-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and CV gallery.
 
 ---
 
-## Component 1 — Synthetic Data Generator ✅ Done
+## Component 1 — Synthetic Data Generator Done
 
 **Current state:** `generate_data.py` produces one site, two generic zones,
 28 days of 15-minute occupancy data with a single daily curve shape, plus a
@@ -53,7 +53,7 @@ types/levels, same schema as today.
 
 ---
 
-## Component 2 — ML Forecasting Model ✅ Done (minor note)
+## Component 2 — ML Forecasting Model Done (minor note)
 
 **Current state:** `predictor.py` trains a real
 `HistGradientBoostingRegressor` on a time-based holdout, reports MAE against
@@ -79,7 +79,7 @@ number to have ready for the presentation.
 
 ---
 
-## Component 3 — Computer Vision Feasibility Demo ✅ Done
+## Component 3 — Computer Vision Feasibility Demo Done
 
 **This is the main adopted addition.** Everything in the current app —
 occupancy, plate reads, OCR confidence — is a generated number; nothing
@@ -111,24 +111,24 @@ feasibility proof on generic public images, not Megaworld data.
 
 ---
 
-## Component 4 — Interactive Web App ✅ Done
+## Component 4 — Interactive Web App Done
 
 **Current state:** the Streamlit app already delivers the seat-map view,
 trip-planner view (baseline vs. trained model, plain-language label), and
 ML insights view — i.e., all of Demo_Prototype_Plan.md's Steps 4.1, 4.2,
 and the metrics-transparency part of 4.2.
 
-- ✅ **Component 4 (Enterprise Web App):** 6-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and dual CV galleries.
-- ✅ **Component 5 (Multi-Angle Parking Space Vacancy Detection):** Real-time YOLOv8 vehicle detection + spatial bay IoU classification across `car_dataset/` camera perspectives.
+- **Component 4 (Enterprise Web App):** 6-tab dark theme dashboard with interactive simulation clock, trip planner, model diagnostics, matcher inspector, and dual CV galleries.
+- **Component 5 (Multi-Angle Parking Space Vacancy Detection):** Real-time YOLOv8 vehicle detection + spatial bay IoU classification across `car_dataset/` camera perspectives.
 
 ---
 
-## Component 5 — Multi-Angle Space Vacancy Detection ✅ Done
+## Component 5 — Multi-Angle Space Vacancy Detection Done
 
 **Overview:** Adds computer vision parking space detection across multi-angle surveillance feeds in `car_dataset/`:
 - **Multi-Angle Camera Feeds:** Evaluates 3 distinct CCTV perspectives (North Upper Deck, East Central Lot, South Perimeter) and 12 sequential slot row feeds.
 - **Vehicle Object Detection:** Uses YOLOv8n to locate all cars, SUVs, trucks, and buses.
-- **Spatial Overlap & IoU Classification:** Calculates intersection between designated parking bays and vehicle bounding boxes to classify bays as **VACANT (🟢)** or **OCCUPIED (🔴)**.
+- **Spatial Overlap & IoU Classification:** Calculates intersection between designated parking bays and vehicle bounding boxes to classify bays as **VACANT ()** or **OCCUPIED ()**.
 - **Interactive UI Tab:** Tab 6 in `app.py` allows interactive threshold tuning, visual feed toggling, live KPI tracking, and bay-by-bay telemetry.
 
 ---

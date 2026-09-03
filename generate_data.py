@@ -27,7 +27,6 @@ import math
 from datetime import datetime, timedelta
 
 import numpy as np
-import pandas as pd
 
 random.seed(42)
 np.random.seed(42)

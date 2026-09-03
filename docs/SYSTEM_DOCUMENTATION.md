@@ -619,9 +619,9 @@ pip install -r requirements.txt
 # 3. Generate SQLite database & synthetic dataset
 python generate_data.py
 
-# 4. Fetch real benchmark & CCTV datasets
+# 4. Fetch real benchmark & build authentic Philippine Roboflow dataset
 python fetch_real_dataset.py
-python fetch_ph_dataset.py
+python build_ph_roboflow_dataset.py
 
 # 5. Run Computer Vision benchmark pipeline
 python cv_demo.py --dataset all
