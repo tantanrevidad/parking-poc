@@ -269,7 +269,7 @@ stateDiagram-v2
     Occupied_Likely_Vacating --> Occupied_Unpaid : Grace Period Exceeded (Park Overstay Penalty)
 ```
 
-### State Definitions & Operational Logic
+### 5.1 State Definitions & Operational Logic
 
 | State | UI Representation | Operational Meaning | Available for Routing? |
 |---|---|---|---|
@@ -277,6 +277,54 @@ stateDiagram-v2
 | **`OCCUPIED_UNPAID`** | Red | Vehicle is parked; parking ticket is unpaid. | No |
 | **`OCCUPIED_PAID`** | Amber | Ticket has been paid at the kiosk. Standard 15-min egress grace period active. | No |
 | **`OCCUPIED_LIKELY_VACATING`** | Cyan | Vehicle has paid and $t_{\text{elapsed}} \ge 10\text{ min}$. Driver is at car; bay will free within 2–5 minutes. | **Yes (Predictive Allocation)** |
+
+---
+
+### 5.2 Interactive Vacating Feature Simulator (`vacating_simulator.py`)
+
+To evaluate and demonstrate the end-to-end turnover lifecycle under real-world commercial township conditions, the system incorporates an interactive **3-Way Split-Screen Vacating Simulator** accessible directly inside Tab 1.
+
+```mermaid
+flowchart LR
+    subgraph Panel1["Panel 1: Mall Kiosk POS"]
+        K1["Target Stall Selection"] --> K2["Compute Megaworld Fee\n(₱50 first 3h + ₱20/hr)"]
+        K2 --> K3["Method: GCash / Maya / Card"]
+        K3 --> K4["Issue Official E-Receipt"]
+    end
+    subgraph Panel2["Panel 2: Deck Journey Stepper"]
+        S1["Stage 1: Parked (Unpaid)"] --> S2["Stage 2: Payment Grace (15m)"]
+        S2 --> S3["Stage 3: Vehicle Reversing"]
+        S3 --> S4["Stage 4: Bay Released (+1 Spot)"]
+    end
+    subgraph Panel3["Panel 3: SQLite & Event Bus"]
+        D1["Table: current_state\nstatus update"]
+        D2["Table: ticketing_records\npayment_settled_at update"]
+        D3["Signage JSON Event Stream"]
+    end
+    K4 --> S2
+    S2 --> D1
+    S2 --> D2
+    S4 --> D3
+```
+
+#### Key Functional Modules:
+
+1. **Mall Kiosk POS Simulator:**
+   - Ingests active occupied vehicles and computes township parking tariffs based on duration of stay:
+     $$\text{Fee} = \begin{cases} 50.00 & \text{if } t \le 3.0\text{ hours} \\ 50.00 + \lceil t - 3.0 \rceil \times 20.00 & \text{if } t > 3.0\text{ hours} \end{cases}$$
+   - Supports multi-channel payments (GCash, Maya, Credit Card, Cash) and generates printable digital thermal e-receipts with timestamped grace period notifications.
+
+2. **Visual Driver Journey Stepper:**
+   - Provides a 4-step horizontal progress tracker with dynamic color synchronization:
+     - **Stage 1 (Parked — Unpaid):** Vehicle parked, customer dining or shopping.
+     - **Stage 2 (Payment Grace):** Payment confirmed at kiosk; 15-minute exit grace window armed.
+     - **Stage 3 (Departure Egress):** Vehicle reversing detected by camera / sensor (IoA drops below 35%).
+     - **Stage 4 (Bay Released):** Slot marked available, available capacity incremented by $+1$, and entrance LED displays refreshed.
+   - Supports both manual step-by-step advancement and an automated **1-Click Auto-Play Demo** (8-second walkthrough with progress bar).
+
+3. **Real-Time Database & Outbound Event Telemetry:**
+   - Synchronizes transitions into local SQLite tables (`current_state` and `ticketing_records`).
+   - Dispatches structured JSON event payloads consumed by downstream digital entrance signage and Megaworld mobile wayfinding APIs.
 
 ---
 

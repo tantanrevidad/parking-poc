@@ -14,6 +14,7 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 - **Philippine National Holidays Calendar (`ph_holidays.py`):** Automated statutory calendar (2024–2028) modeling zone-differentiated holiday mobility curves (commercial mall surges vs. corporate office dips).
 - **Forecast Intelligence & Methodology (Tab 2):** Integrated analytical intelligence providing zone behavioral classification (Mall vs. Office vs. Residential), 4-week telemetry dataset provenance (2,688 intervals at 15-minute resolution), and detailed model specifications.
 - **Stabilized Simulation State Machine:** Real-time 4-state slot tracking (`Available (Free)`, `Occupied — Unpaid`, `Occupied — Pending Match`, `Occupied — Likely Vacating Soon`) driven by simulated ticketing logs, grace periods, and stabilized 5-minute simulation window seeds.
+- **Interactive Vacating Feature Simulator (`vacating_simulator.py`):** 3-way split-screen interactive studio directly inside Tab 1 demonstrating the complete departure lifecycle: (1) Mall Kiosk POS fee calculation (₱50 flat first 3h + ₱20/hr) with digital e-receipt generation, (2) 4-stage visual driver journey stepper with live mini-stall color transitions and 1-click animated demo playback, and (3) real-time SQLite database row inspection and outbound JSON signage event stream.
 - **Confidence-Weighted Fuzzy Matcher:** Real OCR-to-ticket matching algorithm with optical confusable-character scoring ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) and margin enforcement ensuring **0% false positive ticket matches**.
 - **ML Occupancy Forecasting Engine:** `scikit-learn` `HistGradientBoostingRegressor` trained on historical readings using causal feature engineering enriched with Google busyness, weather, events, and holiday signals.
 - **Dual Computer Vision ALPR Validation:**
@@ -31,6 +32,7 @@ An enterprise-grade Streamlit application demonstrating every layer of the Smart
 | **Camera Feed / Slot Occupancy** | **Simulated** | Synthetic 28-day 15-minute time series generated with zone-specific mathematical curves + Gaussian noise + event multipliers. |
 | **License Plate OCR (App Live Stream)** | **Simulated** | Synthetic reads corrupted via an optical confusion matrix ($0/O, 1/I, 8/B, 5/S, 2/Z, 6/G$) with randomized confidence scores. |
 | **Ticketing POS Integration** | **Simulated** | SQLite relational transaction log (`ticketing_records` in `data/parking.db`) tracking entry, payment timestamp, and ticket status. |
+| **Vacating Lifecycle Simulator** | **Real** | 4-stage lifecycle state engine in `vacating_simulator.py` computing Megaworld parking fees, issuing receipts, and dispatching event bus telemetry. |
 | **Plate-to-Ticket Matching Algorithm** | **Real** | Confidence-weighted Levenshtein matching with confusable character penalty discounts in `matcher.py`. |
 | **Slot State Machine Engine** | **Real** | State transition rules in `state_machine.py` modeling Free, Unpaid, Pending Match, and Vacating states. |
 | **ML Predictive Forecaster** | **Real** | `HistGradientBoostingRegressor` in `predictor.py` trained with time-based holdout validation, MAE metrics, and permutation feature importance. |
@@ -103,7 +105,7 @@ python cv_demo.py --dataset all
 
 ## Application Modules & Tabs
 
-1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, and solid-color clickable blocks (Available, Occupied, Pending Match, Vacating) that trigger in-place SQLite modal inspection with zero page reload.
+1. **Occupancy Map:** Live real-time operations deck displaying Uptown Bonifacio, Eastwood City, and McKinley Hill (Venice Grand Canal Mall) zones ordered sequentially by archetype (**Mall** $\rightarrow$ **Office** $\rightarrow$ **Residential**). Displays live capacity KPIs, Drive Aisles, a dynamic counting PST clock, solid-color clickable blocks (Available, Occupied, Pending Match, Vacating) that trigger in-place SQLite modal inspection with zero page reload, and the integrated **Interactive Vacating Feature Simulator** modeling mall POS checkout, 15-minute grace windows, and automated bay release.
 2. **Availability Forecast:** Dedicated future simulation & predictive planning tool allowing users to pick any zone, calendar date, and arrival time (using clean centered Date & Time pickers) to receive an ML forecast, baseline comparison, conservative safety margin, historical trend curve, and an in-depth Forecast Intelligence & Methodology analysis breakdown.
 3. **Model Performance:** Diagnostic validation dashboard detailing AI Prediction Error %, Standard Baseline Guess Error %, Accuracy Advantage %, Permutation Feature Importance with plain-English signal labels, Actual vs. Forecasted time-series tracking, and an Operational Executive Summary for non-technical stakeholders.
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings via theme-adaptive tables, and match margin confirmation.
@@ -141,6 +143,7 @@ parking-poc/
 │   ├── calibrate_roi.py          # Interactive GUI parking slot ROI calibrator
 │   └── debug_overlay.py          # 3-layer visual regression & diagnostic framework
 ├── app.py                        # Streamlit Enterprise Dashboard (6 Tabs)
+├── build_ph_roboflow_dataset.py  # Authentic Philippine Roboflow dataset ingest & benchmark
 ├── calibrate.html                # Interactive browser-based polygon annotation tool
 ├── cv_demo.py                    # Computer Vision & ALPR evaluation pipeline
 ├── fetch_ph_dataset.py           # CCTV surveillance dataset extractor
@@ -155,5 +158,6 @@ parking-poc/
 ├── simulate.py                   # Real-time state simulation helper
 ├── slots_config.json             # Calibrated slot ROI polygon configurations
 ├── state_machine.py              # Parking slot lifecycle state machine
+├── vacating_simulator.py         # 4-stage vacating feature simulation engine
 └── yolov8n.pt                    # Pre-trained YOLOv8 vehicle detector model
 ```

@@ -1,10 +1,10 @@
-# 🅿️ Tab 6: Space Detection (CV) — The Complete Beginner's Guide
+# Tab 6: Space Detection (CV) — The Complete Beginner's Guide
 
-Welcome! This guide explains **Tab 6: Multi-Angle Parking Space Occupancy & Car Detection** in the Smart Parking System. Whether you are completely new to computer vision, AI, or software engineering, this document breaks down **how the system sees, thinks, and decides whether a parking space is empty (🟢 FREE) or filled (🔴 OCCUPIED)** using ordinary overhead CCTV security cameras.
+Welcome! This guide explains **Tab 6: Multi-Angle Parking Space Occupancy & Car Detection** in the Smart Parking System. Whether you are completely new to computer vision, AI, or software engineering, this document breaks down **how the system sees, thinks, and decides whether a parking space is empty (FREE) or filled (OCCUPIED)** using ordinary overhead CCTV security cameras.
 
 ---
 
-## 🌟 Table of Contents
+## Table of Contents
 1. [The Big Picture: What is Tab 6?](#1-the-big-picture-what-is-tab-6)
 2. [Why is Parking Space Detection Hard?](#2-why-is-parking-space-detection-hard)
 3. [How the System Works: The 5-Phase Algorithm](#3-how-the-system-works-the-5-phase-algorithm)
@@ -32,8 +32,8 @@ In modern smart parking garages, property managers often install expensive physi
 Instead of thousands of physical sensors, we use **existing overhead CCTV cameras**. A single camera can watch 6, 12, or 20+ parking bays at once. 
 
 Our computer vision engine looks at the live video stream, finds where all the parking bays are painted on the concrete, detects any vehicles parked in the scene, and instantly updates the status of each bay to:
-- 🟢 **FREE (Vacant)** — The slot is clear and ready for a driver to park.
-- 🔴 **OCCUPIED** — A vehicle is parked inside the bay.
+- **FREE (Vacant)** — The slot is clear and ready for a driver to park.
+- **OCCUPIED** — A vehicle is parked inside the bay.
 
 ```
        Overhead CCTV Camera Feeds
@@ -50,7 +50,7 @@ Our computer vision engine looks at the live video stream, finds where all the p
                  │
                  ▼
  ┌────────────────────────────────────────┐
- │  🟢 🔴 Live Dashboard Overlays,       │
+ │  Live Dashboard Overlays,       │
  │  LED Entrance Signs & Driver App APIs  │
  └────────────────────────────────────────┘
 ```
@@ -98,8 +98,8 @@ flowchart TD
         H --> J["Test 2: Vehicle Area Coverage >= 35%?"]
         H --> K["Test 3: Raw Overlap IoA >= 30%?"]
         I & J & K --> L{Any Test Passed?}
-        L -->|Yes| M[Mark OCCUPIED 🔴]
-        L -->|No| N[Mark VACANT 🟢]
+        L -->|Yes| M[Mark OCCUPIED]
+        L -->|No| N[Mark VACANT]
     end
 
     subgraph P4["Phase 4: Prevent Flickering"]
@@ -136,7 +136,7 @@ flowchart TD
   - Class 3: `Motorcycle`
   - Class 5: `Bus`
   - Class 7: `Truck` (SUVs, Pickups, Vans)
-- **The Low-Light CLAHE Boost 🌙:**
+- **The Low-Light CLAHE Boost:**
   - In dim parking decks, black cars often disappear into asphalt shadows.
   - To fix this, our pipeline converts the image into **CIELAB color space** and applies **CLAHE** (*Contrast Limited Adaptive Histogram Equalization*) to the $L$-channel (Luminance).
   - This mathematically brings out hidden grills, wheel arches, roof edges, and windshield borders without blinding or washing out bright white cars.
@@ -154,21 +154,21 @@ We use **3 smart spatial tests**:
 #### 1. Centroid Containment (The "Pin on the Map" Test)
 We find the exact center point (centroid) of the car's bounding box $(c_x, c_y)$. If that center point is located inside the parking slot's polygon, the car is parked in that bay!
 
-$$\text{If } (c_x, c_y) \in \text{Slot Polygon} \implies \text{OCCUPIED (🔴)}$$
+$$\text{If } (c_x, c_y) \in \text{Slot Polygon} \implies \text{OCCUPIED}$$
 
 #### 2. Vehicle Coverage Ratio (The "Car in the Bay" Test)
 Sometimes a driver parks slightly crooked. We calculate what percentage of the **car's body** is sitting inside the bay:
 
 $$\text{Vehicle Coverage} = \frac{\text{Area}(\text{Slot Polygon} \cap \text{Car Box})}{\text{Area}(\text{Car Box})}$$
 
-If **$\ge 35\%$** of the car is inside the bay polygon, it is marked as **OCCUPIED (🔴)**.
+If **$\ge 35\%$** of the car is inside the bay polygon, it is marked as **OCCUPIED**.
 
 #### 3. Intersection over Area (IoA) & Tire Ground-Contact
 We calculate what fraction of the **slot area** is filled:
 
 $$\text{IoA} = \frac{\text{Area}(\text{Slot Polygon} \cap \text{Car Box})}{\text{Area}(\text{Slot Polygon})}$$
 
-If the car's bottom tire line touches the pavement inside the bay, it receives a ground-contact boost. If $\text{Effective IoA} \ge \tau_{\text{ioa}}$ (default $0.30$ or $30\%$), the bay is **OCCUPIED (🔴)**; otherwise, it is **FREE (🟢)**.
+If the car's bottom tire line touches the pavement inside the bay, it receives a ground-contact boost. If $\text{Effective IoA} \ge \tau_{\text{ioa}}$ (default $0.30$ or $30\%$), the bay is **OCCUPIED**; otherwise, it is **FREE**.
 
 > **Quality Review Flag:** If a slot's score is right on the fence (within $\pm 5\%$ of the threshold), the engine marks it with a `low_confidence_flag = True` so human attendants can review it if needed.
 
@@ -228,9 +228,9 @@ Finally, the engine turns all the visual boxes into a clean, standardized **JSON
 ```
 
 This JSON feed can be piped into:
-- 📱 **Megaworld Township Mobile App** (showing drivers available bays before arrival)
-- 🚥 **Electronic LED Entrance Display Boards** (`"LEVEL 2: 4 SPOTS AVAILABLE"`)
-- 💾 **Billing & Security Database Records**
+- **Megaworld Township Mobile App** (showing drivers available bays before arrival)
+-  **Electronic LED Entrance Display Boards** (`"LEVEL 2: 4 SPOTS AVAILABLE"`)
+- **Billing & Security Database Records**
 
 ---
 
@@ -244,7 +244,7 @@ When you open **Tab 6** on the Streamlit dashboard ([http://localhost:8501](http
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │  [Total Spaces: 6]  │  [Vacant: 2]  │  [Occupied: 4]  │  [Rate: 66.7%]  │  [Vehs: 8]   │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  [Tab: 🟢/🔴 Annotated Overlay]  │  [Tab: 📷 Raw Feed]  │  [Tab: 📦 JSON Payload]       │
+│  [Tab: Annotated Overlay]  │  [Tab: Raw Feed]  │  [Tab: JSON Payload]       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │  [Slot-by-Slot Telemetry Table]        │  [5-Phase Algorithm Architecture Card]        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
@@ -257,32 +257,32 @@ When you open **Tab 6** on the Streamlit dashboard ([http://localhost:8501](http
    *Default: `0.25`*. Controls how sure the AI must be before it draws a box around a car. Lower values catch dark cars in dim light; higher values ignore faint shapes.
 3. **IoA Overlap Ratio ($\tau_{\text{ioa}}$):**
    *Default: `0.30` (30%)*. Controls how much overlap is required to classify a spot as Occupied.
-4. **🌙 Low-Light CLAHE Boost (Checkbox):**
+4. **Low-Light CLAHE Boost (Checkbox):**
    Enables adaptive luminance contrast enhancement to illuminate black SUVs, pickups, and heavy shadows.
-5. **⏱️ Temporal Smoothing (Checkbox):**
+5. **Temporal Smoothing (Checkbox):**
    Enables the 5-frame rolling memory window to eliminate state flickering.
 
 ### KPI Summary Cards
 - **Total Spaces:** Number of calibrated parking bays monitored by this camera.
-- **Vacant Slots (🟢):** Number of available spaces ready for drivers.
-- **Occupied Slots (🔴):** Number of spaces currently filled by cars.
+- **Vacant Slots:** Number of available spaces ready for drivers.
+- **Occupied Slots:** Number of spaces currently filled by cars.
 - **Occupancy Rate (%):** Lot fullness percentage ($\frac{\text{Occupied}}{\text{Total}}$).
 - **Vehicles Tracked:** Total count of YOLO vehicle objects found in the camera view.
 
 ### Visual Feed Sub-Tabs
-- **🟢/🔴 Annotated Vacancy Overlay:** Shows the live camera view with translucent **Emerald Green (Free)** and **Rose Red (Occupied)** polygons, labeled with slot IDs and occupancy percentages.
-- **📷 Raw Surveillance Feed:** Shows the unaltered original camera frame.
-- **📦 Phase 5 Standard JSON Payload:** Live interactive JSON viewer displaying the exact structured payload generated for downstream APIs.
+- **Annotated Vacancy Overlay:** Shows the live camera view with translucent **Emerald Green (Free)** and **Rose Red (Occupied)** polygons, labeled with slot IDs and occupancy percentages.
+- **Raw Surveillance Feed:** Shows the unaltered original camera frame.
+- **Phase 5 Standard JSON Payload:** Live interactive JSON viewer displaying the exact structured payload generated for downstream APIs.
 
 ### Slot-by-Slot Telemetry Table
 A detailed table listing every individual bay:
 - **Slot ID & Bay Name**
 - **Zone** (`Front Row`, `Deck A`, etc.)
-- **Status** (`🟢 Vacant` / `🔴 Occupied`)
+- **Status** (`Vacant` / `Occupied`)
 - **IoA Overlap %** (How full the space is)
 - **Confidence %** (AI certainty score)
 - **Vehicle Class** (`car`, `truck`, `bus`, `—`)
-- **Quality Flag** (`✅ High Conf` vs `⚠️ Borderline (±5%)`)
+- **Quality Flag** (`High Conf` vs `Borderline (±5%)`)
 
 ---
 
@@ -294,7 +294,7 @@ If you want to add a new camera or change how the parking slot polygons are draw
 1. Double-click [`calibrate.html`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/calibrate.html) to open it in your web browser (Chrome or Edge).
 2. Left-click the 4 corners of each parking bay on the image.
 3. Press **`C`** on your keyboard (or click *Close Polygon*) to save the bay.
-4. When finished, click **`📋 Copy JSON to Clipboard`** and paste the result into [`slots_config.json`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/slots_config.json).
+4. When finished, click **`Copy JSON to Clipboard`** and paste the result into [`slots_config.json`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/slots_config.json).
 
 ### Method B: OpenCV Desktop Tool
 Run this command in your terminal:
@@ -309,8 +309,8 @@ python scripts/calibrate_roi.py --image "empty lot.jpg"
 
 | What you see | Why it happens | How to fix it in 2 seconds |
 |---|---|---|
-| A car is clearly parked in a bay, but the badge says **`FREE`**. | The car is dark or in shadow, so YOLO's raw confidence was $0.22$, which is below the default slider threshold ($0.25$). | Slide the **YOLO Vehicle Conf ($\tau_{\text{conf}}$)** slider slightly to the left (e.g. `0.20`), or ensure **🌙 Low-Light Boost** is checked. |
-| The badge says **`FREE`** right after changing images. | Temporal smoothing is waiting for consensus from previous frame history. | Uncheck **⏱️ Temporal Smoothing** to see the instant single-frame result, or step through frames sequentially. |
+| A car is clearly parked in a bay, but the badge says **`FREE`**. | The car is dark or in shadow, so YOLO's raw confidence was $0.22$, which is below the default slider threshold ($0.25$). | Slide the **YOLO Vehicle Conf ($\tau_{\text{conf}}$)** slider slightly to the left (e.g. `0.20`), or ensure **Low-Light Boost** is checked. |
+| The badge says **`FREE`** right after changing images. | Temporal smoothing is waiting for consensus from previous frame history. | Uncheck **Temporal Smoothing** to see the instant single-frame result, or step through frames sequentially. |
 | The car is parked very far forward, near the driving lane. | The car's centroid is outside the top half of the polygon. | Re-open [`calibrate.html`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/calibrate.html) and extend the bottom edge of the polygon closer to the aisle. |
 
 ---
