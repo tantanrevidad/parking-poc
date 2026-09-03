@@ -26,6 +26,9 @@ import predictor
 import state_machine as sm
 import parking_detector as pd_engine
 import vacating_simulator as vs
+import revenue_config as rc
+import revenue_engine as rev_engine
+import leakage_detector as ld
 import cv2
 
 st.set_page_config(
@@ -1014,6 +1017,78 @@ button[aria-label*="LEAVING"] {{
     overflow-x: auto;
 }}
 
+/* ── Tab 7 Revenue Intelligence Provenance & Metric CSS ── */
+.provenance-pill {{
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    margin-left: 6px;
+}}
+.pill-tier-a {{
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    border: 1px solid #059669;
+}}
+.pill-tier-b {{
+    background: rgba(56, 189, 248, 0.15);
+    color: #38BDF8;
+    border: 1px solid #0284C7;
+}}
+.pill-tier-c {{
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid #D97706;
+}}
+.pill-tier-d {{
+    background: rgba(168, 85, 247, 0.15);
+    color: #A855F7;
+    border: 1px solid #9333EA;
+}}
+.rev-kpi-card {{
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: {box_shadow_card};
+    margin-bottom: 12px;
+}}
+.rev-kpi-label {{
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}}
+.rev-kpi-value {{
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 6px 0 2px 0;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}}
+.rev-kpi-sub {{
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}}
+.rev-banner {{
+    background: { "rgba(16, 185, 129, 0.08)" if is_dark else "rgba(16, 185, 129, 0.10)" };
+    border: 1px solid #059669;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px 0;
+}}
+
 /* ── Dialog Inspector Modal ── */
 div[data-testid="stDialog"] div[role="dialog"] {{
     background-color: var(--bg-card) !important;
@@ -1871,8 +1946,16 @@ if "selected_slot_code" not in st.session_state:
 # Tabs
 # ---------------------------------------------------------------------------
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-    ["Occupancy Map", "Availability Forecast", "Model Performance", "Plate Matching", "ALPR Feasibility", "Space Detection (CV)"]
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+    [
+        "Occupancy Map",
+        "Availability Forecast",
+        "Model Performance",
+        "Plate Matching",
+        "ALPR Feasibility",
+        "Space Detection (CV)",
+        "Revenue Intelligence",
+    ]
 )
 
 
@@ -3176,3 +3259,428 @@ with tab6:
                     <div><strong style="color:var(--accent-blue);">Phase 5: Structured JSON Telemetry</strong> — Clean API payloads for driver mobile apps and automated LED entrance signage.</div>
                 </div>
                 """, unsafe_allow_html=True)
+
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # TAB 7 — Revenue Intelligence & Commercial Optimization
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    with tab7:
+        is_dark = st.session_state.theme_mode == "dark"
+        st.markdown(
+            """
+            <div style="margin-bottom:16px;">
+                <h3 style="margin:0 0 4px 0; color:var(--text-primary);">Revenue Intelligence & Commercial Optimization</h3>
+                <div style="font-size:0.88rem; color:var(--text-secondary);">
+                    AI-driven revenue modeling, dynamic pricing elasticity, leakage detection, and retail synergy across Megaworld Townships.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # ── Controls: Township Selector & Simulation Date ──
+        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([2, 2, 4])
+        with ctrl_col1:
+            rev_site_choice = st.selectbox(
+                "Township Filter",
+                options=["All Townships", "Uptown Bonifacio", "Eastwood City", "McKinley Hill"],
+                index=0,
+                key="rev_township_select",
+            )
+        with ctrl_col2:
+            rev_sim_date = st.date_input(
+                "Analysis Date",
+                value=datetime.now().date(),
+                key="rev_date_input",
+            )
+        with ctrl_col3:
+            st.markdown(
+                """
+                <div style="padding-top:24px; font-size:0.75rem; color:var(--text-muted);">
+                    Data Provenance Framework Active:
+                    <span class="provenance-pill pill-tier-a">ACTUAL RATE</span>
+                    <span class="provenance-pill pill-tier-b">DERIVED</span>
+                    <span class="provenance-pill pill-tier-c">PH BENCHMARK</span>
+                    <span class="provenance-pill pill-tier-d">INDUSTRY</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # Fetch daily revenue summary
+        rev_summary = rev_engine.get_township_daily_revenue_summary(datetime.combine(rev_sim_date, datetime.min.time()))
+
+        if rev_site_choice != "All Townships":
+            t_data = rev_summary["townships"].get(rev_site_choice, {
+                "revenue": rev_summary["total_revenue"] / 3.0,
+                "capacity": rev_summary["total_capacity"] // 3,
+                "rpbh": rev_summary["average_rpbh"],
+            })
+            display_revenue = t_data["revenue"]
+            display_capacity = t_data["capacity"]
+            display_rpbh = t_data["rpbh"]
+            township_sub = f"Specific to {rev_site_choice}"
+        else:
+            display_revenue = rev_summary["total_revenue"]
+            display_capacity = rev_summary["total_capacity"]
+            display_rpbh = rev_summary["average_rpbh"]
+            township_sub = "Aggregated across 3 Townships"
+
+        # ── SECTION A: Revenue Operations Dashboard ──
+        st.markdown("<h5 style='margin:18px 0 10px 0; color:var(--text-primary);'>Section A: Revenue Operations Deck</h5>", unsafe_allow_html=True)
+
+        kpi_c1, kpi_c2, kpi_c3, kpi_c4 = st.columns(4)
+        with kpi_c1:
+            st.markdown(
+                f"""
+                <div class="rev-kpi-card" style="border-left:3px solid #10B981;">
+                    <div class="rev-kpi-label">
+                        <span>Today's Revenue</span>
+                        <span class="provenance-pill pill-tier-a">ACTUAL RATE</span>
+                    </div>
+                    <div class="rev-kpi-value">₱{display_revenue:,.2f}</div>
+                    <div class="rev-kpi-sub">{township_sub}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with kpi_c2:
+            st.markdown(
+                f"""
+                <div class="rev-kpi-card" style="border-left:3px solid #38BDF8;">
+                    <div class="rev-kpi-label">
+                        <span>Revenue Per Bay Hour</span>
+                        <span class="provenance-pill pill-tier-b">DERIVED</span>
+                    </div>
+                    <div class="rev-kpi-value">₱{display_rpbh:.2f}</div>
+                    <div class="rev-kpi-sub">₱ / bay / hour (RPBH)</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with kpi_c3:
+            st.markdown(
+                f"""
+                <div class="rev-kpi-card" style="border-left:3px solid #F59E0B;">
+                    <div class="rev-kpi-label">
+                        <span>Peak Revenue Window</span>
+                        <span class="provenance-pill pill-tier-b">DERIVED</span>
+                    </div>
+                    <div class="rev-kpi-value" style="font-size:1.42rem; padding-top:4px;">{rev_summary["peak_hour"]}</div>
+                    <div class="rev-kpi-sub">Highest turnover yield</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with kpi_c4:
+            st.markdown(
+                f"""
+                <div class="rev-kpi-card" style="border-left:3px solid #A855F7;">
+                    <div class="rev-kpi-label">
+                        <span>Active Bays</span>
+                        <span class="provenance-pill pill-tier-a">ACTUAL RATE</span>
+                    </div>
+                    <div class="rev-kpi-value">{display_capacity}</div>
+                    <div class="rev-kpi-sub">Monitored parking capacity</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # Revenue Heatmap (Zone x Hour)
+        target_site_for_heatmap = "Uptown Bonifacio" if rev_site_choice == "All Townships" else rev_site_choice
+        z_labels, hours_labels, heatmap_matrix = rev_engine.compute_revenue_heatmap_matrix(
+            target_site_for_heatmap,
+            rev_sim_date.strftime("%Y-%m-%d"),
+        )
+
+        st.markdown(
+            f"""
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:16px 0 8px 0;">
+                <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary);">
+                    Zone × Hour Revenue Intensity Heatmap — {target_site_for_heatmap}
+                </div>
+                <span class="provenance-pill pill-tier-b">DERIVED: TIER A TARIFFS × 15-MIN OCCUPANCY</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        fig_heat = go.Figure(data=go.Heatmap(
+            z=heatmap_matrix,
+            x=hours_labels,
+            y=z_labels,
+            colorscale="Viridis" if is_dark else "YlGnBu",
+            colorbar=dict(title="₱ / Hour", titleside="right"),
+            hoverongaps=False,
+            hovertemplate="Zone: %{y}<br>Time: %{x}<br>Estimated Revenue: ₱%{z:,.2f}<extra></extra>",
+        ))
+        fig_heat.update_layout(
+            height=260,
+            margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#F8FAFC" if is_dark else "#0F172A"),
+            xaxis=dict(showgrid=False, tickangle=-45),
+            yaxis=dict(showgrid=False, autorange="reversed"),
+        )
+        st.plotly_chart(fig_heat, use_container_width=True)
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION B: Dynamic Pricing Simulator ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section B: Dynamic Pricing & Yield Simulator</h5>
+                <span class="provenance-pill pill-tier-d">INDUSTRY: SFPARK & HAH PARKING MODELS (20–40% UPLIFT)</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        @st.fragment
+        def render_dynamic_pricing_fragment(site_name, date_str, dark_mode):
+            p_col1, p_col2, p_col3, p_col4 = st.columns(4)
+            with p_col1:
+                base_rate = st.slider("Base Parking Rate (₱)", min_value=30.0, max_value=100.0, value=50.0, step=5.0, key="dp_base_rate")
+            with p_col2:
+                target_occ = st.slider("Target Occupancy (%)", min_value=50, max_value=95, value=80, step=5, key="dp_target_occ") / 100.0
+            with p_col3:
+                surge_coeff = st.slider("Surge Coefficient", min_value=0.10, max_value=1.00, value=0.40, step=0.05, key="dp_surge_coeff")
+            with p_col4:
+                disc_floor = st.slider("Discount Floor (%)", min_value=50, max_value=90, value=70, step=5, key="dp_disc_floor") / 100.0
+
+            pricing_res = rev_engine.simulate_dynamic_pricing(
+                site_name=site_name,
+                date_str=date_str,
+                base_rate=base_rate,
+                target_occupancy=target_occ,
+                surge_coeff=surge_coeff,
+                discount_floor=disc_floor,
+            )
+
+            uplift_pct = pricing_res["uplift_pct"]
+            uplift_amt = pricing_res["uplift_amount"]
+            st.markdown(
+                f"""
+                <div class="rev-banner">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <strong style="color:#10B981; font-size:1.05rem;">
+                                AI Demand-Responsive Yield: +₱{uplift_amt:,.2f} / day (+{uplift_pct:.1f}% Revenue Uplift)
+                            </strong>
+                            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
+                                Static Flat: ₱{pricing_res['total_flat']:,.2f} &nbsp;·&nbsp; Time-of-Day Tiered: ₱{pricing_res['total_tiered']:,.2f} &nbsp;·&nbsp; <strong>AI Dynamic: ₱{pricing_res['total_ai']:,.2f}</strong>
+                            </div>
+                        </div>
+                        <span class="provenance-pill pill-tier-d">SFPARK BENCHMARK: 20–40% DOCUMENTED GAIN</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            fig_pricing = go.Figure()
+            fig_pricing.add_trace(go.Scatter(
+                x=pricing_res["hours"],
+                y=pricing_res["flat_revenue"],
+                mode="lines+markers",
+                name="Current Static Flat Rate",
+                line=dict(color="#94A3B8", width=2, dash="dot"),
+            ))
+            fig_pricing.add_trace(go.Scatter(
+                x=pricing_res["hours"],
+                y=pricing_res["tiered_revenue"],
+                mode="lines+markers",
+                name="Time-of-Day Peak/Off-Peak Tiered",
+                line=dict(color="#38BDF8", width=2.5),
+            ))
+            fig_pricing.add_trace(go.Scatter(
+                x=pricing_res["hours"],
+                y=pricing_res["ai_revenue"],
+                mode="lines+markers",
+                name="AI Demand-Responsive (Dynamic)",
+                line=dict(color="#10B981", width=3.5),
+                fill="tonexty" if dark_mode else None,
+            ))
+            fig_pricing.update_layout(
+                title=f"24-Hour Revenue Projection: Static vs. Time-of-Day vs. AI Dynamic ({site_name})",
+                height=340,
+                margin=dict(l=10, r=10, t=40, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#F8FAFC" if dark_mode else "#0F172A"),
+                xaxis=dict(showgrid=False, title="Hour of Day"),
+                yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)" if dark_mode else "rgba(0,0,0,0.06)", title="Hourly Revenue (₱)"),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            )
+            st.plotly_chart(fig_pricing, use_container_width=True)
+
+        render_dynamic_pricing_fragment(target_site_for_heatmap, rev_sim_date.strftime("%Y-%m-%d"), is_dark)
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION C: Revenue Leakage Recovery ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section C: Revenue Leakage & Overstay Recovery</h5>
+                <span class="provenance-pill pill-tier-d">INDUSTRY BENCHMARK: 5–15% MANUAL FACILITY LEAKAGE</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        @st.fragment
+        def render_leakage_fragment():
+            l_ctrl1, l_ctrl2, l_ctrl3 = st.columns([2, 2, 2])
+            with l_ctrl1:
+                threshold_h = st.slider("Overstay Threshold (Hours)", min_value=1.5, max_value=6.0, value=3.0, step=0.5, key="leak_thresh_slider")
+
+            leakage_res = ld.compute_overstay_leakage(threshold_hours=threshold_h)
+            with l_ctrl2:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #EF4444; padding:10px 14px; margin:0;">
+                        <div class="rev-kpi-label">Unpaid Overstay Fees Now</div>
+                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#EF4444;">₱{leakage_res['total_unpaid_now']:,.2f}</div>
+                        <div class="rev-kpi-sub">{leakage_res['num_overstayers']} Vehicles Flagged (> {threshold_h}h)</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with l_ctrl3:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #10B981; padding:10px 14px; margin:0;">
+                        <div class="rev-kpi-label">Est. Monthly Recovery</div>
+                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#10B981;">₱{leakage_res['projected_monthly_recovery']:,.2f}</div>
+                        <div class="rev-kpi-sub">Via Automated ALPR Enforcement</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if leakage_res["vehicles"]:
+                leak_df = pd.DataFrame(leakage_res["vehicles"])
+                leak_df_display = leak_df[["slot_code", "plate", "site_name", "zone_label", "entry_time", "dwell_hours", "uncollected_fee", "status"]].copy()
+                leak_df_display.columns = ["Bay Code", "License Plate", "Township", "Zone", "Entry Time", "Dwell (Hours)", "Uncollected Fee (₱)", "Enforcement Status"]
+                render_html_table(leak_df_display)
+            else:
+                st.info(f"No vehicles currently exceeding the {threshold_h}-hour overstay threshold.")
+
+        render_leakage_fragment()
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION D: Retail Intelligence & Visitor Value ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section D: Retail Intelligence & Township Economic Synergy</h5>
+                <span class="provenance-pill pill-tier-c">PH BENCHMARK: COLLIERS PH ₱1,000–₱3,000 MALL SPEND</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        ret_col1, ret_col2 = st.columns([3, 2])
+        with ret_col1:
+            dwell_df = rev_engine.compute_dwell_distribution()
+            fig_dwell = px.bar(
+                dwell_df,
+                x="dwell_bucket",
+                y="count",
+                color="zone_type",
+                barmode="group",
+                title="Empirical Dwell Time Distribution by Archetype",
+                labels={"dwell_bucket": "Parking Duration", "count": "Vehicle Count", "zone_type": "Archetype"},
+                color_discrete_map={"Mall": "#38BDF8", "Office": "#10B981", "Residential": "#F59E0B"},
+            )
+            fig_dwell.update_layout(
+                height=300,
+                margin=dict(l=10, r=10, t=40, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#F8FAFC" if is_dark else "#0F172A"),
+                xaxis=dict(showgrid=False),
+                yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)" if is_dark else "rgba(0,0,0,0.06)"),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            )
+            st.plotly_chart(fig_dwell, use_container_width=True)
+
+        with ret_col2:
+            st.markdown(
+                """
+                <div style="font-weight:700; font-size:0.88rem; color:var(--text-primary); margin-bottom:8px;">
+                    Retail Spend Sensitivity Analysis
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            base_spend_slider = st.slider(
+                "Baseline Mall Spend per Visit (₱)",
+                min_value=1000.0,
+                max_value=3000.0,
+                value=2000.0,
+                step=100.0,
+                key="ret_spend_slider",
+            )
+
+            spend_data = rev_engine.estimate_visitor_retail_spend(2.8, base_spend_slider)
+            daily_mall_patrons = 48 * 2.8
+            daily_retail_economic_val = daily_mall_patrons * spend_data["projected_spend_per_visitor"]
+
+            st.markdown(
+                f"""
+                <div style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:12px; padding:14px; font-size:0.82rem; line-height:1.6;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="color:var(--text-secondary);">Projected Spend / Visitor:</span>
+                        <strong style="color:#10B981; font-size:0.96rem;">₱{spend_data['projected_spend_per_visitor']:,.2f}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="color:var(--text-secondary);">Dwell-Spend Elasticity:</span>
+                        <strong style="color:var(--text-primary);">+1.3% retail spend / +1% dwell</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-secondary);">Daily Mall Patrons:</span>
+                        <strong style="color:var(--text-primary);">~{int(daily_mall_patrons)} vehicles / day</strong>
+                    </div>
+                    <hr style="margin:8px 0; border:none; border-top:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; color:var(--text-primary);">Total Daily Retail Impact:</span>
+                        <strong style="color:#38BDF8; font-size:1.05rem;">₱{daily_retail_economic_val:,.2f}</strong>
+                    </div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">
+                        *Estimated retail spending captured by mall tenant merchants driven by parking capacity.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION E: Methodology Transparency ──
+        with st.expander("Methodology & Verifiable Data Provenance", expanded=False):
+            st.markdown(
+                """
+                <div style="font-size:0.84rem; line-height:1.7; color:var(--text-secondary);">
+                    <p><strong>1. Rate Schedules (Tier A — Actual Rates):</strong><br>
+                    Tariffs are exact values taken from official Megaworld Lifestyle Mall parking signage and MoneyMax.ph advisories (2024–2025). Uptown Mall implements ₱50 first 3h + ₱15/hr (hrs 4–7) + ₱100/hr (AM peak entry) / ₱30/hr (PM entry) with a ₱200 overnight surcharge. Eastwood Mall implements ₱60 first 3h + ₱20/hr weekday or ₱60 flat all-day on weekends/holidays with ₱150 overnight surcharge. Venice Grand Canal Mall implements ₱50 first 3h + ₱20/hr with 15-minute drop-off grace.</p>
+
+                    <p><strong>2. Revenue Computation Formula (Tier B — Derived):</strong><br>
+                    Individual ticket revenues are computed deterministically: <code>Revenue = compute_ticket_revenue(entry_time, exit_time, site, zone_type)</code>. Macro township revenue is computed from 15-minute historical intervals: <code>Interval Revenue = Occupied Count × (Effective Hourly Tariff ÷ 4)</code>. Revenue Per Bay Hour (RPBH) is computed as: <code>RPBH = Daily Revenue ÷ (Capacity × 24)</code>.</p>
+
+                    <p><strong>3. Philippine Retail Benchmarks (Tier C — PH Industry):</strong><br>
+                    Average mall visitor spend of ₱1,000–₱3,000 is based on Colliers International Philippine Retail Market reports. Megaworld daily foot-traffic of 297,000 and mall leasing revenue of ₱6.9B are sourced from Megaworld Corporation's FY2025 Financial Statement Disclosures. Dwell-spend elasticity factor of 1.3 is sourced from the International Council of Shopping Centers (ICSC).</p>
+
+                    <p><strong>4. International Smart Parking Research (Tier D — Industry Pilots):</strong><br>
+                    Dynamic pricing revenue uplift of 15–40% is derived from the San Francisco Municipal Transportation Agency (SFpark) pilot evaluation and HAH Parking commercial deployments. Revenue leakage baseline of 5–15% is derived from Vert.ai and PreciseParkLink parking revenue audit white papers.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )

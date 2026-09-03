@@ -337,8 +337,21 @@ def main():
             has_paid_ticket = random.random() < 0.45
             ticket_id = f"TCK{ticket_counter:05d}"
             ticket_counter += 1
-            entry_time = now - timedelta(minutes=random.randint(10, 180))
-            settled_at = (entry_time + timedelta(minutes=random.randint(5, 90))).isoformat() if has_paid_ticket else None
+
+            # Archetype-specific dwell time distribution
+            ztype = z["zone_type"]
+            if ztype == "mall":
+                # Lognormal centered around ~2.5 hours (150 mins)
+                dwell_mins = int(np.clip(np.random.lognormal(mean=np.log(140), sigma=0.55), 20, 420))
+            elif ztype == "office":
+                # Bimodal: 75% full workday (480-540 mins) + 25% meetings/visitors (60-150 mins)
+                dwell_mins = int(random.gauss(510, 35)) if random.random() < 0.75 else int(random.gauss(100, 25))
+            else:
+                # Residential: 70% overnight/long (600-960 mins) + 30% day guests (120-240 mins)
+                dwell_mins = int(random.gauss(780, 70)) if random.random() < 0.70 else int(random.gauss(180, 40))
+
+            entry_time = now - timedelta(minutes=dwell_mins)
+            settled_at = (entry_time + timedelta(minutes=int(dwell_mins * 0.9))).isoformat() if has_paid_ticket else None
 
             ticket_rows.append((ticket_id, plate, entry_time.isoformat(), settled_at, sid))
 
@@ -348,6 +361,44 @@ def main():
 
             status = "occupied_unpaid" if not has_paid_ticket else "occupied_pending_match"
             state_rows.append((sid, status, now.isoformat()))
+
+    # Generate historical completed ticket sessions over the past 7 days
+    # This enables deep empirical dwell distributions and revenue intelligence reconciliation
+    for past_day in range(1, 8):
+        day_date = now - timedelta(days=past_day)
+        is_wknd = day_date.weekday() >= 5
+        for zi, z in enumerate(ZONES, start=1):
+            ztype = z["zone_type"]
+            # Sessions proportional to zone capacity
+            n_sessions = int(z["capacity"] * (1.8 if ztype == "mall" and is_wknd else (1.4 if ztype != "residential" else 0.8)))
+            zone_slot_ids = [row[0] for row in slot_rows if row[1] == zi]
+            
+            for _ in range(n_sessions):
+                plate = random_plate()
+                ticket_id = f"TCK{ticket_counter:05d}"
+                ticket_counter += 1
+                sid = random.choice(zone_slot_ids)
+
+                # Peak-weighted arrival hour
+                if ztype == "office":
+                    arr_hour = int(random.gauss(9, 1.5))
+                elif ztype == "mall":
+                    arr_hour = int(random.gauss(16, 3.0))
+                else:
+                    arr_hour = int(random.gauss(19, 2.5))
+                arr_hour = max(6, min(22, arr_hour))
+                arr_min = random.randint(0, 59)
+                t_entry = day_date.replace(hour=arr_hour, minute=arr_min, second=0)
+
+                if ztype == "mall":
+                    d_mins = int(np.clip(np.random.lognormal(mean=np.log(145), sigma=0.55), 20, 360))
+                elif ztype == "office":
+                    d_mins = int(random.gauss(500, 40)) if random.random() < 0.75 else int(random.gauss(95, 20))
+                else:
+                    d_mins = int(random.gauss(760, 60)) if random.random() < 0.70 else int(random.gauss(170, 35))
+
+                t_settle = t_entry + timedelta(minutes=d_mins)
+                ticket_rows.append((ticket_id, plate, t_entry.isoformat(), t_settle.isoformat(), sid))
 
     cur.executemany("INSERT INTO ticketing_records VALUES (?,?,?,?,?)", ticket_rows)
     cur.executemany(
@@ -366,7 +417,7 @@ def main():
     print(f"  Sites: {n_sites} | Zones: {n_zones} | Slots: {n_slots}")
     print(f"  Zone types: office, mall, residential")
     print(f"  Historical rows: {len(hist_rows)} ({HISTORY_DAYS} days @ {INTERVAL_MINUTES}min)")
-    print(f"  Live tickets: {len(ticket_rows)} | Plate reads: {len(plate_read_rows)}")
+    print(f"  Total ticket records (live + 7d past): {len(ticket_rows)} | Plate reads: {len(plate_read_rows)}")
     print(f"  Holidays: {len(holidays)} | Events: {len(events)}")
 
 

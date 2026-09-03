@@ -147,3 +147,84 @@ and the metrics-transparency part of 4.2.
 - This remains a proof-of-concept for the *idea*, not production
   infrastructure. The full implementation plan's phased roadmap still
   governs the real path to deployment.
+
+---
+
+## Proposed Phase 2 Enhancements (Presentation Roadmap)
+
+The following two features are **not yet built** but are documented here as
+the recommended next-phase additions to discuss during the presentation.
+Both build directly on existing modules — no architectural rewrites needed.
+
+Full technical specifications are in
+[`SYSTEM_DOCUMENTATION.md` §13](SYSTEM_DOCUMENTATION.md#13-proposed-future-enhancements--presentation-roadmap).
+
+### Enhancement A — Anomaly Detection & Security Intelligence Layer
+
+**What it does:** Turns the system from *monitoring* into *active
+surveillance intelligence* by asking "is this normal?" about every
+parking event.
+
+**Three detection engines:**
+
+1. **Overstay Detection** — Flags vehicles in `OCCUPIED_UNPAID` beyond
+   a configurable threshold (e.g., 4 hours). Computes unpaid revenue
+   per overstayer using actual Megaworld rate structures. Builds on
+   `state_machine.py` transition timestamps.
+
+2. **Occupancy Anomaly Scoring** — Compares real-time occupancy against
+   the ML prediction (from `predictor.py`) and flags z-score deviations
+   above 2σ. Example: *"Mall Grand Wing is at 95% but we predicted 72%.
+   Possible unreported event."* The system uses its own trained model as
+   the "expected normal" baseline — a self-referential feedback loop
+   typically seen only in production MLOps.
+
+3. **Plate Mismatch / Unauthorized Parking** — Uses `matcher.py` to
+   cross-reference ALPR reads against active tickets. Plates with no
+   match (score < 0.80) are flagged as potentially unauthorized.
+
+**Implementation:** New `anomaly_engine.py` (~200 lines). Extends
+`state_machine.py`, `predictor.py`, and `matcher.py`. No new
+dependencies.
+
+### Enhancement B — What-If Scenario Simulator (Capacity Planning Digital Twin)
+
+**What it does:** Lets operators ask "what if?" and see the AI-predicted
+impact. Turns the ML model from a *passive predictor* into an *active
+planning tool*.
+
+**Four capabilities:**
+
+1. **Scenario Builder** — Interactive controls to close zones, add/remove
+   bays, simulate custom events, or reclassify zone types.
+
+2. **Split-View Forecast** — Shows baseline prediction vs. scenario
+   prediction side-by-side on the same Plotly chart, highlighting the
+   delta: *"Closing Basement 1 on Saturday displaces ~38 vehicles to Mall
+   Grand Wing, pushing it to 97% by 4 PM."*
+
+3. **Overflow Cascade Model** — When a zone saturates, models where
+   displaced vehicles redistribute based on proximity, zone-type
+   preference, and available capacity headroom.
+
+4. **Maintenance Window Optimizer** — Scans 14–28 days of ML predictions
+   to find the safest time window to close a zone: *"Optimal 48-hour
+   window: Tuesday 10 PM – Thursday 10 PM, predicted occupancy 12%."*
+
+**Implementation:** New `scenario_engine.py` (~250 lines). Invokes the
+existing `predictor.py` model with modified feature vectors — no
+retraining required. Can be embedded in Tab 2 or as a dedicated new tab.
+
+---
+
+### Why these two, specifically
+
+Both features close the **predict → optimize → act** loop:
+
+| Current System | + Anomaly Detection | + Scenario Simulator |
+|----------------|--------------------|--------------------|
+| *"Bay M-023 is occupied."* | *"Bay M-023 has been occupied unpaid for 6 hours — ₱340 uncollected."* | *"If we close this zone Saturday, 38 vehicles overflow to Mall Grand Wing."* |
+| **Monitoring** | **Active Intelligence** | **Strategic Planning** |
+
+Neither feature modifies any existing module — both are additive
+consumers of `state_machine.py`, `predictor.py`, and `matcher.py`.

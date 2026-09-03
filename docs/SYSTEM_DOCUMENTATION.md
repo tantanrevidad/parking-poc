@@ -20,6 +20,7 @@
 10. [Enterprise Dashboard UI Architecture (`app.py`)](#10-enterprise-dashboard-ui-architecture-apppy)
 11. [Production Deployment, Edge Hardware & Scaling Guide](#11-production-deployment-edge-hardware--scaling-guide)
 12. [Operational Runbook & Quickstart](#12-operational-runbook--quickstart)
+13. [Proposed Future Enhancements — Presentation Roadmap](#13-proposed-future-enhancements--presentation-roadmap)
 
 ---
 
@@ -635,3 +636,179 @@ python -m streamlit run app.py
 - [x] Streamlit running on port `8502` or `8501`.
 - [x] ML model achieves $>60\%$ MAE reduction over baseline.
 - [x] CV demo achieves $>85\%$ character accuracy with 0 false positive ticket matches.
+
+---
+
+## 13. Proposed Future Enhancements — Presentation Roadmap
+
+> The following two capabilities represent the recommended **next-phase enhancements** that would transform this POC from a monitoring and prediction platform into an **active operational intelligence system**. They are designed to build directly on top of the existing architecture — the state machine, ML forecaster, ALPR matcher, and CV detection engine — with no architectural rewrites required. These are documented here as presentation talking points for stakeholder review.
+
+### 13.1 Anomaly Detection & Security Intelligence Layer
+
+**Problem Statement:**
+The current system knows *what is happening* (occupancy state) and *what will happen* (ML forecast), but it never asks **"is this normal?"** In a production township environment, parking operations face revenue leakage from overstaying vehicles, security risks from unauthorized parkers, and operational blind spots from occupancy patterns that deviate from expected norms.
+
+**Proposed Capability:**
+
+#### 13.1.1 Overstay Detection Engine
+- Monitors vehicles in the `OCCUPIED_UNPAID` state (tracked by `current_state.status` and `current_state.updated_at`).
+- Flags any vehicle whose dwell time exceeds a configurable threshold (e.g., 4 hours without payment settlement).
+- Computes the **unpaid revenue** for each flagged vehicle using the applicable Megaworld parking rate structure.
+- Surfaces overstay alerts with severity levels (`INFO` for 4–6 hours, `WARNING` for 6–10 hours, `CRITICAL` for 10+ hours).
+- **Data basis:** Builds directly on the existing `state_machine.py` transition timestamps and `ticketing_records.entry_time`.
+
+#### 13.1.2 Occupancy Anomaly Scoring
+- Compares **real-time observed occupancy** against the **ML-predicted occupancy** for the current hour (from `predictor.py`).
+- Computes a z-score deviation: if actual occupancy exceeds the prediction by $>2\sigma$, the system flags an **occupancy anomaly**.
+- Example alert: *"Zone Mall Grand Wing is at 95% occupancy but the model predicted 72% for this hour. Possible unreported event or upstream traffic diversion."*
+- This is a self-referential feedback loop — the system uses its own trained predictions as the **"expected normal" baseline**, which is an approach typically seen only in production MLOps environments.
+- **Data basis:** Uses the trained `HistGradientBoostingRegressor` from `predictor.py` (already operational) compared against live `occupancy_history` observations.
+
+#### 13.1.3 Plate Mismatch & Unauthorized Parking Alerts
+- Leverages the existing `matcher.py` confidence-weighted fuzzy matcher.
+- If an ALPR camera read in a bay returns a plate that does **not match any active ticket** in `ticketing_records` (i.e., match score $< 0.80$ against all candidates), the system flags the vehicle as a **potential unauthorized park**.
+- Tracks repeat-offender plates across time windows to distinguish one-time misreads from systematic unauthorized parkers.
+- **Data basis:** Reuses `matcher.py:match_plate()` output and `plate_reads` / `ticketing_records` cross-referencing.
+
+#### 13.1.4 Operational Alert Feed
+- A scrollable, time-ordered alert timeline integrated into the dashboard with:
+  - **Severity indicators:** `INFO` / `WARNING` / `CRITICAL`
+  - **Affected bay and zone** identification
+  - **Suggested action** (e.g., "Dispatch enforcement to Bay M-023" or "Investigate occupancy spike in Mall Main Plaza")
+  - **Timestamp and duration** of the anomalous condition
+- **Dwell Time Distribution Visualization:** A Plotly histogram of parking durations by zone type, with statistical outlier markers — visual proof that the system catches patterns humans would miss.
+
+#### 13.1.5 Technical Architecture (Presentation Talking Points)
+- **New module:** `anomaly_engine.py` (~200 lines)
+- **Extends:** `state_machine.py` (overstay rules), `predictor.py` (anomaly baseline), `matcher.py` (unauthorized detection)
+- **No new dependencies required** — uses existing scikit-learn, pandas, and SQLite infrastructure
+- **Production pathway:** In a real deployment, anomaly alerts would be pushed via MQTT/WebSocket to patrol officer mobile devices and integrated with the township's security operations center (SOC)
+
+---
+
+### 13.2 What-If Scenario Simulator (Capacity Planning Digital Twin)
+
+**Problem Statement:**
+The current ML forecaster answers **"what will happen?"** — but township operations managers frequently need to answer **"what would happen if…?"** Questions like:
+- *"What if we close Basement 1 for 48 hours of resurfacing — where do displaced vehicles go?"*
+- *"What if we add 30 bays to Mall Grand Wing — does it alleviate the Saturday evening bottleneck?"*
+- *"What if we host a mega-sale event during a holiday weekend — do we exceed capacity?"*
+
+The existing system cannot answer these questions because the ML model is trained on fixed historical conditions. A scenario simulator allows operators to **modify the input parameters** and observe the predicted impact.
+
+**Proposed Capability:**
+
+#### 13.2.1 Scenario Builder Interface
+- An interactive panel with controls to define hypothetical modifications:
+  - **Close Zone:** Set any zone's capacity to 0 for a specified date range (maintenance simulation).
+  - **Add/Remove Bays:** Adjust a zone's capacity by $\pm N$ bays (expansion/contraction planning).
+  - **Simulate Custom Event:** Define an ad-hoc event with a date, duration, and traffic impact level (`low` / `medium` / `high`) — feeding into the same `event_multiplier()` pipeline already used by `generate_data.py`.
+  - **Change Zone Type:** Re-classify a zone (e.g., convert an underperforming office deck to mall parking) to apply the corresponding diurnal occupancy curve.
+
+#### 13.2.2 Split-View Forecast Comparison
+- Presents the **baseline ML prediction** side-by-side with the **scenario-modified prediction** on the same Plotly chart.
+- Highlights the **delta zone** — the gap between "what would happen normally" and "what happens under this scenario."
+- Annotates critical insights: *"Closing Basement 1 on a Saturday would displace ~38 vehicles to Mall Grand Wing, pushing it from 82% to 97% saturation by 4:00 PM."*
+- **Data basis:** The existing `predictor.py` model is invoked twice — once with original features, once with modified features (adjusted `capacity`, `zone_id`, `is_event` flags). The model's learned relationships between these features naturally produce different predictions.
+
+#### 13.2.3 Overflow Cascade Model
+- When a scenario pushes one zone to 100% capacity, the simulator models **where displaced vehicles redistribute** based on:
+  - **Zone proximity:** Vehicles prefer the nearest available alternative zone within the same township.
+  - **Zone type preference:** Mall visitors prefer other mall zones; office workers prefer other office zones.
+  - **Capacity headroom:** Vehicles flow to the zone with the most available space.
+- This overflow logic produces actionable insights: *"If Mall Grand Wing saturates at 6:30 PM, the overflow model predicts 60% of displaced vehicles will attempt Piazza & Canal Level (Venice Grand Canal Mall), 30% will divert to Mall Main Plaza (Eastwood City), and 10% will leave the township entirely."*
+
+#### 13.2.4 Maintenance Window Optimizer
+- Answers the question: **"When is the safest time to close Zone X for maintenance?"**
+- Scans the next 14–28 days of ML predictions to find the time window where the target zone's predicted occupancy is consistently lowest.
+- Output: *"The optimal 48-hour window to close Office Tower Alpha for resurfacing is Tuesday 10 PM through Thursday 10 PM, when predicted occupancy averages 12%."*
+- **Data basis:** Iterates the existing `predictor.py` forecast over future time slots, selecting the window that minimizes displaced vehicles.
+
+#### 13.2.5 Technical Architecture (Presentation Talking Points)
+- **New module:** `scenario_engine.py` (~250 lines)
+- **Core dependency:** `predictor.py` — the trained `HistGradientBoostingRegressor` model is invoked with modified feature vectors; no retraining is needed to evaluate scenarios
+- **UI integration:** Can be embedded as a sub-section within the existing **Tab 2 (Availability Forecast)** or as a dedicated new tab
+- **Production pathway:** In a full deployment, the scenario simulator would be connected to the facility management system, allowing operations managers to submit maintenance requests and automatically receive AI-optimized scheduling recommendations
+
+---
+
+### 13.3 Relationship to Current System Architecture
+
+Both proposed enhancements are designed as **additive extensions** — they consume the outputs of existing modules without modifying them:
+
+```
+                                        ┌─────────────────────────┐
+                                        │ anomaly_engine.py       │
+                     ┌─────────────────►│  - Overstay detection   │
+                     │                  │  - Occupancy z-score    │
+  ┌──────────────┐   │                  │  - Plate mismatch alert │
+  │ state_machine│───┤                  └─────────────────────────┘
+  │ .py          │   │
+  └──────────────┘   │
+  ┌──────────────┐   │                  ┌─────────────────────────┐
+  │ predictor.py │───┼─────────────────►│ scenario_engine.py      │
+  │              │   │                  │  - Scenario builder     │
+  └──────────────┘   │                  │  - Split-view forecast  │
+  ┌──────────────┐   │                  │  - Overflow cascade     │
+  │ matcher.py   │───┘                  │  - Maintenance optimizer│
+  └──────────────┘                      └─────────────────────────┘
+```
+
+**No existing modules require modification.** Both engines read from the same SQLite database and invoke existing model functions with different parameters.
+
+---
+
+## 14. Tab 7 — Revenue Intelligence & Commercial Optimization Engine
+
+### 14.1 Objective & Megaworld Commercial Synergy
+Parking in modern mixed-use developments is not merely a cost-center or logistical requirement; it is a primary lever for **direct revenue generation**, **tenant retail sales enhancement**, and **operational efficiency**. Tab 7 implements an enterprise financial intelligence platform specifically aligned with Megaworld Corporation's commercial township portfolio (**Uptown Bonifacio**, **Eastwood City**, and **McKinley Hill / Venice Grand Canal Mall**).
+
+### 14.2 The 4-Tier Data Provenance Framework
+To eliminate invented metrics and ensure auditable integrity for corporate presentations, every metric in Tab 7 is bound to a verifiable provenance tier:
+
+| Tier | Badge | Classification | Verifiable Empirical Source |
+| :--- | :--- | :--- | :--- |
+| **Tier A** | `ACTUAL RATE` | Real Megaworld Parking Tariffs | Official Megaworld Lifestyle Mall parking signage and MoneyMax.ph advisories (2024–2025). |
+| **Tier B** | `DERIVED` | Deterministic Database Computation | Mathematically calculated from SQLite tables (`occupancy_history`, `ticketing_records`, `current_state`) using physical rate cards. |
+| **Tier C** | `PH BENCHMARK` | Philippine Retail Industry Research | Colliers International Philippine Retail Reports, Megaworld FY2025 Financial Statement Disclosures, and ICSC retail elasticity studies. |
+| **Tier D** | `INDUSTRY` | Peer-Reviewed International Smart Parking | SFpark municipal pilot evaluation, HAH Parking commercial deployments, and Vert.ai leakage audit white papers. |
+
+### 14.3 Official Township Rate Card Tariffs (Tier A)
+- **Uptown Bonifacio (Uptown Mall):**
+  - First 3 hours flat: ₱50.00
+  - 4th to 7th hours: ₱15.00 / hour
+  - 7th hour onwards (AM entry 06:00–11:59): ₱100.00 / hour (steep progressive tier discouraging office commuter stall monopolization)
+  - 7th hour onwards (PM entry 12:00–05:59): ₱30.00 / hour
+  - Overnight surcharge: ₱200.00
+- **Eastwood City (Eastwood Mall):**
+  - Weekday: ₱60.00 first 3 hours flat; ₱20.00 / hour succeeding
+  - Weekend & Statutory Holidays: ₱60.00 flat rate all day
+  - Overnight surcharge: ₱150.00
+- **McKinley Hill (Venice Grand Canal Mall):**
+  - First 3 hours flat: ₱50.00
+  - Succeeding hours: ₱20.00 / hour
+  - Drop-off grace period: 15 minutes (₱0.00)
+  - Overnight surcharge: ₱150.00
+
+### 14.4 Mathematical Formulations
+
+#### 14.4.1 Revenue Per Bay Hour (RPBH)
+$$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
+Provides an apples-to-apples monetization metric across zones of varying bay sizes and turnover frequencies.
+
+#### 14.4.2 AI Demand-Responsive Dynamic Pricing
+Given baseline parking rate $R_{\text{base}}$, target occupancy $\theta_{\text{target}} \in [0.50, 0.95]$, observed/forecasted occupancy $\theta_t \in [0, 1]$, surge coefficient $\alpha$, and discount floor $\beta$:
+$$M_t = \begin{cases} 
+1.0 + \alpha \left(\frac{\theta_t - \theta_{\text{target}}}{1.0 - \theta_{\text{target}}}\right) & \text{if } \theta_t \ge \theta_{\text{target}} \\
+\max\left(\beta, 1.0 - 0.35 \left(\frac{\theta_{\text{target}} - \theta_t}{\theta_{\text{target}}}\right)\right) & \text{if } \theta_t < \theta_{\text{target}}
+\end{cases}$$
+$$\text{Effective Rate}_t = R_{\text{base}} \times M_t$$
+Yields $+15\%$ to $+40\%$ revenue uplift during peak congestion while filling vacant stalls during shoulder and off-peak periods.
+
+#### 14.4.3 Retail Spend Synergy Elasticity
+Based on International Council of Shopping Centers (ICSC) dwell analytics ($E_{\text{dwell}} = 1.3$):
+$$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{base}}}{T_{\text{base}}}$$
+$$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
+Connecting parking ease directly to merchant sales growth across Megaworld Lifestyle Malls.
+
+
