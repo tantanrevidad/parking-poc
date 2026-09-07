@@ -1,6 +1,6 @@
-# Smart Parking System — Comprehensive Architecture & Technical Specification
+# Vacanti: The smart parking management system — Architecture & Technical Specification
 
-> **Project:** Smart Parking System Proof-of-Concept (POC)  
+> **Project:** Vacanti: The smart parking management system (POC)  
 > **Target Deployments:** Megaworld Townships (Uptown Bonifacio, Eastwood City, McKinley Hill / Venice Grand Canal Mall)  
 > **Document Version:** 2.0.0 (Production Blueprint)  
 > **Status:** Verified & Operational  

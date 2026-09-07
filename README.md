@@ -1,6 +1,6 @@
-# Smart Parking Management System — Proof of Concept (POC)
+# Vacanti: The smart parking management system — Proof of Concept (POC)
 
-An enterprise-grade Streamlit application demonstrating every layer of the Smart Parking system end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, interactive direct-click SQLite database telemetry inspection, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio, Eastwood City, and McKinley Hill / Venice Grand Canal Mall).
+An enterprise-grade Streamlit application demonstrating every layer of Vacanti end-to-end, featuring predictive availability forecasting, confidence-weighted license plate matching, real-time slot state tracking, interactive direct-click SQLite database telemetry inspection, and computer vision feasibility validation across **Megaworld Townships** (Uptown Bonifacio, Eastwood City, and McKinley Hill / Venice Grand Canal Mall).
 
 ---
 

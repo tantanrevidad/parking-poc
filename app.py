@@ -33,7 +33,7 @@ import loyalty_engine as loyalty
 import cv2
 
 st.set_page_config(
-    page_title="Smart Parking Management System",
+    page_title="Vacanti: The smart parking management system",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -1662,8 +1662,8 @@ with brand_col:
             <span class="pulse-dot"></span>
             MEGAWORLD TOWNSHIP SMART PARKING OPERATIONS · POC
         </div>
-        <h1 class="brand-title">Smart Parking Management Platform</h1>
-        <p class="brand-subtitle">Real-time deck telemetry, computer vision slot detection, and AI predictive occupancy analytics.</p>
+        <h1 class="brand-title">Vacanti: The smart parking management system</h1>
+        <p class="brand-subtitle">Real-time deck telemetry, computer vision slot detection, and retail intelligence for Megaworld Townships.</p>
     </div>
     """, unsafe_allow_html=True)
 
