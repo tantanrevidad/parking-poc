@@ -317,18 +317,18 @@ def main():
     cur.executemany("INSERT INTO zones VALUES (?,?,?,?,?,?)", zone_rows)
     cur.executemany("INSERT INTO slots VALUES (?,?,?)", slot_rows)
 
-    # Calendar
-    start_date = datetime.now() - timedelta(days=HISTORY_DAYS)
-    holidays, events = build_calendar(start_date, HISTORY_DAYS, SITES)
+    # Calendar (aligned to start of day through end of today for complete 24h operational profiles)
+    start_date = (datetime.now() - timedelta(days=HISTORY_DAYS)).replace(hour=0, minute=0, second=0, microsecond=0)
+    holidays, events = build_calendar(start_date, HISTORY_DAYS + 1, SITES)
     cur.executemany("INSERT INTO holidays VALUES (?,?)", [(h["date"], h["name"]) for h in holidays])
     cur.executemany(
         "INSERT INTO events VALUES (?,?,?,?,?)",
         [(e["site"], e["name"], e["starts_at"], e["ends_at"], e["impact"]) for e in events],
     )
 
-    # Historical occupancy per zone, at INTERVAL_MINUTES resolution
+    # Historical occupancy per zone, at INTERVAL_MINUTES resolution (full 24h for all days)
     hist_rows = []
-    n_steps = int(HISTORY_DAYS * 24 * 60 / INTERVAL_MINUTES)
+    n_steps = (HISTORY_DAYS + 1) * 24 * (60 // INTERVAL_MINUTES)
     for step in range(n_steps):
         ts = start_date + timedelta(minutes=step * INTERVAL_MINUTES)
         hour_frac = ts.hour + ts.minute / 60.0
