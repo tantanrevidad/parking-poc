@@ -771,8 +771,8 @@ To eliminate invented metrics and ensure auditable integrity for corporate prese
 | **Tier A** | `ACTUAL RATE` | Real Megaworld Parking Tariffs | Official Megaworld Lifestyle Mall parking signage and MoneyMax.ph advisories (2024–2025). |
 | **Tier B** | `DERIVED` | Deterministic Database Computation | Mathematically calculated from SQLite tables (`occupancy_history`, `ticketing_records`, `current_state`) using physical rate cards and salted hashes. |
 | **Tier C** | `PH BENCHMARK` | Philippine Retail Industry Research | Colliers International Philippine Retail Reports, Megaworld FY2025 Financial Statement Disclosures, and Path Intelligence / ICSC dwell elasticity studies. |
-| **Tier D** | `INDUSTRY` | Peer-Reviewed International Research | ScienceDirect (2014) Starbucks parking fee study, Bain & Company retention research, and Vert.ai leakage audit white papers. |
-| **Tier E** | `MODELED` | Explicit Diagnostic Assumptions | Clearly-labeled sensitivity parameters (e.g. friction sensitivity coefficient) translating qualitative research findings into interactive operational diagnostics. |
+| **Tier D** | `INDUSTRY` | Peer-Reviewed International Research | Bain & Company customer retention research and Vert.ai leakage audit white papers. |
+| **Tier E** | `MODELED` | Explicit Modeled Diagnostic Assumptions | Modeled loyalty spend assumptions (+67% repeat customer spend premium) evaluating cohort retention economic value. |
 
 ### 14.3 Official Township Rate Card Tariffs (Tier A)
 - **Uptown Bonifacio (Uptown Mall):**
@@ -797,18 +797,7 @@ To eliminate invented metrics and ensure auditable integrity for corporate prese
 $$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
 Provides an apples-to-apples monetization metric across zones of varying bay sizes and turnover frequencies.
 
-#### 14.4.2 Parking Friction & Saturation Model (Tier E Modeled)
-Anchored in the 2014 ScienceDirect study (*"Do Parking Fees Affect Retail Sales? Evidence from Starbucks"*):
-- When occupancy $\ge \theta_{\text{sat}}$ (default $85\%$), the deck is in the **Saturated Regime**. Parking fees serve as a healthy turnover mechanism that increases visitor flow without penalizing gross merchant sales.
-- When occupancy $< \theta_{\text{sat}}$, the deck is in the **Unsaturated Regime**. Static parking fees act as economic friction that prematurely cuts shopping dwell short without creating useful vacancies.
-
-$$\text{Regime}_t = \begin{cases} \text{Saturated} & \text{if } \theta_t \ge 0.85 \\ \text{Unsaturated} & \text{if } \theta_t < 0.85 \end{cases}$$
-
-For unsaturated hours, the dwell suppression and resulting merchant spend-at-risk are computed as:
-$$\text{Suppression} = \text{friction\_coefficient} \times \left(\frac{\text{Current Tariff}}{\text{Base Tariff}}\right)$$
-$$\text{Spend At Risk} = \text{Suppression} \times 1.3 \times \text{Average Basket Spend} \times \text{Hourly Vehicle Visits}$$
-
-#### 14.4.3 Repeat-Visitor Recognition & Customer Retention Engine (Tier B & D)
+#### 14.4.2 Repeat-Visitor Recognition & Customer Retention Engine (Tier B & D)
 Anchored in Bain & Company customer retention findings (a 5% lift in retention yields a 25%–95% increase in profit) and aggregated retail loyalty analytics (+67% repeat spend premium):
 
 1. **Cryptographic Salted Hashing (RA 10173 Compliance):**
@@ -820,13 +809,13 @@ Anchored in Bain & Company customer retention findings (a 5% lift in retention y
    $$\text{Repeat Rate} = \frac{V_{\text{Returning}} + V_{\text{Loyal}}}{V_{\text{Total}}} \times 100\%$$
    $$\text{Incremental Loyalty Spend} = (V_{\text{Returning}} + V_{\text{Loyal}}) \times S_{\text{base}} \times 0.67$$
 
-#### 14.4.4 Dwell-Spend Elasticity
+#### 14.4.3 Dwell-Spend Elasticity
 Based on Path Intelligence retail analytics and ICSC dwell research ($E_{\text{dwell}} = 1.3$):
 $$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{base}}}{T_{\text{base}}}$$
 $$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
 Connecting parking ease directly to merchant sales growth across Megaworld Lifestyle Malls.
 
-#### 14.4.5 Revenue Leakage & Overstay Detection
+#### 14.4.4 Revenue Leakage & Overstay Detection
 Flags vehicles with status `occupied_unpaid` exceeding duration $T_{\text{threshold}}$:
 $$\text{Uncollected Fee} = \text{compute\_ticket\_revenue}(\text{entry\_time}, \text{now}, \text{site}, \text{zone\_type})$$
 Projects annualized recovery potential when integrated with automated ALPR barrier gates.

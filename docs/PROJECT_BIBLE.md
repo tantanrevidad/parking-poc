@@ -41,7 +41,7 @@ This Proof of Concept (POC) demonstrates a unified, 7-layer architecture combini
 - **Grace-Period-Aware State Machine:** Tracking parking slots across a 4-state turnover lifecycle (`Available`, `Occupied — Unpaid`, `Occupied — Likely Vacating Soon`, `Occupied — Departing`).
 - **Confidence-Weighted Fuzzy ALPR Matcher:** Implementing Levenshtein distance modified with confusable-character optical penalty discounts ($0 \leftrightarrow O$, $1 \leftrightarrow I$, $8 \leftrightarrow B$, $5 \leftrightarrow S$, $2 \leftrightarrow Z$, $6 \leftrightarrow G$) to guarantee **0% false positive ticket reconciliations**.
 - **5-Phase Edge Computer Vision Sensing:** Dual-exposure CLAHE-boosted YOLOv8 vehicle detection with true perspective polygon Intersection over Area (IoA) and temporal rolling debouncing.
-- **Commercial Financial Engineering:** A revenue optimization engine modeling real Megaworld parking tariffs, dynamic pricing uplift (+15% to +40%), retail spend elasticity, and automated revenue leakage recapture.
+- **Commercial Financial Engineering:** A retail intelligence and revenue optimization engine modeling actual Megaworld parking tariffs, retail spend elasticity, customer retention loyalty economics, and automated revenue leakage recapture.
 
 ---
 
@@ -468,31 +468,32 @@ PHASE 5: Standardized JSON Payload Generation & UI Telemetry
 
 ---
 
-## 10. Tab 7: Revenue Intelligence & Commercial Optimization
+## 10. Tab 7: Revenue Intelligence & Retail Synergy Engine
 
 ### 10.1 System Overview & Architectural Purpose
-Tab 7 transforms parking management from a passive cost-center into an active executive financial optimization engine. Tailored specifically for **Megaworld Corporation's commercial township portfolio**, it integrates actual township tariffs, demand-responsive dynamic pricing simulations, automated revenue leakage recapture, and tenant retail spend synergy.
+Tab 7 transforms parking management from a passive cost-center into an active executive financial optimization and retail synergy engine. Tailored specifically for **Megaworld Corporation's commercial township portfolio**, it integrates actual township tariffs, empirical dwell-to-spend elasticity, repeat-visitor retention analytics, and automated revenue leakage recapture.
 
 ### 10.2 Tech Stack
-- **Financial Simulation Engines:** Deterministic tariff calculators, numerical integration across 15-minute occupancy bins, elasticity modeling.
-- **Visualization:** Plotly 24-hour Zone $\times$ Hour Intensity Heatmaps, multi-strategy revenue trajectory curves, dwell time histograms.
-- **Backend Modules:** [`revenue_engine.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/revenue_engine.py), [`revenue_config.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/revenue_config.py), [`leakage_detector.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/leakage_detector.py).
+- **Financial & Retention Engines:** Deterministic tariff calculators, numerical integration across 15-minute occupancy bins, retail spend elasticity modeling, salted cryptographic hashing.
+- **Visualization:** Plotly 24-hour Zone $\times$ Hour Intensity Heatmaps, empirical dwell histograms, retention cohort stacked bar charts.
+- **Backend Modules:** [`revenue_engine.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/revenue_engine.py), [`revenue_config.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/revenue_config.py), [`loyalty_engine.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/loyalty_engine.py), [`leakage_detector.py`](file:///c:/Users/Tedd/Documents/College/2nd%20year/OJT/Megaworld/Personal%20Project/parking-poc/leakage_detector.py).
 
 ### 10.3 Real-World Sources & Academic Evidence
-- **Donald Shoup (*The High Cost of Free Parking*, American Planning Association, 2005):** The foundational economic treatise proving that underpriced parking creates artificial scarcity and traffic cruising, whereas market-clearing demand-responsive pricing optimizes deck utilization.
-- **SFpark Municipal Pilot Project (San Francisco, 2011–2014):** Achieved an average $15\%$ to $25\%$ revenue yield increase while reducing parking search times by $43\%$ through time-of-day dynamic pricing.
 - **International Council of Shopping Centers (ICSC) & PathIntelligence Retail Analytics:** Established the empirical retail dwell elasticity coefficient ($E_{\text{dwell}} = 1.3$), indicating that a $+1\%$ increase in customer dwell time corresponds to a $+1.3\%$ increase in retail tenant spend.
 - **Colliers International Philippine Retail Reports (2024–2025):** Published consumer spending benchmarks across Metro Manila shopping malls (₱1,000 to ₱3,000 average spend per visit).
 - **Megaworld Corporation FY2025 Audited Financial Statement Disclosures:** Reported ₱6.9 Billion in commercial mall leasing revenues (+9% YoY growth) with daily foot-traffic exceeding 297,000 visitors.
+- **Bain & Company Customer Retention Research:** Empirical findings establishing that increasing customer retention rates by 5% increases profits by 25% to 95%, with repeat customers spending +67% more than first-time visitors.
+- **Vert.ai & PreciseParkLink Parking Revenue Audit White Papers:** Documented an average baseline revenue leakage of 5% to 15% in unmonitored commercial parking facilities due to manual tolling gaps and overstay non-enforcement.
 
-### 10.4 Data Provenance
+### 10.4 Data Provenance (5-Tier Framework)
 - **Parking Tariffs:** Tier A (Actual Official Rates). Researched directly from Megaworld Lifestyle Malls on-site parking signage and MoneyMax.ph:
   - **Uptown Mall (BGC):** ₱50.00 first 3 hours flat; ₱15.00/hr (4th–7th hr); ₱100.00/hr (7th hr+ for AM entry 06:00–12:00 to deter office parkers); ₱30.00/hr (7th hr+ for PM entry); ₱200.00 overnight surcharge.
   - **Eastwood Mall:** ₱60.00 first 3 hours flat; ₱20.00/hr succeeding (weekdays); ₱60.00 flat all day on weekends & statutory holidays; ₱150.00 overnight surcharge.
   - **Venice Grand Canal Mall:** ₱50.00 first 3 hours flat; ₱20.00/hr succeeding; 15-minute drop-off grace period; ₱150.00 overnight surcharge.
-- **Occupancy & Dwell Timestamps:** Tier B (Database Derived). Deterministic integration over `occupancy_history` and `ticketing_records`.
-- **Retail Elasticity & Benchmarks:** Tier C (Colliers PH / ICSC).
-- **Dynamic Pricing & Leakage Audits:** Tier D (SFpark / Vert.ai).
+- **Occupancy, Dwell Timestamps & Salted Loyalty Hashes:** Tier B (Database Derived). Deterministic integration over `occupancy_history` and `ticketing_records` with 16-character salted SHA-256 pseudonymization.
+- **Retail Elasticity & Spending Benchmarks:** Tier C (Colliers PH / ICSC / Megaworld Financial Disclosures).
+- **Retention & Leakage Audits:** Tier D (Bain & Company / Vert.ai).
+- **Modeled Customer Loyalty Assumptions:** Tier E (Modeled). Modeled +67% repeat customer spend premium evaluating retention economic value.
 
 ### 10.5 Mathematical Formulations & Data Flow
 
@@ -500,32 +501,33 @@ Tab 7 transforms parking management from a passive cost-center into an active ex
 $$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
 Normalizes revenue performance across decks of differing physical capacities and operating profiles.
 
-#### 2. AI Demand-Responsive Dynamic Pricing Algorithm:
-Given base tariff $R_{\text{base}}$, target occupancy $\theta_{\text{target}} \in [0.50, 0.95]$ (default: $0.80$), observed/forecasted occupancy ratio $\theta_t$, surge coefficient $\alpha$ (default: $0.40$), and discount floor $\beta$ (default: $0.70$):
-$$M_t = \begin{cases}
-1.0 + \alpha \left(\frac{\theta_t - \theta_{\text{target}}}{1.0 - \theta_{\text{target}}}\right) & \text{if } \theta_t \ge \theta_{\text{target}} \\
-\max\left(\beta, 1.0 - 0.35 \left(\frac{\theta_{\text{target}} - \theta_t}{\theta_{\text{target}}}\right)\right) & \text{if } \theta_t < \theta_{\text{target}}
-\end{cases}$$
-$$\text{Effective Rate}_t = R_{\text{base}} \times M_t$$
-Yields a projected $+15\%$ to $+40\%$ revenue uplift during peak congestion while stimulating utilization during off-peak shoulder hours.
-
-#### 3. Automated Revenue Leakage & Overstay Detection (`leakage_detector.py`):
-Monitors vehicles in `occupied_unpaid` state where dwell duration $t_{\text{dwell}} \ge \tau_{\text{overstay}}$ (e.g., $3.0$ hours).
-$$\text{Unpaid Revenue} = \sum_{k \in \text{Overstayers}} \text{ComputeTariff}(t_{\text{entry}, k}, t_{\text{ref}}, \text{Site}_k, \text{ZoneType}_k)$$
-Projects monthly recoverable leakage against international parking audit benchmarks ($5\%$ to $15\%$ leakage in unmonitored facilities).
-
-#### 4. Retail Dwell-Spend Economic Synergy:
+#### 2. Retail Dwell-Spend Economic Synergy:
 $$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{baseline}}}{T_{\text{baseline}}} \quad (T_{\text{baseline}} = 2.5\text{ hours})$$
 $$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
 Demonstrates how frictionless parking wayfinding and turnover optimization directly fuel tenant sales across Megaworld Lifestyle Malls.
 
+#### 3. Repeat-Visitor Recognition & Retention Analytics (`loyalty_engine.py`):
+1. **Cryptographic Salted Hashing (RA 10173 Compliance):**
+   $$\text{Hashed ID} = \text{SHA256}(\text{Salt} \parallel \text{Plate})[0:16]$$
+   Raw license plates are never logged into loyalty structures or exposed in analytics views.
+2. **Cohort Classification over Lookback Window ($W \in \{7, 14, 28\}\text{ days}$):**
+   $$\text{Cohort} = \begin{cases} \text{New} & \text{if Visits} = 1 \\ \text{Returning} & \text{if } 2 \le \text{Visits} \le 3 \\ \text{Loyal} & \text{if Visits} \ge 4 \end{cases}$$
+3. **Repeat Visitor Rate & Incremental Loyalty Spend:**
+   $$\text{Repeat Rate} = \frac{V_{\text{Returning}} + V_{\text{Loyal}}}{V_{\text{Total}}} \times 100\%$$
+   $$\text{Incremental Loyalty Spend} = (V_{\text{Returning}} + V_{\text{Loyal}}) \times S_{\text{base}} \times 0.67$$
+
+#### 4. Automated Revenue Leakage & Overstay Detection (`leakage_detector.py`):
+Monitors vehicles in `occupied_unpaid` state where dwell duration $t_{\text{dwell}} \ge \tau_{\text{overstay}}$ (e.g., $3.0$ hours).
+$$\text{Unpaid Revenue} = \sum_{k \in \text{Overstayers}} \text{ComputeTariff}(t_{\text{entry}, k}, t_{\text{ref}}, \text{Site}_k, \text{ZoneType}_k)$$
+Projects monthly recoverable leakage against international parking audit benchmarks ($5\%$ to $15\%$ leakage in unmonitored facilities).
+
 ### 10.6 Variable Sensitivity & Impact Analysis
 | Variable | Operational Range | Impacted Metric / Output | Sensitivity & Economic Dynamics |
 | :--- | :--- | :--- | :--- |
-| Target Occupancy $\theta_{\text{target}}$ | $50\%$ to $95\%$ (Default: $80\%$) | Surge Pricing Trigger Point | Lowering to $70\%$ triggers surge rates earlier, rationing scarce bays; raising to $90\%$ keeps standard rates until near gridlock. |
-| Surge Multiplier $\alpha$ | $0.10$ to $1.00$ (Default: $0.40$) | Peak Hour Yield Uplift | Controls peak price elasticity. At $\alpha = 0.40$, peak rates reach $+40\%$ ($₱70$/3h), yielding $+18\%$ to $+24\%$ daily revenue gain. |
-| Overstay Threshold $\tau_{\text{overstay}}$ | $1.0$ to $8.0$ hours (Default: $3.0\text{h}$) | Flagged Vehicles Count, Leakage Recovery ₱ | Tightening to $2.0$h catches short-term overstays; setting to $4.0$h isolates severe commercial parking violators and abandoned vehicles. |
+| Lookback Window $W$ | $7, 14, 28\text{ days}$ (Default: $28\text{d}$) | Cohort Sizes, Repeat Rate % | Longer windows capture fuller lifecycle frequency; 28d yields realistic $35\%\text{--}40\%$ repeat rate. |
 | Baseline Visitor Spend $S_{\text{base}}$ | ₱1,000 to ₱3,000 (Colliers PH) | Projected Tenant Retail Sales | Directly scales mall gross tenant spend estimates; amplified by $+1.3\%$ per $+1\%$ dwell duration increase. |
+| Loyalty Spend Premium | $+67\%$ (Bain & Retention Analytics) | Incremental Loyalty Value ₱ | Evaluates additional commercial retail contribution generated by returning and loyal patron cohorts. |
+| Overstay Threshold $\tau_{\text{overstay}}$ | $1.5$ to $6.0$ hours (Default: $3.0\text{h}$) | Flagged Vehicles Count, Leakage Recovery ₱ | Tightening to $2.0$h catches short-term overstays; setting to $4.0$h isolates severe commercial parking violators and abandoned vehicles. |
 
 ---
 
