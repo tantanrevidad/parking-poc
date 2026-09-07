@@ -38,6 +38,26 @@ def hashed_plate(plate: str, salt: Optional[str] = None) -> str:
     return hashlib.sha256(salted_string.encode("utf-8")).hexdigest()[:16]
 
 
+def _empty_loyalty_result(lookback_days: int = 28) -> dict:
+    return {
+        "lookback_days": lookback_days,
+        "total_visitors": 0,
+        "total_unique_visitors": 0,
+        "total_tickets": 0,
+        "total_tickets_analyzed": 0,
+        "repeat_visitor_rate": 0.0,
+        "repeat_visitor_rate_pct": 0.0,
+        "returning_visitors": 0,
+        "loyal_visitors": 0,
+        "loyal_share_pct": 0.0,
+        "incremental_spend_php": 0.0,
+        "segment_counts": {"New": 0, "Returning": 0, "Loyal": 0},
+        "segment_ticket_share": {"New": 0.0, "Returning": 0.0, "Loyal": 0.0},
+        "archetype_breakdown": [],
+        "provenance": "Tier B Derived Cohorts × Tier D (+67% Repeat Spend Premium)",
+    }
+
+
 def compute_repeat_visitor_segments(
     site_name: Optional[str] = None,
     lookback_days: int = 28,
@@ -63,17 +83,7 @@ def compute_repeat_visitor_segments(
     latest_ts_row = conn.execute("SELECT max(entry_time) FROM ticketing_records").fetchone()
     if not latest_ts_row or not latest_ts_row[0]:
         conn.close()
-        return {
-            "repeat_visitor_rate": 0.0,
-            "loyal_share_pct": 0.0,
-            "incremental_spend_php": 0.0,
-            "total_visitors": 0,
-            "total_tickets": 0,
-            "segment_counts": {"New": 0, "Returning": 0, "Loyal": 0},
-            "segment_ticket_share": {"New": 0.0, "Returning": 0.0, "Loyal": 0.0},
-            "archetype_breakdown": [],
-            "provenance": "Tier B Derived Cohorts × Tier D (+67% Repeat Spend Premium)",
-        }
+        return _empty_loyalty_result(lookback_days)
 
     latest_dt = datetime.fromisoformat(latest_ts_row[0])
     cutoff_dt = latest_dt - timedelta(days=lookback_days)
@@ -101,17 +111,7 @@ def compute_repeat_visitor_segments(
     conn.close()
 
     if df.empty:
-        return {
-            "repeat_visitor_rate": 0.0,
-            "loyal_share_pct": 0.0,
-            "incremental_spend_php": 0.0,
-            "total_visitors": 0,
-            "total_tickets": 0,
-            "segment_counts": {"New": 0, "Returning": 0, "Loyal": 0},
-            "segment_ticket_share": {"New": 0.0, "Returning": 0.0, "Loyal": 0.0},
-            "archetype_breakdown": [],
-            "provenance": "Tier B Derived Cohorts × Tier D (+67% Repeat Spend Premium)",
-        }
+        return _empty_loyalty_result(lookback_days)
 
     # Hash all plates immediately — purge raw plate text from analysis pipeline
     effective_salt = salt or DEFAULT_SALT

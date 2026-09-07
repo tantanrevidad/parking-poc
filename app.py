@@ -3555,9 +3555,17 @@ with tab6:
                 )
 
             loyalty_data = loyalty_engine.compute_repeat_visitor_segments(
+                site_name=site_name,
                 lookback_days=lookback_choice,
                 base_spend_php=base_spend,
             )
+
+            u_visitors = loyalty_data.get("total_unique_visitors", loyalty_data.get("total_visitors", 0))
+            tot_tickets = loyalty_data.get("total_tickets_analyzed", loyalty_data.get("total_tickets", 0))
+            rep_rate = loyalty_data.get("repeat_visitor_rate_pct", loyalty_data.get("repeat_visitor_rate", 0.0))
+            ret_parkers = loyalty_data.get("returning_visitors", loyalty_data.get("segment_counts", {}).get("Returning", 0))
+            loy_parkers = loyalty_data.get("loyal_visitors", loyalty_data.get("segment_counts", {}).get("Loyal", 0))
+            inc_spend = loyalty_data.get("incremental_spend_php", 0.0)
 
             # 3 KPI Cards
             kpi_l1, kpi_l2, kpi_l3 = st.columns(3)
@@ -3569,8 +3577,8 @@ with tab6:
                             <span>Unique Visitors Identified</span>
                             <span class="provenance-pill pill-tier-b">DERIVED</span>
                         </div>
-                        <div class="rev-kpi-value" style="color:#38BDF8;">{loyalty_data['total_unique_visitors']:,}</div>
-                        <div class="rev-kpi-sub">Across {loyalty_data['total_tickets_analyzed']:,} total parking events</div>
+                        <div class="rev-kpi-value" style="color:#38BDF8;">{u_visitors:,}</div>
+                        <div class="rev-kpi-sub">Across {tot_tickets:,} total parking events</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -3583,8 +3591,8 @@ with tab6:
                             <span>Repeat Visitor Rate</span>
                             <span class="provenance-pill pill-tier-b">DERIVED</span>
                         </div>
-                        <div class="rev-kpi-value" style="color:#10B981;">{loyalty_data['repeat_visitor_rate_pct']:.1f}%</div>
-                        <div class="rev-kpi-sub">{loyalty_data['returning_visitors'] + loyalty_data['loyal_visitors']:,} Returning & Loyal parkers</div>
+                        <div class="rev-kpi-value" style="color:#10B981;">{rep_rate:.1f}%</div>
+                        <div class="rev-kpi-sub">{ret_parkers + loy_parkers:,} Returning & Loyal parkers</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -3597,7 +3605,7 @@ with tab6:
                             <span>Est. Loyalty Incremental Spend</span>
                             <span class="provenance-pill pill-tier-e">MODELED</span>
                         </div>
-                        <div class="rev-kpi-value" style="color:#EC4899;">₱{loyalty_data['incremental_spend_php']:,.2f}</div>
+                        <div class="rev-kpi-value" style="color:#EC4899;">₱{inc_spend:,.2f}</div>
                         <div class="rev-kpi-sub">Via +67% repeat spend premium</div>
                     </div>
                     """,
@@ -3605,31 +3613,35 @@ with tab6:
                 )
 
             # Stacked Bar Chart: New vs Returning vs Loyal by Zone Archetype
-            if loyalty_data["archetype_breakdown"]:
+            if loyalty_data.get("archetype_breakdown"):
                 arch_df = pd.DataFrame(loyalty_data["archetype_breakdown"])
+                new_s = arch_df["new_pct"] if "new_pct" in arch_df.columns else arch_df["New"]
+                ret_s = arch_df["returning_pct"] if "returning_pct" in arch_df.columns else arch_df["Returning"]
+                loy_s = arch_df["loyal_pct"] if "loyal_pct" in arch_df.columns else arch_df["Loyal"]
+
                 fig_arch = go.Figure()
                 fig_arch.add_trace(go.Bar(
                     name="New (1 visit)",
                     x=arch_df["zone_archetype"],
-                    y=arch_df["new_pct"],
+                    y=new_s,
                     marker_color="#38BDF8",
-                    text=arch_df["new_pct"].apply(lambda v: f"{v:.1f}%"),
+                    text=new_s.apply(lambda v: f"{v:.1f}%"),
                     textposition="auto",
                 ))
                 fig_arch.add_trace(go.Bar(
                     name="Returning (2–3 visits)",
                     x=arch_df["zone_archetype"],
-                    y=arch_df["returning_pct"],
+                    y=ret_s,
                     marker_color="#10B981",
-                    text=arch_df["returning_pct"].apply(lambda v: f"{v:.1f}%"),
+                    text=ret_s.apply(lambda v: f"{v:.1f}%"),
                     textposition="auto",
                 ))
                 fig_arch.add_trace(go.Bar(
                     name="Loyal (4+ visits)",
                     x=arch_df["zone_archetype"],
-                    y=arch_df["loyal_pct"],
+                    y=loy_s,
                     marker_color="#EC4899",
-                    text=arch_df["loyal_pct"].apply(lambda v: f"{v:.1f}%"),
+                    text=loy_s.apply(lambda v: f"{v:.1f}%"),
                     textposition="auto",
                 ))
                 fig_arch.update_layout(
