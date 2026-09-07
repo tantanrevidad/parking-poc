@@ -76,6 +76,43 @@ def random_plate():
     return f"{letters}{digits}"
 
 
+def build_vehicle_pool(n_regulars=350, zipf_exponent=0.55, seed=42):
+    """
+    Builds a calibrated vehicle pool with regular returning parkers (Zipf weighted)
+    and transient parkers to achieve an authentic 20-35% repeat-visitor cohort rate.
+    """
+    rng = random.Random(seed)
+    plates_set = set()
+    while len(plates_set) < n_regulars:
+        letters = "".join(rng.choices(string.ascii_uppercase, k=3))
+        digits = "".join(rng.choices(string.digits, k=4))
+        plates_set.add(f"{letters}{digits}")
+    reg_plates = list(plates_set)
+    ranks = np.arange(1, n_regulars + 1)
+    weights = 1.0 / np.power(ranks, zipf_exponent)
+    weights = weights / weights.sum()
+    rng.shuffle(reg_plates)
+    return reg_plates, weights
+
+
+class VehiclePoolDrawer:
+    def __init__(self, n_regulars=350, repeat_prob=0.18, seed=42):
+        self.reg_plates, self.reg_weights = build_vehicle_pool(n_regulars, seed=seed)
+        self.repeat_prob = repeat_prob
+        self.transient_pool = []
+        self.rng = random.Random(seed + 7)
+
+    def draw(self):
+        if np.random.random() < self.repeat_prob:
+            return str(np.random.choice(self.reg_plates, p=self.reg_weights))
+        if self.transient_pool and np.random.random() < 0.12:
+            return self.rng.choice(self.transient_pool)
+        fresh = random_plate()
+        if len(self.transient_pool) < 2500:
+            self.transient_pool.append(fresh)
+        return fresh
+
+
 def corrupt_plate(plate, noise_level=0.25):
     """Simulate a low/variable-confidence OCR read of a real plate.
     Returns (read_text, per_char_confidence_list)."""
@@ -319,6 +356,9 @@ def main():
     hour_frac_now = now.hour + now.minute / 60.0
     is_weekend_now = now.weekday() >= 5
 
+    # Pre-build vehicle pool drawer for realistic repeat visitor dynamics
+    pool_drawer = VehiclePoolDrawer(n_regulars=350, repeat_prob=0.22, seed=42)
+
     for zi, z in enumerate(ZONES, start=1):
         site_name = SITES[z["site_idx"]]["name"]
         live_mult = event_multiplier(now, events, site_name) * holiday_multiplier(now, holidays, z["zone_type"])
@@ -332,7 +372,7 @@ def main():
                 state_rows.append((sid, "free", now.isoformat()))
                 continue
 
-            plate = random_plate()
+            plate = pool_drawer.draw()
             # ~45% of currently-occupied slots have a settled payment on file
             has_paid_ticket = random.random() < 0.45
             ticket_id = f"TCK{ticket_counter:05d}"
@@ -362,9 +402,9 @@ def main():
             status = "occupied_unpaid" if not has_paid_ticket else "occupied_pending_match"
             state_rows.append((sid, status, now.isoformat()))
 
-    # Generate historical completed ticket sessions over the past 7 days
-    # This enables deep empirical dwell distributions and revenue intelligence reconciliation
-    for past_day in range(1, 8):
+    # Generate historical completed ticket sessions across the full 28-day window
+    # This enables realistic repeat-visitor recognition and empirical dwell distributions
+    for past_day in range(1, HISTORY_DAYS + 1):
         day_date = now - timedelta(days=past_day)
         is_wknd = day_date.weekday() >= 5
         for zi, z in enumerate(ZONES, start=1):
@@ -374,7 +414,7 @@ def main():
             zone_slot_ids = [row[0] for row in slot_rows if row[1] == zi]
             
             for _ in range(n_sessions):
-                plate = random_plate()
+                plate = pool_drawer.draw()
                 ticket_id = f"TCK{ticket_counter:05d}"
                 ticket_counter += 1
                 sid = random.choice(zone_slot_ids)

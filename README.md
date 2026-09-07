@@ -111,7 +111,7 @@ python cv_demo.py --dataset all
 4. **Plate Matching:** Interactive slot inspector testing the fuzzy matcher on noisy OCR plate reads, displaying character confidence bars, candidate rankings via theme-adaptive tables, and match margin confirmation.
 5. **ALPR Feasibility (CV):** Dual-dataset visual gallery allowing users to toggle between the **Philippine License Plates (Roboflow Universe)** and the **Academic OpenALPR Benchmark**, inspecting YOLOv8 vehicle boxes, localized plate crops, OCR reads, and matcher resolutions.
 6. **Space Detection (CV):** Enterprise computer vision parking space occupancy detection engine across surveillance feeds in `car_dataset/`, implementing a **5-Phase Occupancy Detection Algorithm**: (1) Dual Native ROI Calibration from `slots_config.json`, (2) YOLOv8n vehicle inference with Adaptive Low-Light CLAHE Boost, (3) Intersection over Area (IoA) spatial occupancy calculation with Centroid Containment, (4) temporal sliding-window state debouncing (5-frame history, $\ge 60\%$ consensus), and (5) standardized JSON output payload generation with real-time overlays, capacity KPIs, and telemetry.
-7. **Revenue Intelligence:** Executive financial engineering and commercial optimization dashboard built on a **4-Tier Data Provenance Framework** (Tier A: Actual Megaworld Tariffs, Tier B: Deterministically Derived Database Records, Tier C: Colliers Philippine Retail Benchmarks, Tier D: SFpark/HAH International Smart Parking Research). Features (1) Revenue Operations Deck with daily ₱ metrics, RPBH (Revenue Per Bay Hour), and Zone × Hour Intensity Heatmaps; (2) Dynamic Pricing Simulator comparing Static vs. Time-of-Day vs. AI Demand-Responsive pricing strategies (+15% to +40% yield); (3) Revenue Leakage Recovery detecting unpaid overstayers with automated enforcement recapture models; (4) Retail Intelligence correlating dwell times with Philippine retail tenant spend elasticity (+1.3% retail spend per +1% dwell); and (5) an auditable Methodology transparency drawer.
+7. **Revenue Intelligence:** Executive financial engineering and commercial optimization dashboard built on a **5-Tier Data Provenance Framework** (Tier A: Actual Megaworld Tariffs, Tier B: Deterministically Derived Database Records, Tier C: Colliers Philippine Retail Benchmarks, Tier D: International Academic Research, Tier E: Explicit Modeled Diagnostics). Features (1) **Revenue Operations Deck** with daily ₱ metrics, RPBH (Revenue Per Bay Hour), peak revenue windows, and Zone × Hour Intensity Heatmaps; (2) **Dwell → Spend Elasticity** correlating empirical dwell distributions with tenant retail spend elasticity (Path Intelligence 1.3 elasticity, ₱1,000–₱3,000 baseline); (3) **Parking Friction & Saturation Model** diagnosing where static parking tariffs discourage retail dwell in unsaturated decks vs. healthy turnover in saturated decks (ScienceDirect 2014 Starbucks study); (4) **Repeat-Visitor Recognition Engine** analyzing visitor retention cohorts (New, Returning, Loyal) with +67% loyalty spend premiums, operating exclusively on salted SHA-256 cryptographic hashes for full Philippine Data Privacy Act (RA 10173) compliance; (5) **Revenue Leakage Recovery** detecting unpaid overstayers with automated enforcement recapture models; and (6) an auditable Methodology transparency drawer.
 
 ---
 
@@ -135,6 +135,7 @@ parking-poc/
 │   └── parking.db                # SQLite database with relational schemas & telemetry
 ├── debug_output/                 # Visual regression layers & JSON telemetry outputs
 ├── docs/
+│   ├── PROJECT_BIBLE.md               # Hyper-detailed Master Project Bible (Tab-by-Tab)
 │   ├── Revised_Prototype_Plan.md      # Prototype architectural roadmap
 │   ├── SYSTEM_DOCUMENTATION.md        # Comprehensive technical specification
 │   ├── TAB6_SPACE_DETECTION_GUIDE.md  # Space Detection engine guide
@@ -148,16 +149,17 @@ parking-poc/
 ├── calibrate.html                # Interactive browser-based polygon annotation tool
 ├── cv_demo.py                    # Computer Vision & ALPR evaluation pipeline
 ├── fetch_real_dataset.py         # OpenALPR benchmark dataset downloader
-├── generate_data.py              # Synthetic database & time-series generator
+├── generate_data.py              # Synthetic database & calibrated vehicle pool generator
 ├── leakage_detector.py           # Overstay vehicle detection and revenue recovery engine
+├── loyalty_engine.py             # Repeat-visitor cohort recognition & loyalty spend engine (RA 10173 compliant)
 ├── matcher.py                    # Confidence-weighted fuzzy matching algorithm
 ├── parking_detector.py           # 5-phase space occupancy & vehicle detection engine
 ├── ph_holidays.py                # Philippine National Holidays calendar & mobility modifiers
 ├── predictor.py                  # ML forecasting engine (HistGradientBoosting)
 ├── real_data_pipeline.py         # Real-world Google foot-traffic, weather, and events connector
 ├── requirements.txt              # Project dependencies
-├── revenue_config.py             # Megaworld township rate tariffs, benchmarks, & provenance tiers
-├── revenue_engine.py             # RPBH, dynamic pricing simulator, heatmaps, & retail models
+├── revenue_config.py             # Megaworld township rate tariffs, benchmarks, & 5 provenance tiers
+├── revenue_engine.py             # RPBH, parking friction & saturation model, heatmaps, & dwell elasticity
 ├── simulate.py                   # Real-time state simulation helper
 ├── slots_config.json             # Calibrated slot ROI polygon configurations
 ├── state_machine.py              # Parking slot lifecycle state machine

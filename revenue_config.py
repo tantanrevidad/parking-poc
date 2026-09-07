@@ -46,6 +46,14 @@ PROVENANCE_TIERS: Dict[str, Dict[str, str]] = {
         "border_color": "#9333EA",
         "description": "International academic and municipal smart parking pilots (SFpark, HAH Parking, PreciseParkLink).",
     },
+    "E": {
+        "tier": "Tier E",
+        "badge": "MODELED",
+        "color": "#EC4899",
+        "bg_color": "rgba(236, 72, 153, 0.15)",
+        "border_color": "#DB2777",
+        "description": "Explicit modeled assumption based on empirical research without an exact published formula coefficient.",
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -162,17 +170,10 @@ INDUSTRY_BENCHMARKS: Dict[str, Any] = {
     "dwell_spend_elasticity": {
         "value": 1.3,
         "meaning": "1% increase in customer dwell time corresponds to approx. 1.3% increase in retail spend",
-        "source": "International Council of Shopping Centers (ICSC) & PathIntelligence Retail Analytics",
+        "source": "Path Intelligence Retail Analytics & International Council of Shopping Centers (ICSC)",
         "provenance": "Tier C",
     },
     # Smart Parking Industry Benchmarks (Tier D)
-    "dynamic_pricing_uplift_pct": {
-        "conservative": 15.0,
-        "moderate": 25.0,
-        "aggressive": 40.0,
-        "source": "HAH Parking dynamic pricing deployments; SFpark municipal pilot evaluation",
-        "provenance": "Tier D",
-    },
     "manual_leakage_rate_pct": {
         "low": 5.0,
         "mid": 10.0,
@@ -193,6 +194,42 @@ INDUSTRY_BENCHMARKS: Dict[str, Any] = {
     "co2_saved_per_parking_trip_kg": {
         "value": 0.48,
         "source": "Environmental Protection Agency (EPA) gasoline vehicle emissions model",
+        "provenance": "Tier D",
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Tier D & E: Parking Friction & Saturation Model Parameters
+# ---------------------------------------------------------------------------
+FRICTION_MODEL_PARAMS: Dict[str, Any] = {
+    "saturation_threshold": {
+        "value": 0.85,
+        "source": "ScienceDirect: 'Do Parking Fees Affect Retail Sales? Evidence from Starbucks' (2014); consistent with Donald Shoup's 85% occupancy target",
+        "provenance": "Tier D",
+    },
+    "friction_coefficient": {
+        "value": 0.15,
+        "default_range": [0.05, 0.30],
+        "note": "Modeled sensitivity parameter reflecting dwell suppression from parking fees in unsaturated decks. Adjustable via UI slider.",
+        "provenance": "Tier E",
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Tier D: Retail Customer Retention & Loyalty Benchmarks
+# ---------------------------------------------------------------------------
+LOYALTY_BENCHMARKS: Dict[str, Any] = {
+    "retention_profit_uplift_pct": {
+        "low": 25.0,
+        "high": 95.0,
+        "basis": "5-percentage-point retention increase",
+        "source": "Bain & Company customer retention research (widely cited industry figure)",
+        "provenance": "Tier D",
+    },
+    "repeat_customer_spend_premium_pct": {
+        "value": 67.0,
+        "meaning": "Returning and loyal customers spend approx. 67% more per visit than one-time visitors",
+        "source": "Aggregated retail loyalty and customer retention analytics industry benchmarks",
         "provenance": "Tier D",
     },
 }

@@ -758,26 +758,27 @@ Both proposed enhancements are designed as **additive extensions** — they cons
 
 ---
 
-## 14. Tab 7 — Revenue Intelligence & Commercial Optimization Engine
+## 14. Tab 7 — Revenue Intelligence & Retail Synergy Engine
 
 ### 14.1 Objective & Megaworld Commercial Synergy
-Parking in modern mixed-use developments is not merely a cost-center or logistical requirement; it is a primary lever for **direct revenue generation**, **tenant retail sales enhancement**, and **operational efficiency**. Tab 7 implements an enterprise financial intelligence platform specifically aligned with Megaworld Corporation's commercial township portfolio (**Uptown Bonifacio**, **Eastwood City**, and **McKinley Hill / Venice Grand Canal Mall**).
+Parking in modern mixed-use developments is not merely a cost-center or logistical requirement; it is a primary lever for **direct revenue generation**, **tenant retail sales enhancement**, and **customer retention**. Tab 7 implements an enterprise financial and retail intelligence platform specifically aligned with Megaworld Corporation's commercial township portfolio (**Uptown Bonifacio**, **Eastwood City**, and **McKinley Hill / Venice Grand Canal Mall**).
 
-### 14.2 The 4-Tier Data Provenance Framework
+### 14.2 The 5-Tier Data Provenance Framework
 To eliminate invented metrics and ensure auditable integrity for corporate presentations, every metric in Tab 7 is bound to a verifiable provenance tier:
 
 | Tier | Badge | Classification | Verifiable Empirical Source |
 | :--- | :--- | :--- | :--- |
 | **Tier A** | `ACTUAL RATE` | Real Megaworld Parking Tariffs | Official Megaworld Lifestyle Mall parking signage and MoneyMax.ph advisories (2024–2025). |
-| **Tier B** | `DERIVED` | Deterministic Database Computation | Mathematically calculated from SQLite tables (`occupancy_history`, `ticketing_records`, `current_state`) using physical rate cards. |
-| **Tier C** | `PH BENCHMARK` | Philippine Retail Industry Research | Colliers International Philippine Retail Reports, Megaworld FY2025 Financial Statement Disclosures, and ICSC retail elasticity studies. |
-| **Tier D** | `INDUSTRY` | Peer-Reviewed International Smart Parking | SFpark municipal pilot evaluation, HAH Parking commercial deployments, and Vert.ai leakage audit white papers. |
+| **Tier B** | `DERIVED` | Deterministic Database Computation | Mathematically calculated from SQLite tables (`occupancy_history`, `ticketing_records`, `current_state`) using physical rate cards and salted hashes. |
+| **Tier C** | `PH BENCHMARK` | Philippine Retail Industry Research | Colliers International Philippine Retail Reports, Megaworld FY2025 Financial Statement Disclosures, and Path Intelligence / ICSC dwell elasticity studies. |
+| **Tier D** | `INDUSTRY` | Peer-Reviewed International Research | ScienceDirect (2014) Starbucks parking fee study, Bain & Company retention research, and Vert.ai leakage audit white papers. |
+| **Tier E** | `MODELED` | Explicit Diagnostic Assumptions | Clearly-labeled sensitivity parameters (e.g. friction sensitivity coefficient) translating qualitative research findings into interactive operational diagnostics. |
 
 ### 14.3 Official Township Rate Card Tariffs (Tier A)
 - **Uptown Bonifacio (Uptown Mall):**
   - First 3 hours flat: ₱50.00
   - 4th to 7th hours: ₱15.00 / hour
-  - 7th hour onwards (AM entry 06:00–11:59): ₱100.00 / hour (steep progressive tier discouraging office commuter stall monopolization)
+  - 7th hour onwards (AM entry 06:00–11:59): ₱100.00 / hour (progressive tier discouraging office stall monopolization)
   - 7th hour onwards (PM entry 12:00–05:59): ₱30.00 / hour
   - Overnight surcharge: ₱200.00
 - **Eastwood City (Eastwood Mall):**
@@ -796,19 +797,38 @@ To eliminate invented metrics and ensure auditable integrity for corporate prese
 $$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
 Provides an apples-to-apples monetization metric across zones of varying bay sizes and turnover frequencies.
 
-#### 14.4.2 AI Demand-Responsive Dynamic Pricing
-Given baseline parking rate $R_{\text{base}}$, target occupancy $\theta_{\text{target}} \in [0.50, 0.95]$, observed/forecasted occupancy $\theta_t \in [0, 1]$, surge coefficient $\alpha$, and discount floor $\beta$:
-$$M_t = \begin{cases} 
-1.0 + \alpha \left(\frac{\theta_t - \theta_{\text{target}}}{1.0 - \theta_{\text{target}}}\right) & \text{if } \theta_t \ge \theta_{\text{target}} \\
-\max\left(\beta, 1.0 - 0.35 \left(\frac{\theta_{\text{target}} - \theta_t}{\theta_{\text{target}}}\right)\right) & \text{if } \theta_t < \theta_{\text{target}}
-\end{cases}$$
-$$\text{Effective Rate}_t = R_{\text{base}} \times M_t$$
-Yields $+15\%$ to $+40\%$ revenue uplift during peak congestion while filling vacant stalls during shoulder and off-peak periods.
+#### 14.4.2 Parking Friction & Saturation Model (Tier E Modeled)
+Anchored in the 2014 ScienceDirect study (*"Do Parking Fees Affect Retail Sales? Evidence from Starbucks"*):
+- When occupancy $\ge \theta_{\text{sat}}$ (default $85\%$), the deck is in the **Saturated Regime**. Parking fees serve as a healthy turnover mechanism that increases visitor flow without penalizing gross merchant sales.
+- When occupancy $< \theta_{\text{sat}}$, the deck is in the **Unsaturated Regime**. Static parking fees act as economic friction that prematurely cuts shopping dwell short without creating useful vacancies.
 
-#### 14.4.3 Retail Spend Synergy Elasticity
-Based on International Council of Shopping Centers (ICSC) dwell analytics ($E_{\text{dwell}} = 1.3$):
+$$\text{Regime}_t = \begin{cases} \text{Saturated} & \text{if } \theta_t \ge 0.85 \\ \text{Unsaturated} & \text{if } \theta_t < 0.85 \end{cases}$$
+
+For unsaturated hours, the dwell suppression and resulting merchant spend-at-risk are computed as:
+$$\text{Suppression} = \text{friction\_coefficient} \times \left(\frac{\text{Current Tariff}}{\text{Base Tariff}}\right)$$
+$$\text{Spend At Risk} = \text{Suppression} \times 1.3 \times \text{Average Basket Spend} \times \text{Hourly Vehicle Visits}$$
+
+#### 14.4.3 Repeat-Visitor Recognition & Customer Retention Engine (Tier B & D)
+Anchored in Bain & Company customer retention findings (a 5% lift in retention yields a 25%–95% increase in profit) and aggregated retail loyalty analytics (+67% repeat spend premium):
+
+1. **Cryptographic Salted Hashing (RA 10173 Compliance):**
+   $$\text{Hashed ID} = \text{SHA256}(\text{Salt} \parallel \text{Plate})[0:16]$$
+   Raw license plates are never logged into loyalty structures or exposed in analytics views.
+2. **Cohort Classification over Lookback Window ($W \in \{7, 14, 28\}\text{ days}$):**
+   $$\text{Cohort} = \begin{cases} \text{New} & \text{if Visits} = 1 \\ \text{Returning} & \text{if } 2 \le \text{Visits} \le 3 \\ \text{Loyal} & \text{if Visits} \ge 4 \end{cases}$$
+3. **Repeat Visitor Rate & Incremental Loyalty Spend:**
+   $$\text{Repeat Rate} = \frac{V_{\text{Returning}} + V_{\text{Loyal}}}{V_{\text{Total}}} \times 100\%$$
+   $$\text{Incremental Loyalty Spend} = (V_{\text{Returning}} + V_{\text{Loyal}}) \times S_{\text{base}} \times 0.67$$
+
+#### 14.4.4 Dwell-Spend Elasticity
+Based on Path Intelligence retail analytics and ICSC dwell research ($E_{\text{dwell}} = 1.3$):
 $$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{base}}}{T_{\text{base}}}$$
 $$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
 Connecting parking ease directly to merchant sales growth across Megaworld Lifestyle Malls.
+
+#### 14.4.5 Revenue Leakage & Overstay Detection
+Flags vehicles with status `occupied_unpaid` exceeding duration $T_{\text{threshold}}$:
+$$\text{Uncollected Fee} = \text{compute\_ticket\_revenue}(\text{entry\_time}, \text{now}, \text{site}, \text{zone\_type})$$
+Projects annualized recovery potential when integrated with automated ALPR barrier gates.
 
 

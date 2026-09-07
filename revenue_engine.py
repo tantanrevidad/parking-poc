@@ -315,38 +315,46 @@ def compute_revenue_heatmap_matrix(
 
 
 # ---------------------------------------------------------------------------
-# 5. Dynamic Pricing Simulator (Flat vs. Tiered vs. AI Demand-Responsive)
+# 5. Parking Friction & Saturation Model (Tier E Modeled)
+# Based on ScienceDirect (2014) Starbucks parking fee study
 # ---------------------------------------------------------------------------
-def simulate_dynamic_pricing(
+def compute_friction_saturation_model(
     site_name: str,
     date_str: str,
-    base_rate: float = 50.0,
-    target_occupancy: float = 0.80,
-    surge_coeff: float = 0.40,
-    discount_floor: float = 0.70,
+    saturation_threshold: float = 0.85,
+    friction_coefficient: float = 0.15,
+    base_spend_php: float = 2000.0,
     db_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """
-    Compare projected 24-hour revenue across 3 distinct pricing strategies:
-      1. Flat / Current Rate (Tier A static tariffs)
-      2. Time-of-Day Tiered (Peak: +25%, Off-Peak: -15%)
-      3. AI Demand-Responsive (Dynamic rate based on real-time / forecasted occupancy)
+    Classifies each zone x hour bucket as Saturated vs. Unsaturated and
+    estimates retail spend-at-risk in Unsaturated buckets, per the Starbucks
+    parking-fee study's regime-dependent effect.
+
+    Data Provenance:
+        - Occupancy: Tier B (occupancy_history)
+        - Fee ratio: Tier A (PARKING_RATES)
+        - Friction coefficient: Tier E (MODELED — user-adjustable sensitivity)
+        - Dwell-spend conversion: Tier C (Path Intelligence 1.3 elasticity)
     """
     conn = get_db_connection(db_path)
     zones = pd.read_sql_query(
-        "SELECT z.zone_id, z.capacity FROM zones z JOIN sites s ON z.site_id = s.site_id WHERE s.name = ?",
+        """
+        SELECT z.zone_id, z.label, z.zone_type, z.capacity
+        FROM zones z
+        JOIN sites s ON z.site_id = s.site_id
+        WHERE s.name = ?
+        ORDER BY z.zone_id
+        """,
         conn,
         params=(site_name,),
     )
-    total_capacity = int(zones["capacity"].sum()) if not zones.empty else 100
-
+    
     hist_df = pd.read_sql_query(
         """
-        SELECT ts as timestamp, sum(occupied_count) as total_occ
+        SELECT ts as timestamp, zone_id, occupied_count, capacity, occupancy_rate
         FROM occupancy_history
         WHERE substr(ts, 1, 10) = ?
-        GROUP BY ts
-        ORDER BY ts
         """,
         conn,
         params=(date_str,),
@@ -357,76 +365,94 @@ def simulate_dynamic_pricing(
         conn = get_db_connection(db_path)
         latest_date = conn.execute("SELECT substr(max(ts), 1, 10) FROM occupancy_history").fetchone()[0]
         hist_df = pd.read_sql_query(
-            "SELECT ts as timestamp, sum(occupied_count) as total_occ FROM occupancy_history WHERE substr(ts, 1, 10) = ? GROUP BY ts ORDER BY ts",
+            "SELECT ts as timestamp, zone_id, occupied_count, capacity, occupancy_rate FROM occupancy_history WHERE substr(ts, 1, 10) = ?",
             conn,
             params=(latest_date,),
         )
         conn.close()
 
     hist_df["hour"] = pd.to_datetime(hist_df["timestamp"]).dt.hour
-    hourly_df = hist_df.groupby("hour")["total_occ"].mean().reset_index()
+    
+    zone_labels = zones["label"].tolist()
+    hours = [f"{h:02d}:00" for h in range(24)]
+    
+    # 0 = Unsaturated (Fee suppresses dwell), 1 = Saturated (Fee drives healthy turnover)
+    regime_matrix = np.zeros((len(zone_labels), 24))
+    occ_matrix = np.zeros((len(zone_labels), 24))
+    
+    site_rates = PARKING_RATES.get(site_name, PARKING_RATES["Uptown Bonifacio"])
+    elasticity = INDUSTRY_BENCHMARKS["dwell_spend_elasticity"]["value"]
+    
+    total_spend_at_risk = 0.0
+    unsaturated_buckets_count = 0
+    total_buckets_count = len(zone_labels) * 24
+    worst_buckets = []
 
-    hours_list = []
-    flat_rev = []
-    tiered_rev = []
-    ai_rev = []
-    dynamic_rates = []
+    for z_idx, (_, zrow) in enumerate(zones.iterrows()):
+        zid = zrow["zone_id"]
+        ztype = zrow["zone_type"]
+        zlabel = zrow["label"]
+        cap = zrow["capacity"]
+        
+        rates = site_rates.get(ztype, site_rates.get("mall", {}))
+        ref_flat_fee = rates.get("first_3hr_flat", 50.0)
+        
+        zone_hist = hist_df[hist_df["zone_id"] == zid]
+        for h in range(24):
+            hour_slice = zone_hist[zone_hist["hour"] == h]
+            if not hour_slice.empty:
+                avg_occ_rate = float(hour_slice["occupancy_rate"].mean())
+                avg_occ_count = float(hour_slice["occupied_count"].mean())
+            else:
+                avg_occ_rate = 0.35
+                avg_occ_count = cap * 0.35
+                
+            occ_matrix[z_idx, h] = round(avg_occ_rate * 100.0, 1)
+            
+            if avg_occ_rate >= saturation_threshold:
+                # Saturated: turnover constraint, fee does not suppress sales
+                regime_matrix[z_idx, h] = 1
+            else:
+                # Unsaturated: fee suppresses marginal dwell
+                regime_matrix[z_idx, h] = 0
+                unsaturated_buckets_count += 1
+                
+                # Fee ratio relative to reference first 3h flat rate
+                current_effective_fee = ref_flat_fee
+                fee_ratio = min(2.0, max(0.5, current_effective_fee / ref_flat_fee))
+                
+                # Implied dwell suppression percentage
+                suppression_pct = friction_coefficient * fee_ratio
+                
+                # Estimated visits in this 1-hour window (approx occupied bays * hourly turnover factor ~0.6)
+                visits_in_hour = max(1.0, avg_occ_count * 0.6)
+                
+                # Spend at risk formula
+                bucket_spend_at_risk = suppression_pct * elasticity * base_spend_php * visits_in_hour
+                total_spend_at_risk += bucket_spend_at_risk
+                
+                worst_buckets.append({
+                    "zone_label": zlabel,
+                    "zone_type": ztype.capitalize(),
+                    "hour": f"{h:02d}:00",
+                    "occupancy_pct": round(avg_occ_rate * 100.0, 1),
+                    "spend_at_risk": round(bucket_spend_at_risk, 2),
+                    "explanation": f"Unsaturated ({avg_occ_rate*100.0:.0f}% occ < {saturation_threshold*100:.0f}% threshold), static fee discourages extended dwell",
+                })
 
-    for h in range(24):
-        h_row = hourly_df[hourly_df["hour"] == h]
-        occ = float(h_row["total_occ"].iloc[0]) if not h_row.empty else (total_capacity * 0.4)
-        occ_ratio = min(1.0, max(0.05, occ / total_capacity))
-
-        hours_list.append(f"{h:02d}:00")
-
-        # 1. Flat Rate Strategy (constant base rate)
-        # Average hourly revenue = occupied cars * (base_rate / 3 hours)
-        hourly_base_rev = occ * (base_rate / 3.0)
-        flat_rev.append(round(hourly_base_rev, 2))
-
-        # 2. Time-of-Day Tiered Strategy
-        # Peak: 11:00-14:00 and 18:00-21:00 (+25%)
-        # Shoulder: 08:00-11:00, 14:00-18:00 (base)
-        # Off-peak: night/early morning (-20%)
-        if (11 <= h <= 14) or (18 <= h <= 21):
-            t_mult = 1.25
-        elif (8 <= h < 11) or (14 < h < 18):
-            t_mult = 1.00
-        else:
-            t_mult = 0.80
-        tiered_rev.append(round(hourly_base_rev * t_mult, 2))
-
-        # 3. AI Demand-Responsive Strategy
-        # If occ_ratio > target_occupancy: surge up to (1 + surge_coeff)
-        # If occ_ratio <= target_occupancy: discount down to discount_floor
-        if occ_ratio >= target_occupancy:
-            excess = (occ_ratio - target_occupancy) / max(0.01, (1.0 - target_occupancy))
-            ai_mult = 1.0 + (surge_coeff * excess)
-        else:
-            deficit = (target_occupancy - occ_ratio) / max(0.01, target_occupancy)
-            ai_mult = max(discount_floor, 1.0 - (0.35 * deficit))
-
-        effective_rate = base_rate * ai_mult
-        dynamic_rates.append(round(effective_rate, 2))
-        ai_rev.append(round(hourly_base_rev * ai_mult, 2))
-
-    total_flat = sum(flat_rev)
-    total_tiered = sum(tiered_rev)
-    total_ai = sum(ai_rev)
-    uplift_pct = ((total_ai - total_flat) / total_flat * 100.0) if total_flat > 0 else 0.0
+    worst_buckets.sort(key=lambda x: x["spend_at_risk"], reverse=True)
 
     return {
-        "hours": hours_list,
-        "flat_revenue": flat_rev,
-        "tiered_revenue": tiered_rev,
-        "ai_revenue": ai_rev,
-        "dynamic_rates": dynamic_rates,
-        "total_flat": total_flat,
-        "total_tiered": total_tiered,
-        "total_ai": total_ai,
-        "uplift_pct": uplift_pct,
-        "uplift_amount": total_ai - total_flat,
-        "provenance": "Tier D Dynamic Pricing Model (SFpark / HAH Parking) applied to Tier B Occupancy",
+        "zone_labels": zone_labels,
+        "hours": hours,
+        "regime_matrix": regime_matrix,
+        "occ_matrix": occ_matrix,
+        "total_spend_at_risk": round(total_spend_at_risk, 2),
+        "saturation_threshold": saturation_threshold,
+        "friction_coefficient": friction_coefficient,
+        "unsaturated_ratio_pct": round((unsaturated_buckets_count / max(1, total_buckets_count)) * 100.0, 1),
+        "worst_buckets": worst_buckets[:5],
+        "provenance": "Tier D (Starbucks / Shoup Saturation Regime) × Tier E (Modeled Friction Coeff) × Tier C (Path Intelligence 1.3 Elasticity)",
     }
 
 

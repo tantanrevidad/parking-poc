@@ -29,6 +29,7 @@ import vacating_simulator as vs
 import revenue_config as rc
 import revenue_engine as rev_engine
 import leakage_detector as ld
+import loyalty_engine as loyalty
 import cv2
 
 st.set_page_config(
@@ -1049,6 +1050,11 @@ button[aria-label*="LEAVING"] {{
     background: rgba(168, 85, 247, 0.15);
     color: #A855F7;
     border: 1px solid #9333EA;
+}}
+.pill-tier-e {{
+    background: rgba(236, 72, 153, 0.15);
+    color: #EC4899;
+    border: 1px solid #DB2777;
 }}
 .rev-kpi-card {{
     background: var(--bg-card);
@@ -3303,6 +3309,7 @@ with tab6:
                     <span class="provenance-pill pill-tier-b">DERIVED</span>
                     <span class="provenance-pill pill-tier-c">PH BENCHMARK</span>
                     <span class="provenance-pill pill-tier-d">INDUSTRY</span>
+                    <span class="provenance-pill pill-tier-e">MODELED</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -3429,158 +3436,11 @@ with tab6:
 
         st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
 
-        # ── SECTION B: Dynamic Pricing Simulator ──
+        # ── SECTION B: Dwell → Spend Elasticity ──
         st.markdown(
             """
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h5 style="margin:0; color:var(--text-primary);">Section B: Dynamic Pricing & Yield Simulator</h5>
-                <span class="provenance-pill pill-tier-d">INDUSTRY: SFPARK & HAH PARKING MODELS (20–40% UPLIFT)</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        @st.fragment
-        def render_dynamic_pricing_fragment(site_name, date_str, dark_mode):
-            p_col1, p_col2, p_col3, p_col4 = st.columns(4)
-            with p_col1:
-                base_rate = st.slider("Base Parking Rate (₱)", min_value=30.0, max_value=100.0, value=50.0, step=5.0, key="dp_base_rate")
-            with p_col2:
-                target_occ = st.slider("Target Occupancy (%)", min_value=50, max_value=95, value=80, step=5, key="dp_target_occ") / 100.0
-            with p_col3:
-                surge_coeff = st.slider("Surge Coefficient", min_value=0.10, max_value=1.00, value=0.40, step=0.05, key="dp_surge_coeff")
-            with p_col4:
-                disc_floor = st.slider("Discount Floor (%)", min_value=50, max_value=90, value=70, step=5, key="dp_disc_floor") / 100.0
-
-            pricing_res = rev_engine.simulate_dynamic_pricing(
-                site_name=site_name,
-                date_str=date_str,
-                base_rate=base_rate,
-                target_occupancy=target_occ,
-                surge_coeff=surge_coeff,
-                discount_floor=disc_floor,
-            )
-
-            uplift_pct = pricing_res["uplift_pct"]
-            uplift_amt = pricing_res["uplift_amount"]
-            st.markdown(
-                f"""
-                <div class="rev-banner">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div>
-                            <strong style="color:#10B981; font-size:1.05rem;">
-                                AI Demand-Responsive Yield: +₱{uplift_amt:,.2f} / day (+{uplift_pct:.1f}% Revenue Uplift)
-                            </strong>
-                            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
-                                Static Flat: ₱{pricing_res['total_flat']:,.2f} &nbsp;·&nbsp; Time-of-Day Tiered: ₱{pricing_res['total_tiered']:,.2f} &nbsp;·&nbsp; <strong>AI Dynamic: ₱{pricing_res['total_ai']:,.2f}</strong>
-                            </div>
-                        </div>
-                        <span class="provenance-pill pill-tier-d">SFPARK BENCHMARK: 20–40% DOCUMENTED GAIN</span>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            fig_pricing = go.Figure()
-            fig_pricing.add_trace(go.Scatter(
-                x=pricing_res["hours"],
-                y=pricing_res["flat_revenue"],
-                mode="lines+markers",
-                name="Current Static Flat Rate",
-                line=dict(color="#94A3B8", width=2, dash="dot"),
-            ))
-            fig_pricing.add_trace(go.Scatter(
-                x=pricing_res["hours"],
-                y=pricing_res["tiered_revenue"],
-                mode="lines+markers",
-                name="Time-of-Day Peak/Off-Peak Tiered",
-                line=dict(color="#38BDF8", width=2.5),
-            ))
-            fig_pricing.add_trace(go.Scatter(
-                x=pricing_res["hours"],
-                y=pricing_res["ai_revenue"],
-                mode="lines+markers",
-                name="AI Demand-Responsive (Dynamic)",
-                line=dict(color="#10B981", width=3.5),
-                fill="tonexty" if dark_mode else None,
-            ))
-            fig_pricing.update_layout(
-                title=f"24-Hour Revenue Projection: Static vs. Time-of-Day vs. AI Dynamic ({site_name})",
-                height=340,
-                margin=dict(l=10, r=10, t=40, b=10),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#F8FAFC" if dark_mode else "#0F172A"),
-                xaxis=dict(showgrid=False, title="Hour of Day"),
-                yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)" if dark_mode else "rgba(0,0,0,0.06)", title="Hourly Revenue (₱)"),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            )
-            st.plotly_chart(fig_pricing, use_container_width=True)
-
-        render_dynamic_pricing_fragment(target_site_for_heatmap, rev_sim_date.strftime("%Y-%m-%d"), is_dark)
-
-        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
-
-        # ── SECTION C: Revenue Leakage Recovery ──
-        st.markdown(
-            """
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h5 style="margin:0; color:var(--text-primary);">Section C: Revenue Leakage & Overstay Recovery</h5>
-                <span class="provenance-pill pill-tier-d">INDUSTRY BENCHMARK: 5–15% MANUAL FACILITY LEAKAGE</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        @st.fragment
-        def render_leakage_fragment():
-            l_ctrl1, l_ctrl2, l_ctrl3 = st.columns([2, 2, 2])
-            with l_ctrl1:
-                threshold_h = st.slider("Overstay Threshold (Hours)", min_value=1.5, max_value=6.0, value=3.0, step=0.5, key="leak_thresh_slider")
-
-            leakage_res = ld.compute_overstay_leakage(threshold_hours=threshold_h)
-            with l_ctrl2:
-                st.markdown(
-                    f"""
-                    <div class="rev-kpi-card" style="border-left:3px solid #EF4444; padding:10px 14px; margin:0;">
-                        <div class="rev-kpi-label">Unpaid Overstay Fees Now</div>
-                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#EF4444;">₱{leakage_res['total_unpaid_now']:,.2f}</div>
-                        <div class="rev-kpi-sub">{leakage_res['num_overstayers']} Vehicles Flagged (> {threshold_h}h)</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            with l_ctrl3:
-                st.markdown(
-                    f"""
-                    <div class="rev-kpi-card" style="border-left:3px solid #10B981; padding:10px 14px; margin:0;">
-                        <div class="rev-kpi-label">Est. Monthly Recovery</div>
-                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#10B981;">₱{leakage_res['projected_monthly_recovery']:,.2f}</div>
-                        <div class="rev-kpi-sub">Via Automated ALPR Enforcement</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-            if leakage_res["vehicles"]:
-                leak_df = pd.DataFrame(leakage_res["vehicles"])
-                leak_df_display = leak_df[["slot_code", "plate", "site_name", "zone_label", "entry_time", "dwell_hours", "uncollected_fee", "status"]].copy()
-                leak_df_display.columns = ["Bay Code", "License Plate", "Township", "Zone", "Entry Time", "Dwell (Hours)", "Uncollected Fee (₱)", "Enforcement Status"]
-                render_html_table(leak_df_display)
-            else:
-                st.info(f"No vehicles currently exceeding the {threshold_h}-hour overstay threshold.")
-
-        render_leakage_fragment()
-
-        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
-
-        # ── SECTION D: Retail Intelligence & Visitor Value ──
-        st.markdown(
-            """
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h5 style="margin:0; color:var(--text-primary);">Section D: Retail Intelligence & Township Economic Synergy</h5>
+                <h5 style="margin:0; color:var(--text-primary);">Section B: Dwell → Spend Elasticity</h5>
                 <span class="provenance-pill pill-tier-c">PH BENCHMARK: COLLIERS PH ₱1,000–₱3,000 MALL SPEND</span>
             </div>
             """,
@@ -3664,7 +3524,315 @@ with tab6:
 
         st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
 
-        # ── SECTION E: Methodology Transparency ──
+        # ── SECTION C: Parking Friction & Saturation Model ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section C: Parking Friction & Saturation Model</h5>
+                <span class="provenance-pill pill-tier-e">MODELED (TIER E): STARBUCKS REGIME × FRICTION SENSITIVITY</span>
+            </div>
+            <div style="font-size:0.83rem; color:var(--text-secondary); margin-bottom:14px;">
+                ScienceDirect (2014) Finding: When parking is saturated (≥85%), parking fees encourage healthy turnover and customer throughput. When unsaturated (&lt;85%), static tariffs discourage marginal dwell, putting tenant retail sales at risk.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        @st.fragment
+        def render_friction_fragment(site_name, date_str, dark_mode, base_spend):
+            f_col_left, f_col_right = st.columns([3, 2])
+            
+            with f_col_right:
+                st.markdown(
+                    """
+                    <div style="font-weight:700; font-size:0.88rem; color:var(--text-primary); margin-bottom:8px;">
+                        Friction Sensitivity Parameter
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                friction_coeff = st.slider(
+                    "Friction Sensitivity Coefficient",
+                    min_value=0.05,
+                    max_value=0.30,
+                    value=0.15,
+                    step=0.01,
+                    key="fric_coeff_slider",
+                    help="Modeled assumption: fraction of static fee burden that suppresses customer dwell in unsaturated decks.",
+                )
+                st.caption("Modeled assumption (Tier E) — adjust to evaluate spend-at-risk sensitivity.")
+
+                fric_res = rev_engine.compute_friction_saturation_model(
+                    site_name=site_name,
+                    date_str=date_str,
+                    saturation_threshold=0.85,
+                    friction_coefficient=friction_coeff,
+                    base_spend_php=base_spend,
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #EC4899; margin-top:10px;">
+                        <div class="rev-kpi-label">
+                            <span>Estimated Dwell Spend at Risk</span>
+                            <span class="provenance-pill pill-tier-e">MODELED</span>
+                        </div>
+                        <div class="rev-kpi-value" style="color:#EC4899;">₱{fric_res['total_spend_at_risk']:,.2f}</div>
+                        <div class="rev-kpi-sub">Across {fric_res['unsaturated_ratio_pct']}% of daily operational hours</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            with f_col_left:
+                st.markdown(
+                    f"""
+                    <div style="font-weight:700; font-size:0.88rem; color:var(--text-primary); margin-bottom:8px;">
+                        Capacity Regime Matrix — {site_name} (Saturated vs. Unsaturated)
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                # Two-tone heatmap: 0 = Unsaturated (Amber), 1 = Saturated (Emerald Green)
+                colorscale_regime = [
+                    [0.0, "#F59E0B" if dark_mode else "#D97706"],
+                    [0.49, "#F59E0B" if dark_mode else "#D97706"],
+                    [0.5, "#10B981"],
+                    [1.0, "#10B981"],
+                ]
+                
+                fig_regime = go.Figure(data=go.Heatmap(
+                    z=fric_res["regime_matrix"],
+                    x=fric_res["hours"],
+                    y=fric_res["zone_labels"],
+                    colorscale=colorscale_regime,
+                    showscale=False,
+                    hoverongaps=False,
+                    customdata=fric_res["occ_matrix"],
+                    hovertemplate="Zone: %{y}<br>Time: %{x}<br>Occupancy: %{customdata}%<extra></extra>",
+                ))
+                fig_regime.update_layout(
+                    height=240,
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font=dict(color="#F8FAFC" if dark_mode else "#0F172A"),
+                    xaxis=dict(showgrid=False, tickangle=-45),
+                    yaxis=dict(showgrid=False, autorange="reversed"),
+                )
+                st.plotly_chart(fig_regime, use_container_width=True)
+
+                st.markdown(
+                    """
+                    <div style="font-size:0.76rem; color:var(--text-secondary); display:flex; gap:16px; align-items:center;">
+                        <span><strong style="color:#10B981;">■ Saturated (≥85%):</strong> Healthy turnover constraint</span>
+                        <span><strong style="color:#F59E0B;">■ Unsaturated (&lt;85%):</strong> Fee suppresses marginal dwell</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            # Top 5 spend-at-risk ranking table
+            if fric_res["worst_buckets"]:
+                st.markdown("<div style='font-weight:700; font-size:0.86rem; color:var(--text-primary); margin:14px 0 6px 0;'>Top 5 Operational Windows with Dwell Spend at Risk</div>", unsafe_allow_html=True)
+                worst_df = pd.DataFrame(fric_res["worst_buckets"])
+                worst_display = worst_df[["zone_label", "zone_type", "hour", "occupancy_pct", "spend_at_risk", "explanation"]].copy()
+                worst_display.columns = ["Zone", "Archetype", "Time Window", "Avg Occupancy", "Estimated Spend at Risk (₱)", "Diagnostic Context"]
+                worst_display["Avg Occupancy"] = worst_display["Avg Occupancy"].apply(lambda v: f"{v:.1f}%")
+                worst_display["Estimated Spend at Risk (₱)"] = worst_display["Estimated Spend at Risk (₱)"].apply(lambda v: f"₱{v:,.2f}")
+                render_html_table(worst_display)
+
+        render_friction_fragment(target_site_for_heatmap, rev_sim_date.strftime("%Y-%m-%d"), is_dark, base_spend_slider)
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION D: Repeat-Visitor Recognition Engine ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section D: Repeat-Visitor Recognition Engine</h5>
+                <div>
+                    <span class="provenance-pill pill-tier-b">DERIVED: SALTED SHA-256 HASHES</span>
+                    <span class="provenance-pill pill-tier-d">INDUSTRY: +67% LOYALTY SPEND PREMIUM</span>
+                </div>
+            </div>
+            <div style="font-size:0.83rem; color:var(--text-secondary); margin-bottom:14px;">
+                Leverages camera ALPR exit reads to quantify visitor retention without tracking individuals. Operates strictly on salted cryptographic hashes in full compliance with the Philippine Data Privacy Act of 2012 (RA 10173).
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        @st.fragment
+        def render_loyalty_fragment(site_name, dark_mode, base_spend):
+            c_lookback, _ = st.columns([2, 4])
+            with c_lookback:
+                lookback_selection = st.radio(
+                    "Historical Lookback Window",
+                    options=[7, 14, 28],
+                    index=2,
+                    horizontal=True,
+                    format_func=lambda d: f"{d} Days",
+                    key="loyalty_lookback_radio",
+                )
+
+            loyalty_data = loyalty.compute_repeat_visitor_segments(
+                site_name=site_name,
+                lookback_days=lookback_selection,
+                base_spend_php=base_spend,
+            )
+
+            kpi_l1, kpi_l2, kpi_l3 = st.columns(3)
+            with kpi_l1:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #38BDF8;">
+                        <div class="rev-kpi-label">
+                            <span>Repeat Visitor Rate</span>
+                            <span class="provenance-pill pill-tier-b">DERIVED</span>
+                        </div>
+                        <div class="rev-kpi-value">{loyalty_data['repeat_visitor_rate']:.1f}%</div>
+                        <div class="rev-kpi-sub">Returning + Loyal share of total visits</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with kpi_l2:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #10B981;">
+                        <div class="rev-kpi-label">
+                            <span>Loyal Cohort Share</span>
+                            <span class="provenance-pill pill-tier-b">DERIVED</span>
+                        </div>
+                        <div class="rev-kpi-value">{loyalty_data['loyal_share_pct']:.1f}%</div>
+                        <div class="rev-kpi-sub">Vehicles with 4+ visits in window</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with kpi_l3:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #EC4899;">
+                        <div class="rev-kpi-label">
+                            <span>Est. Loyalty Incremental Spend</span>
+                            <span class="provenance-pill pill-tier-e">MODELED</span>
+                        </div>
+                        <div class="rev-kpi-value" style="color:#EC4899;">₱{loyalty_data['incremental_spend_php']:,.2f}</div>
+                        <div class="rev-kpi-sub">Via +67% repeat spend premium</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            # Stacked Bar Chart: New vs Returning vs Loyal by Zone Archetype
+            if loyalty_data["archetype_breakdown"]:
+                arch_df = pd.DataFrame(loyalty_data["archetype_breakdown"])
+                fig_arch = go.Figure()
+                fig_arch.add_trace(go.Bar(
+                    name="New (1 visit)",
+                    x=arch_df["zone_archetype"],
+                    y=arch_df["New"],
+                    marker_color="#94A3B8",
+                    hovertemplate="%{x} - New: %{y:.1f}%<extra></extra>",
+                ))
+                fig_arch.add_trace(go.Bar(
+                    name="Returning (2–3 visits)",
+                    x=arch_df["zone_archetype"],
+                    y=arch_df["Returning"],
+                    marker_color="#38BDF8",
+                    hovertemplate="%{x} - Returning: %{y:.1f}%<extra></extra>",
+                ))
+                fig_arch.add_trace(go.Bar(
+                    name="Loyal (4+ visits)",
+                    x=arch_df["zone_archetype"],
+                    y=arch_df["Loyal"],
+                    marker_color="#10B981",
+                    hovertemplate="%{x} - Loyal: %{y:.1f}%<extra></extra>",
+                ))
+                fig_arch.update_layout(
+                    barmode="stack",
+                    title="Customer Cohort Distribution by Zone Archetype",
+                    height=280,
+                    margin=dict(l=10, r=10, t=40, b=10),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font=dict(color="#F8FAFC" if dark_mode else "#0F172A"),
+                    yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.06)" if dark_mode else "rgba(0,0,0,0.06)", title="Share of Visits (%)", range=[0, 100]),
+                    xaxis=dict(showgrid=False),
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                st.plotly_chart(fig_arch, use_container_width=True)
+
+            st.markdown(
+                """
+                <div style="font-size:0.75rem; color:var(--text-muted); padding:6px 10px; background:var(--bg-card-subtle); border-radius:6px; border:1px solid var(--border-color);">
+                    <strong>Privacy & Compliance Note:</strong> Vehicle identifiers are cryptographically transformed into 16-character salted SHA-256 hashes at query time. Raw license plates are never logged into loyalty data structures, ensuring zero personal identifying information (PII) exposure in strict accordance with the Philippine Data Privacy Act of 2012 (RA 10173).
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        render_loyalty_fragment(rev_site_choice, is_dark, base_spend_slider)
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION E: Revenue Leakage & Overstay Recovery ──
+        st.markdown(
+            """
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h5 style="margin:0; color:var(--text-primary);">Section E: Revenue Leakage & Overstay Recovery</h5>
+                <span class="provenance-pill pill-tier-d">INDUSTRY BENCHMARK: 5–15% MANUAL FACILITY LEAKAGE</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        @st.fragment
+        def render_leakage_fragment():
+            l_ctrl1, l_ctrl2, l_ctrl3 = st.columns([2, 2, 2])
+            with l_ctrl1:
+                threshold_h = st.slider("Overstay Threshold (Hours)", min_value=1.5, max_value=6.0, value=3.0, step=0.5, key="leak_thresh_slider")
+
+            leakage_res = ld.compute_overstay_leakage(threshold_hours=threshold_h)
+            with l_ctrl2:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #EF4444; padding:10px 14px; margin:0;">
+                        <div class="rev-kpi-label">Unpaid Overstay Fees Now</div>
+                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#EF4444;">₱{leakage_res['total_unpaid_now']:,.2f}</div>
+                        <div class="rev-kpi-sub">{leakage_res['num_overstayers']} Vehicles Flagged (> {threshold_h}h)</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with l_ctrl3:
+                st.markdown(
+                    f"""
+                    <div class="rev-kpi-card" style="border-left:3px solid #10B981; padding:10px 14px; margin:0;">
+                        <div class="rev-kpi-label">Est. Monthly Recovery</div>
+                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#10B981;">₱{leakage_res['projected_monthly_recovery']:,.2f}</div>
+                        <div class="rev-kpi-sub">Via Automated ALPR Enforcement</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+            if leakage_res["vehicles"]:
+                leak_df = pd.DataFrame(leakage_res["vehicles"])
+                leak_df_display = leak_df[["slot_code", "plate", "site_name", "zone_label", "entry_time", "dwell_hours", "uncollected_fee", "status"]].copy()
+                leak_df_display.columns = ["Bay Code", "License Plate", "Township", "Zone", "Entry Time", "Dwell (Hours)", "Uncollected Fee (₱)", "Enforcement Status"]
+                render_html_table(leak_df_display)
+            else:
+                st.info(f"No vehicles currently exceeding the {threshold_h}-hour overstay threshold.")
+
+        render_leakage_fragment()
+
+        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
+
+        # ── SECTION F: Methodology Transparency Drawer ──
         with st.expander("Methodology & Verifiable Data Provenance", expanded=False):
             st.markdown(
                 """
@@ -3676,10 +3844,16 @@ with tab6:
                     Individual ticket revenues are computed deterministically: <code>Revenue = compute_ticket_revenue(entry_time, exit_time, site, zone_type)</code>. Macro township revenue is computed from 15-minute historical intervals: <code>Interval Revenue = Occupied Count × (Effective Hourly Tariff ÷ 4)</code>. Revenue Per Bay Hour (RPBH) is computed as: <code>RPBH = Daily Revenue ÷ (Capacity × 24)</code>.</p>
 
                     <p><strong>3. Philippine Retail Benchmarks (Tier C — PH Industry):</strong><br>
-                    Average mall visitor spend of ₱1,000–₱3,000 is based on Colliers International Philippine Retail Market reports. Megaworld daily foot-traffic of 297,000 and mall leasing revenue of ₱6.9B are sourced from Megaworld Corporation's FY2025 Financial Statement Disclosures. Dwell-spend elasticity factor of 1.3 is sourced from the International Council of Shopping Centers (ICSC).</p>
+                    Average mall visitor spend of ₱1,000–₱3,000 is based on Colliers International Philippine Retail Market reports. Megaworld daily foot-traffic of 297,000 and mall leasing revenue of ₱6.9B are sourced from Megaworld Corporation's FY2025 Financial Statement Disclosures. Dwell-spend elasticity factor of 1.3 is sourced from Path Intelligence Retail Analytics & the International Council of Shopping Centers (ICSC).</p>
 
                     <p><strong>4. International Smart Parking Research (Tier D — Industry Pilots):</strong><br>
-                    Dynamic pricing revenue uplift of 15–40% is derived from the San Francisco Municipal Transportation Agency (SFpark) pilot evaluation and HAH Parking commercial deployments. Revenue leakage baseline of 5–15% is derived from Vert.ai and PreciseParkLink parking revenue audit white papers.</p>
+                    Revenue leakage baseline of 5–15% is derived from Vert.ai and PreciseParkLink parking revenue audit white papers. Repeat customer spend premium (+67%) is aggregated from retail loyalty and retention analytics benchmarks. 85% parking saturation target is sourced from Donald Shoup's urban mobility frameworks.</p>
+
+                    <p><strong>5. Modeled Diagnostic Assumptions (Tier E — Modeled):</strong><br>
+                    Friction sensitivity parameter reflects the 2014 ScienceDirect Starbucks parking study finding: in unsaturated decks, static fees suppress marginal visit dwell. Saturated decks (≥85%) act as turnover constraints where fees do not penalize sales. Modeled parameters are exposed as interactive sliders for transparent sensitivity testing.</p>
+
+                    <p><strong>6. Data Privacy Compliance (RA 10173):</strong><br>
+                    Repeat-visitor recognition operates exclusively on 16-character salted SHA-256 hashes generated dynamically at query execution. Raw license plate strings are never persisted into loyalty reporting tables, ensuring non-identifiability under National Privacy Commission standards.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
