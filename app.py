@@ -29,6 +29,7 @@ import vacating_simulator as vs
 import revenue_config as rc
 import revenue_engine as rev_engine
 import leakage_detector as ld
+import loyalty_engine
 import loyalty_engine as loyalty
 import cv2
 

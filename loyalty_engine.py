@@ -170,14 +170,22 @@ def compute_repeat_visitor_segments(
                 "New": round((row.get("New", 0) / tot_arch) * 100.0, 1),
                 "Returning": round((row.get("Returning", 0) / tot_arch) * 100.0, 1),
                 "Loyal": round((row.get("Loyal", 0) / tot_arch) * 100.0, 1),
+                "new_pct": round((row.get("New", 0) / tot_arch) * 100.0, 1),
+                "returning_pct": round((row.get("Returning", 0) / tot_arch) * 100.0, 1),
+                "loyal_pct": round((row.get("Loyal", 0) / tot_arch) * 100.0, 1),
                 "total_visits": int(tot_arch),
             })
 
     return {
         "lookback_days": lookback_days,
         "total_visitors": total_unique_visitors,
+        "total_unique_visitors": total_unique_visitors,
         "total_tickets": total_tickets,
+        "total_tickets_analyzed": total_tickets,
         "repeat_visitor_rate": round(repeat_visitor_rate, 1),
+        "repeat_visitor_rate_pct": round(repeat_visitor_rate, 1),
+        "returning_visitors": n_ret_visitors,
+        "loyal_visitors": n_loy_visitors,
         "loyal_share_pct": round(loyal_share_pct, 1),
         "incremental_spend_php": round(incremental_spend_php, 2),
         "segment_counts": {
