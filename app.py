@@ -3278,7 +3278,7 @@ with tab6:
             <div style="margin-bottom:16px;">
                 <h3 style="margin:0 0 4px 0; color:var(--text-primary);">Revenue Intelligence & Commercial Optimization</h3>
                 <div style="font-size:0.88rem; color:var(--text-secondary);">
-                    AI-driven revenue modeling, dynamic pricing elasticity, leakage detection, and retail synergy across Megaworld Townships.
+                    AI-driven revenue modeling, dwell-to-spend elasticity, repeat-visitor recognition, and retail synergy across Megaworld Townships.
                 </div>
             </div>
             """,

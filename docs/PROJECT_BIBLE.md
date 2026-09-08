@@ -12,7 +12,7 @@
 ## Table of Contents
 1. [Executive Summary & System Philosophy](#1-executive-summary--system-philosophy)
 2. [Global Technology Stack & Infrastructure](#2-global-technology-stack--infrastructure)
-3. [Global Data Provenance Framework (4-Tier Taxonomy)](#3-global-data-provenance-framework-4-tier-taxonomy)
+3. [Global Data Provenance Framework (5-Tier Taxonomy)](#3-global-data-provenance-framework-5-tier-taxonomy)
 4. [Tab 1: Occupancy Map & Real-Time Township Deck Operations](#4-tab-1-occupancy-map--real-time-township-deck-operations)
 5. [Tab 2: Availability Forecast & Predictive Scenario Modeling](#5-tab-2-availability-forecast--predictive-scenario-modeling)
 6. [Tab 3: Model Performance & Diagnostic Validation](#6-tab-3-model-performance--diagnostic-validation)
@@ -83,9 +83,9 @@ This Proof of Concept (POC) demonstrates a unified, 7-layer architecture combini
 
 ---
 
-## 3. Global Data Provenance Framework (4-Tier Taxonomy)
+## 3. Global Data Provenance Framework (5-Tier Taxonomy)
 
-To eliminate unverified assumptions, every dataset, metric, and coefficient across this system is categorized under an auditable 4-Tier Data Provenance Framework:
+To eliminate unverified assumptions, every dataset, metric, and coefficient across this system is categorized under an auditable 5-Tier Data Provenance Framework:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -97,14 +97,17 @@ To eliminate unverified assumptions, every dataset, metric, and coefficient acro
 ├──────────────┼──────────────────┼────────────────────────────────────────────────┤
 │ Tier C       │ PH BENCHMARK     │ Colliers PH, ICSC, Megaworld FY2025 Disclosures │
 ├──────────────┼──────────────────┼────────────────────────────────────────────────┤
-│ Tier D       │ INDUSTRY         │ SFpark, HAH, Vert.ai, Donald Shoup Smart Parking│
+│ Tier D       │ INDUSTRY         │ SFpark, HAH, Bain & Co, Donald Shoup Benchmarks│
+├──────────────┼──────────────────┼────────────────────────────────────────────────┤
+│ Tier E       │ MODELED          │ Explicit Modeled Assumptions (Retention Econ)  │
 └──────────────┴──────────────────┴────────────────────────────────────────────────┘
 ```
 
 - **Tier A (Actual Rates):** Official published parking tariffs from Megaworld Lifestyle Malls (Uptown Mall, Eastwood Mall, Venice Grand Canal Mall) verified via physical facility signage and financial portals.
 - **Tier B (Derived Data):** Deterministically computed from local SQLite records (`data/parking.db`), such as dwell times derived from ticket issuance and payment settlement timestamps.
 - **Tier C (Philippine Market Benchmarks):** Empirical Philippine real estate and retail consumer data sourced from Colliers International Philippines, Megaworld Corporation FY2025 Audited Financial Statements, and ICSC research.
-- **Tier D (International Smart Parking Benchmarks):** Peer-reviewed smart parking municipal research, including SFpark (San Francisco Municipal Transportation Agency), Donald Shoup's academic economic models, and Vert.ai audit studies.
+- **Tier D (International Smart Parking Benchmarks):** Peer-reviewed smart parking municipal research (SFpark, Donald Shoup) and customer retention economics (Bain & Company).
+- **Tier E (Modeled Customer Loyalty Assumptions):** Explicit parameterized economic modeling based on empirical retail analytics (e.g., +67% repeat customer spend premium evaluated against empirical visitation cohorts).
 
 ---
 
@@ -494,26 +497,49 @@ Tab 7 transforms parking management from a passive cost-center into an active ex
 - **Retention Analytics:** Tier D (Bain & Company).
 - **Modeled Customer Loyalty Assumptions:** Tier E (Modeled). Modeled +67% repeat customer spend premium evaluating retention economic value.
 
-### 10.5 Mathematical Formulations & Data Flow
+### 10.5 Mathematical Formulations, Architecture & Data Flow
 
-#### 1. Revenue Per Bay Hour (RPBH):
-$$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
-Normalizes revenue performance across decks of differing physical capacities and operating profiles.
+Tab 7 is structured into three primary operational analytical sections and an auditable transparency drawer:
 
-#### 2. Retail Dwell-Spend Economic Synergy:
-$$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{baseline}}}{T_{\text{baseline}}} \quad (T_{\text{baseline}} = 2.5\text{ hours})$$
-$$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
-Demonstrates how frictionless parking wayfinding and turnover optimization directly fuel tenant sales across Megaworld Lifestyle Malls.
+#### Section A: Revenue Operations Dashboard & Township RPBH
+1. **Deterministic Ticket Tariff Calculation:**
+   Revenues are computed deterministically per vehicle session using official Tier A rate cards:
+   $$\text{Revenue} = \text{compute\_ticket\_revenue}(\text{entry\_time}, \text{exit\_time}, \text{site}, \text{zone\_type})$$
+2. **Township Macro Revenue & Hourly Run-Rate:**
+   Macro township revenue is aggregated across 15-minute historical intervals:
+   $$\text{Interval Revenue} = \text{Occupied Count} \times \frac{\text{Effective Hourly Tariff}}{4}$$
+3. **Revenue Per Bay Hour (RPBH):**
+   $$\text{RPBH} = \frac{\sum_{i=1}^{N} \text{Daily Revenue}_i}{\text{Capacity} \times 24}$$
+   Normalizes revenue performance across decks of differing physical capacities and operating profiles.
+4. **24-Hour Zone $\times$ Hour Intensity Heatmap:**
+   Renders diurnal intensity across all 9 township parking zones, mapping operational utilization against revenue generation.
 
-#### 3. Repeat-Visitor Recognition & Retention Analytics (`loyalty_engine.py`):
+#### Section B: Dwell $\rightarrow$ Spend Elasticity Engine
+1. **Empirical Dwell Time Distribution:**
+   Classifies ticketing records into four operational dwell cohorts across archetypes (Mall, Office, Residential):
+   - *Short Stay / Errand:* $< 1.5\text{ hours}$
+   - *Target Retail Window:* $1.5\text{ to } 3.0\text{ hours}$
+   - *Extended Stay / Dining & Cinema:* $3.0\text{ to } 6.0\text{ hours}$
+   - *Commuter / Monopolization:* $> 6.0\text{ hours}$
+2. **Retail Dwell-Spend Economic Synergy:**
+   $$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{baseline}}}{T_{\text{baseline}}} \quad (T_{\text{baseline}} = 2.5\text{ hours})$$
+   $$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
+   Demonstrates how frictionless parking wayfinding and turnover optimization directly fuel tenant sales across Megaworld Lifestyle Malls (supported by interactive $S_{\text{base}}$ slider: ₱1,000 to ₱3,000).
+
+#### Section C: Repeat-Visitor Recognition & Customer Loyalty Analytics (`loyalty_engine.py`)
 1. **Cryptographic Salted Hashing (RA 10173 Compliance):**
    $$\text{Hashed ID} = \text{SHA256}(\text{Salt} \parallel \text{Plate})[0:16]$$
-   Raw license plates are never logged into loyalty structures or exposed in analytics views.
+   Raw license plates are never logged into loyalty structures or exposed in analytics views, fully satisfying the Philippine Data Privacy Act of 2012.
 2. **Cohort Classification over Lookback Window ($W \in \{7, 14, 28\}\text{ days}$):**
    $$\text{Cohort} = \begin{cases} \text{New} & \text{if Visits} = 1 \\ \text{Returning} & \text{if } 2 \le \text{Visits} \le 3 \\ \text{Loyal} & \text{if Visits} \ge 4 \end{cases}$$
 3. **Repeat Visitor Rate & Incremental Loyalty Spend:**
    $$\text{Repeat Rate} = \frac{V_{\text{Returning}} + V_{\text{Loyal}}}{V_{\text{Total}}} \times 100\%$$
    $$\text{Incremental Loyalty Spend} = (V_{\text{Returning}} + V_{\text{Loyal}}) \times S_{\text{base}} \times 0.67$$
+4. **Retention Breakdown by Archetype:**
+   Stacked bar chart reporting percentage distribution of New, Returning, and Loyal parkers across Mall, Office, and Residential zones.
+
+#### Section D: Methodology & Verifiable Data Provenance Drawer
+An interactive drawer detailing the mathematical formulas, official rate schedules, statutory disclosures, and research citations across all 5 tiers of data provenance.
 
 ### 10.6 Variable Sensitivity & Impact Analysis
 | Variable | Operational Range | Impacted Metric / Output | Sensitivity & Economic Dynamics |
