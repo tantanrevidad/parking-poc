@@ -1,3 +1,7 @@
 [theme]
 primaryColor = "#2563EB"
 font = "sans serif"
+
+[server]
+enableCORS = false
+enableXsrfProtection = false
