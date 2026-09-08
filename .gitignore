@@ -55,3 +55,7 @@ desktop.ini
 
 # Ultralytics YOLO model cache
 runs/
+
+# Repomix outputs & XML dumps
+repomix-output.*
+*.xml

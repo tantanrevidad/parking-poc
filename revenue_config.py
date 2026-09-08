@@ -198,22 +198,6 @@ INDUSTRY_BENCHMARKS: Dict[str, Any] = {
     },
 }
 
-# ---------------------------------------------------------------------------
-# Tier D & E: Parking Friction & Saturation Model Parameters
-# ---------------------------------------------------------------------------
-FRICTION_MODEL_PARAMS: Dict[str, Any] = {
-    "saturation_threshold": {
-        "value": 0.85,
-        "source": "ScienceDirect: 'Do Parking Fees Affect Retail Sales? Evidence from Starbucks' (2014); consistent with Donald Shoup's 85% occupancy target",
-        "provenance": "Tier D",
-    },
-    "friction_coefficient": {
-        "value": 0.15,
-        "default_range": [0.05, 0.30],
-        "note": "Modeled sensitivity parameter reflecting dwell suppression from parking fees in unsaturated decks. Adjustable via UI slider.",
-        "provenance": "Tier E",
-    },
-}
 
 # ---------------------------------------------------------------------------
 # Tier D: Retail Customer Retention & Loyalty Benchmarks

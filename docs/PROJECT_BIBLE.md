@@ -56,7 +56,7 @@ This Proof of Concept (POC) demonstrates a unified, 7-layer architecture combini
    [ ML & Prediction ]                  [ Sensing & Vision ]                 [ Business & Finance ]
     • scikit-learn (HistGradBoost)       • Ultralytics YOLOv8n                • revenue_engine.py
     • predictor.py                       • OpenCV (cv2) & CLAHE               • revenue_config.py
-    • real_data_pipeline.py              • Shapely (Polygon IoA)              • leakage_detector.py
+    • real_data_pipeline.py              • Shapely (Polygon IoA)              • loyalty_engine.py
     • ph_holidays.py                     • RapidOCR ONNX / Tesseract          • vacating_simulator.py
     • NumPy / Pandas                     • parking_detector.py                • state_machine.py
             │                                    │                                    │
@@ -535,7 +535,7 @@ This matrix outlines how environmental shocks, sensor noise, and configuration s
 | **Unannounced Township Mega-Event / Concert** | Flash crowd arrival for a concert or product launch without registry entry. | Tab 2 (Forecast), `predictor.py` | Live occupancy surges beyond static diurnal expectations. | **Dynamic Telemetry Fusion:** Ingests live Google Places foot-traffic index and Open-Meteo telemetry every hour to dynamically pull up forecasted values. |
 | **CCTV Camera Angle Perspective Distortion** | Surveillance camera mounted at an oblique deck angle ($>40^\circ$). | Tab 6 (Space CV), `parking_detector.py` | Non-uniform perspective distortion causes rectangular bounding boxes to misalign with bay boundaries. | **Dual Native ROI Polygons:** Hand-calibrated perspective trapezoids in `slots_config.json` combined with Centroid Containment and Tire Ground-Contact logic. |
 | **Temporary Occlusion by Moving Pedestrian / Cart** | Mall shopper or cleaning trolley walking through slot line of sight. | Tab 6 (Space CV), `parking_detector.py` | Momentary drop in IoA occupancy ratio below $\tau_{\text{ioa}}$. | **Temporal Sliding-Window Debouncer:** Requires a $60\%$ majority consensus over a 5-frame sliding window ($N = 5$) before modifying the persisted slot state. |
-| **Prolonged Unpaid Vehicle Stall Monopolization** | Commercial commuter parking in retail mall stall for 8+ hours. | Tab 7 (Revenue), `leakage_detector.py` | Chokes turnover, deprives retail merchants of customer parking, incurs revenue leakage. | **Tiered Progressive Rates & Overstay Alerts:** Uptown Mall ₱100/hr steep rate tier discourages commuter monopolization; automated overstay alerts flag vehicle for enforcement. |
+| **Prolonged Unpaid Vehicle Stall Monopolization** | Commercial commuter parking in retail mall stall for 8+ hours. | Tab 7 (Revenue), `revenue_engine.py` | Chokes turnover, deprives retail merchants of customer parking, incurs revenue leakage. | **Tiered Progressive Rates:** Uptown Mall ₱100/hr steep rate tier discourages commuter monopolization; automated rate progression penalizes overstays. |
 
 ---
 

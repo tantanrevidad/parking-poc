@@ -150,7 +150,6 @@ parking-poc/
 ├── cv_demo.py                    # Computer Vision & ALPR evaluation pipeline
 ├── fetch_real_dataset.py         # OpenALPR benchmark dataset downloader
 ├── generate_data.py              # Synthetic database & calibrated vehicle pool generator
-├── leakage_detector.py           # Overstay vehicle detection and revenue recovery engine
 ├── loyalty_engine.py             # Repeat-visitor cohort recognition & loyalty spend engine (RA 10173 compliant)
 ├── matcher.py                    # Confidence-weighted fuzzy matching algorithm
 ├── parking_detector.py           # 5-phase space occupancy & vehicle detection engine
@@ -159,7 +158,7 @@ parking-poc/
 ├── real_data_pipeline.py         # Real-world Google foot-traffic, weather, and events connector
 ├── requirements.txt              # Project dependencies
 ├── revenue_config.py             # Megaworld township rate tariffs, benchmarks, & 5 provenance tiers
-├── revenue_engine.py             # RPBH, parking friction & saturation model, heatmaps, & dwell elasticity
+├── revenue_engine.py             # RPBH, revenue operations, heatmaps, & dwell-spend elasticity
 ├── simulate.py                   # Real-time state simulation helper
 ├── slots_config.json             # Calibrated slot ROI polygon configurations
 ├── state_machine.py              # Parking slot lifecycle state machine
