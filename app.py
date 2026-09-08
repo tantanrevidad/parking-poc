@@ -28,7 +28,6 @@ import parking_detector as pd_engine
 import vacating_simulator as vs
 import revenue_config as rc
 import revenue_engine as rev_engine
-import leakage_detector as ld
 import loyalty_engine
 import loyalty_engine as loyalty
 import cv2
@@ -3671,61 +3670,7 @@ with tab6:
 
         st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
 
-        # ── SECTION D: Revenue Leakage & Overstay Recovery ──
-        st.markdown(
-            """
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h5 style="margin:0; color:var(--text-primary);">Section D: Revenue Leakage & Overstay Recovery</h5>
-                <span class="provenance-pill pill-tier-d">INDUSTRY BENCHMARK: 5–15% MANUAL FACILITY LEAKAGE</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        @st.fragment
-        def render_leakage_fragment():
-            l_ctrl1, l_ctrl2, l_ctrl3 = st.columns([2, 2, 2])
-            with l_ctrl1:
-                threshold_h = st.slider("Overstay Threshold (Hours)", min_value=1.5, max_value=6.0, value=3.0, step=0.5, key="leak_thresh_slider")
-
-            leakage_res = ld.compute_overstay_leakage(threshold_hours=threshold_h)
-            with l_ctrl2:
-                st.markdown(
-                    f"""
-                    <div class="rev-kpi-card" style="border-left:3px solid #EF4444; padding:10px 14px; margin:0;">
-                        <div class="rev-kpi-label">Unpaid Overstay Fees Now</div>
-                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#EF4444;">₱{leakage_res['total_unpaid_now']:,.2f}</div>
-                        <div class="rev-kpi-sub">{leakage_res['num_overstayers']} Vehicles Flagged (> {threshold_h}h)</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            with l_ctrl3:
-                st.markdown(
-                    f"""
-                    <div class="rev-kpi-card" style="border-left:3px solid #10B981; padding:10px 14px; margin:0;">
-                        <div class="rev-kpi-label">Est. Monthly Recovery</div>
-                        <div class="rev-kpi-value" style="font-size:1.4rem; color:#10B981;">₱{leakage_res['projected_monthly_recovery']:,.2f}</div>
-                        <div class="rev-kpi-sub">Via Automated ALPR Enforcement</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-            if leakage_res["vehicles"]:
-                leak_df = pd.DataFrame(leakage_res["vehicles"])
-                leak_df_display = leak_df[["slot_code", "plate", "site_name", "zone_label", "entry_time", "dwell_hours", "uncollected_fee", "status"]].copy()
-                leak_df_display.columns = ["Bay Code", "License Plate", "Township", "Zone", "Entry Time", "Dwell (Hours)", "Uncollected Fee (₱)", "Enforcement Status"]
-                render_html_table(leak_df_display)
-            else:
-                st.info(f"No vehicles currently exceeding the {threshold_h}-hour overstay threshold.")
-
-        render_leakage_fragment()
-
-        st.markdown("<hr style='margin:28px 0; border:none; border-top:1px solid var(--border-color);'>", unsafe_allow_html=True)
-
-        # ── SECTION E: Methodology Transparency Drawer ──
+        # ── SECTION D: Methodology Transparency Drawer ──
         with st.expander("Methodology & Verifiable Data Provenance", expanded=False):
             st.markdown(
                 """
@@ -3739,8 +3684,8 @@ with tab6:
                     <p><strong>3. Philippine Retail Benchmarks (Tier C — PH Industry):</strong><br>
                     Average mall visitor spend of ₱1,000–₱3,000 is based on Colliers International Philippine Retail Market reports. Megaworld daily foot-traffic of 297,000 and mall leasing revenue of ₱6.9B are sourced from Megaworld Corporation's FY2025 Financial Statement Disclosures. Dwell-spend elasticity factor of 1.3 is sourced from Path Intelligence Retail Analytics & the International Council of Shopping Centers (ICSC).</p>
 
-                    <p><strong>4. International Smart Parking Research (Tier D — Industry Pilots):</strong><br>
-                    Revenue leakage baseline of 5–15% is derived from Vert.ai and PreciseParkLink parking revenue audit white papers. Repeat customer spend premium (+67%) is aggregated from retail loyalty and retention analytics benchmarks.</p>
+                    <p><strong>4. Customer Retention Research (Tier D — Retail Analytics):</strong><br>
+                    Customer retention and loyalty benchmarks (+67% repeat customer spend premium) are aggregated from retail loyalty and retention analytics research (Bain & Company).</p>
 
                     <p><strong>5. Modeled Customer Loyalty Assumptions (Tier E — Modeled):</strong><br>
                     Loyalty spend projections model a +67% repeat customer spend premium aggregated from retail retention analytics benchmarks. Modeled parameters are evaluated against empirical visitation cohorts.</p>

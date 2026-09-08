@@ -771,7 +771,7 @@ To eliminate invented metrics and ensure auditable integrity for corporate prese
 | **Tier A** | `ACTUAL RATE` | Real Megaworld Parking Tariffs | Official Megaworld Lifestyle Mall parking signage and MoneyMax.ph advisories (2024–2025). |
 | **Tier B** | `DERIVED` | Deterministic Database Computation | Mathematically calculated from SQLite tables (`occupancy_history`, `ticketing_records`, `current_state`) using physical rate cards and salted hashes. |
 | **Tier C** | `PH BENCHMARK` | Philippine Retail Industry Research | Colliers International Philippine Retail Reports, Megaworld FY2025 Financial Statement Disclosures, and Path Intelligence / ICSC dwell elasticity studies. |
-| **Tier D** | `INDUSTRY` | Peer-Reviewed International Research | Bain & Company customer retention research and Vert.ai leakage audit white papers. |
+| **Tier D** | `INDUSTRY` | Peer-Reviewed International Research | Bain & Company customer retention and retail loyalty benchmarks (+67% repeat spend premium). |
 | **Tier E** | `MODELED` | Explicit Modeled Diagnostic Assumptions | Modeled loyalty spend assumptions (+67% repeat customer spend premium) evaluating cohort retention economic value. |
 
 ### 14.3 Official Township Rate Card Tariffs (Tier A)
@@ -814,10 +814,5 @@ Based on Path Intelligence retail analytics and ICSC dwell research ($E_{\text{d
 $$\Delta \text{Dwell} = \frac{T_{\text{dwell}} - T_{\text{base}}}{T_{\text{base}}}$$
 $$\text{Projected Spend} = S_{\text{base}} \times \left(1.0 + 1.3 \times \Delta \text{Dwell}\right)$$
 Connecting parking ease directly to merchant sales growth across Megaworld Lifestyle Malls.
-
-#### 14.4.4 Revenue Leakage & Overstay Detection
-Flags vehicles with status `occupied_unpaid` exceeding duration $T_{\text{threshold}}$:
-$$\text{Uncollected Fee} = \text{compute\_ticket\_revenue}(\text{entry\_time}, \text{now}, \text{site}, \text{zone\_type})$$
-Projects annualized recovery potential when integrated with automated ALPR barrier gates.
 
 
