@@ -660,7 +660,7 @@ The current system knows *what is happening* (occupancy state) and *what will ha
 #### 13.1.2 Occupancy Anomaly Scoring
 - Compares **real-time observed occupancy** against the **ML-predicted occupancy** for the current hour (from `predictor.py`).
 - Computes a z-score deviation: if actual occupancy exceeds the prediction by $>2\sigma$, the system flags an **occupancy anomaly**.
-- Example alert: *"Zone Mall Grand Wing is at 95% occupancy but the model predicted 72% for this hour. Possible unreported event or upstream traffic diversion."*
+- Example alert: *"Zone Uptown Mall Retail Deck is at 95% occupancy but the model predicted 72% for this hour. Possible unreported event or upstream traffic diversion."*
 - This is a self-referential feedback loop — the system uses its own trained predictions as the **"expected normal" baseline**, which is an approach typically seen only in production MLOps environments.
 - **Data basis:** Uses the trained `HistGradientBoostingRegressor` from `predictor.py` (already operational) compared against live `occupancy_history` observations.
 
@@ -690,8 +690,8 @@ The current system knows *what is happening* (occupancy state) and *what will ha
 
 **Problem Statement:**
 The current ML forecaster answers **"what will happen?"** — but township operations managers frequently need to answer **"what would happen if…?"** Questions like:
-- *"What if we close Basement 1 for 48 hours of resurfacing — where do displaced vehicles go?"*
-- *"What if we add 30 bays to Mall Grand Wing — does it alleviate the Saturday evening bottleneck?"*
+- *"What if we close Basement 1 & 2 for 48 hours of resurfacing — where do displaced vehicles go?"*
+- *"What if we add 30 bays to Uptown Mall Retail Deck — does it alleviate the Saturday evening bottleneck?"*
 - *"What if we host a mega-sale event during a holiday weekend — do we exceed capacity?"*
 
 The existing system cannot answer these questions because the ML model is trained on fixed historical conditions. A scenario simulator allows operators to **modify the input parameters** and observe the predicted impact.
@@ -708,7 +708,7 @@ The existing system cannot answer these questions because the ML model is traine
 #### 13.2.2 Split-View Forecast Comparison
 - Presents the **baseline ML prediction** side-by-side with the **scenario-modified prediction** on the same Plotly chart.
 - Highlights the **delta zone** — the gap between "what would happen normally" and "what happens under this scenario."
-- Annotates critical insights: *"Closing Basement 1 on a Saturday would displace ~38 vehicles to Mall Grand Wing, pushing it from 82% to 97% saturation by 4:00 PM."*
+- Annotates critical insights: *"Closing Basement 1 & 2 on a Saturday would displace ~38 vehicles to adjacent decks, pushing them from 82% to 97% saturation by 4:00 PM."*
 - **Data basis:** The existing `predictor.py` model is invoked twice — once with original features, once with modified features (adjusted `capacity`, `zone_id`, `is_event` flags). The model's learned relationships between these features naturally produce different predictions.
 
 #### 13.2.3 Overflow Cascade Model
@@ -716,12 +716,12 @@ The existing system cannot answer these questions because the ML model is traine
   - **Zone proximity:** Vehicles prefer the nearest available alternative zone within the same township.
   - **Zone type preference:** Mall visitors prefer other mall zones; office workers prefer other office zones.
   - **Capacity headroom:** Vehicles flow to the zone with the most available space.
-- This overflow logic produces actionable insights: *"If Mall Grand Wing saturates at 6:30 PM, the overflow model predicts 60% of displaced vehicles will attempt Piazza & Canal Level (Venice Grand Canal Mall), 30% will divert to Mall Main Plaza (Eastwood City), and 10% will leave the township entirely."*
+- This overflow logic produces actionable insights: *"If Uptown Mall Retail Deck saturates at 6:30 PM, the overflow model predicts 60% of displaced vehicles will attempt Venice Grand Canal Mall Deck, 30% will divert to Eastwood Mall Retail Deck, and 10% will leave the township entirely."*
 
 #### 13.2.4 Maintenance Window Optimizer
 - Answers the question: **"When is the safest time to close Zone X for maintenance?"**
 - Scans the next 14–28 days of ML predictions to find the time window where the target zone's predicted occupancy is consistently lowest.
-- Output: *"The optimal 48-hour window to close Office Tower Alpha for resurfacing is Tuesday 10 PM through Thursday 10 PM, when predicted occupancy averages 12%."*
+- Output: *"The optimal 48-hour window to close Alliance Global & Corporate Towers for resurfacing is Tuesday 10 PM through Thursday 10 PM, when predicted occupancy averages 12%."*
 - **Data basis:** Iterates the existing `predictor.py` forecast over future time slots, selecting the window that minimizes displaced vehicles.
 
 #### 13.2.5 Technical Architecture (Presentation Talking Points)

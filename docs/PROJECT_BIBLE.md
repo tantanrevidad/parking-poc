@@ -127,7 +127,11 @@ Tab 1 serves as the primary tactical operations command deck for parking operati
 - **Scheidt & Bachmann / Amano McGann Enterprise Deck Systems:** Standardized commercial parking deck layouts that segregate customer retail short-stay parking from commercial office reserved spaces to prevent long-dwell office parkers from choking retail turnover.
 
 ### 4.4 Data Provenance
-- **Deck Topology & Capacity:** Tier A / Derived. Formulated to match the multi-level deck structures of Megaworld Townships (48 Mall bays, 24 Office bays, 16 Residential bays per modeled site).
+- **Deck Topology & Capacity:** Tier A / Derived. Formulated to match the authentic multi-level deck structures of Megaworld Townships:
+  - *Uptown Bonifacio:* 6 underground basement levels (Basement 1 & 2 for Mall Retail, Basement 3 & 4 for Corporate Towers, Basement 5 & 6 for Residential Reserved).
+  - *Eastwood City:* Basement 1 & 2 for Mall Shoppers, Citywalk Multi-Level (Levels 2–4) for Corporate Offices, and Podium Levels 3 & 4 for Residential Towers.
+  - *McKinley Hill:* Venice Grand Canal Mall Basements 1 & 2, Commerce Plaza & Science Hub Basements 2 & 3, and Residential Podiums 2 & 3.
+  - Totaling 48 Mall bays, 24 Office bays, and 16 Residential bays per modeled site.
 - **Slot Status & Telemetry:** Tier B (Database Generated). Stored in `current_state` table in `data/parking.db`.
 - **Clock Synchronization:** Real-time client-side Philippine Standard Time (PST, UTC+8) executed via browser DOM JavaScript with zero server polling overhead.
 
@@ -189,8 +193,8 @@ Tab 2 provides predictive foresight for future parking availability. It allows t
 - **Historical Occupancy:** Tier B (Database Derived). 28 days of continuous 15-minute resolution occupancy readings ($2,688$ intervals per zone $\times 9$ zones $= 24,192$ records) in `occupancy_history`.
 - **Web-Scraped & Registered Mall Sales, Events & Concerts:** Tier C / Empirical External Ingestion. Sourced from Megaworld Lifestyle Malls official events and promotional registers (`megaworld-lifestylemalls.com`), mall social feeds, and concert listings across target townships:
   - *Venice Grand Canal Mall:* "Venice Gondola Fest & Grand Weekend Sale" (3-Day holiday sale + acoustic live sets; Traffic Impact Factor: $1.45\times$).
-  - *Uptown Bonifacio (Mall Grand Wing):* "Uptown BGC Payday Midnight Madness" (Late-night shopping, DJ performances at The Island, cinema premiere screenings; Traffic Impact Factor: $1.35\times$).
-  - *Eastwood City (Mall Main Plaza):* "Eastwood Citywalk Food & Beer Festival" (Open-air plaza dining festival, live indie band concerts; Traffic Impact Factor: $1.30\times$).
+  - *Uptown Bonifacio (Uptown Mall Retail Deck):* "Uptown BGC Payday Midnight Madness" (Late-night shopping, DJ performances at The Island, cinema premiere screenings; Traffic Impact Factor: $1.35\times$).
+  - *Eastwood City (Eastwood Mall Retail Deck):* "Eastwood Citywalk Food & Beer Festival" (Open-air plaza dining festival, live indie band concerts; Traffic Impact Factor: $1.30\times$).
 - **Weather Telemetry:** Tier B/C (Live API). Sourced in real time from Open-Meteo API using Metro Manila township coordinates:
   - Uptown Bonifacio: $14.5562^\circ\text{ N}, 121.0543^\circ\text{ E}$
   - Eastwood City: $14.6094^\circ\text{ N}, 121.0805^\circ\text{ E}$

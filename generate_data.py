@@ -40,18 +40,18 @@ SITES = [
 ]
 
 ZONES = [
-    # Uptown Bonifacio (site_idx=0) — Ordered sequentially: Mall -> Office -> Residential
-    {"site_idx": 0, "level": "Ground & Level 1",  "label": "Mall Grand Wing",           "zone_type": "mall",        "capacity": 48},
-    {"site_idx": 0, "level": "Basement 1",         "label": "Office Tower Alpha",        "zone_type": "office",      "capacity": 24},
-    {"site_idx": 0, "level": "Podium 2",           "label": "Residential Deck",          "zone_type": "residential", "capacity": 16},
-    # Eastwood City (site_idx=1) — Ordered sequentially: Mall -> Office -> Residential
-    {"site_idx": 1, "level": "Ground & Level 1",  "label": "Mall Main Plaza",           "zone_type": "mall",        "capacity": 48},
-    {"site_idx": 1, "level": "Basement 2",         "label": "Office Annex Deck",         "zone_type": "office",      "capacity": 24},
-    {"site_idx": 1, "level": "Podium 1",           "label": "Residential Tower",         "zone_type": "residential", "capacity": 16},
-    # McKinley Hill (site_idx=2) — Ordered sequentially: Mall -> Office -> Residential
-    {"site_idx": 2, "level": "Piazza & Canal Level", "label": "Venice Grand Canal Mall",   "zone_type": "mall",        "capacity": 48},
-    {"site_idx": 2, "level": "Basement 1",         "label": "Commerce & Industry Plaza", "zone_type": "office",      "capacity": 24},
-    {"site_idx": 2, "level": "Podium 3",           "label": "Viceroy & Morgan Deck",     "zone_type": "residential", "capacity": 16},
+    # Uptown Bonifacio (site_idx=0) — 6 Underground Basement Levels (B1 to B6)
+    {"site_idx": 0, "level": "Basement 1 & 2 (B1-B2)",            "label": "Uptown Mall Retail Deck",             "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 0, "level": "Basement 3 & 4 (B3-B4)",            "label": "Alliance Global & Corporate Towers",  "zone_type": "office",      "capacity": 24},
+    {"site_idx": 0, "level": "Basement 5 & 6 (B5-B6)",            "label": "One Uptown & Parksuites Residences",   "zone_type": "residential", "capacity": 16},
+    # Eastwood City (site_idx=1) — Mall Basements (B1-B2), Citywalk Multi-Level, and Tower Podiums
+    {"site_idx": 1, "level": "Basement 1 & 2 (B1-B2)",            "label": "Eastwood Mall Retail Deck",           "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 1, "level": "Citywalk Multi-Level (Levels 2-4)", "label": "Citywalk & CyberPark Office Deck",   "zone_type": "office",      "capacity": 24},
+    {"site_idx": 1, "level": "Podium Levels 3 & 4 (P3-P4)",       "label": "Grand Eastwood Palazzo & Residences", "zone_type": "residential", "capacity": 16},
+    # McKinley Hill (site_idx=2) — Venice Mall Basements (B1-B3) and Residential Podiums
+    {"site_idx": 2, "level": "Basement 1 & 2 (B1-B2)",            "label": "Venice Grand Canal Mall Deck",        "zone_type": "mall",        "capacity": 48},
+    {"site_idx": 2, "level": "Basement 2 & 3 (B2-B3)",            "label": "Commerce Plaza & Science Hub Deck",   "zone_type": "office",      "capacity": 24},
+    {"site_idx": 2, "level": "Podium Levels 2 & 3 (P2-P3)",       "label": "Venice Luxury Residences & Viceroy",   "zone_type": "residential", "capacity": 16},
 ]
 
 HISTORY_DAYS = 28          # weeks of synthetic historical data

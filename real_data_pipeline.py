@@ -25,20 +25,32 @@ TOWNSHIP_COORDINATES = {
 # Sourced from Google Maps Places mobile foot-traffic telemetry:
 # Monday through Sunday (0=Mon, 6=Sun) x 24 Hours
 GOOGLE_POPULAR_TIMES_DATA = {
-    "Venice Grand Canal Mall": {
-        # Monday - Thursday (Weekday leisure & dining pattern)
+    "Venice Grand Canal Mall Deck": {
         "weekday": [0, 0, 0, 0, 0, 0, 0, 5, 12, 25, 45, 60, 55, 50, 58, 65, 75, 88, 92, 85, 60, 35, 15, 0],
-        # Friday (Payday & night dining peak)
         "friday":  [0, 0, 0, 0, 0, 0, 0, 5, 15, 30, 50, 68, 60, 58, 65, 78, 90, 98, 100, 95, 80, 55, 25, 5],
-        # Saturday - Sunday (Gondola tourism, family dining, cinema rushes)
         "weekend": [0, 0, 0, 0, 0, 0, 0, 8, 20, 45, 70, 88, 85, 82, 89, 95, 100, 98, 96, 90, 75, 48, 20, 0],
     },
-    "Mall Grand Wing": {  # Uptown Mall
+    "Venice Grand Canal Mall": {
+        "weekday": [0, 0, 0, 0, 0, 0, 0, 5, 12, 25, 45, 60, 55, 50, 58, 65, 75, 88, 92, 85, 60, 35, 15, 0],
+        "friday":  [0, 0, 0, 0, 0, 0, 0, 5, 15, 30, 50, 68, 60, 58, 65, 78, 90, 98, 100, 95, 80, 55, 25, 5],
+        "weekend": [0, 0, 0, 0, 0, 0, 0, 8, 20, 45, 70, 88, 85, 82, 89, 95, 100, 98, 96, 90, 75, 48, 20, 0],
+    },
+    "Uptown Mall Retail Deck": {
         "weekday": [0, 0, 0, 0, 0, 0, 0, 8, 18, 32, 52, 68, 62, 58, 64, 72, 84, 94, 95, 88, 68, 42, 18, 0],
         "friday":  [0, 0, 0, 0, 0, 0, 0, 8, 20, 38, 58, 75, 70, 68, 75, 86, 96, 100, 99, 94, 85, 60, 28, 5],
         "weekend": [0, 0, 0, 0, 0, 0, 0, 10, 25, 50, 75, 92, 90, 88, 94, 98, 100, 99, 95, 88, 72, 45, 20, 0],
     },
-    "Mall Main Plaza": {  # Eastwood Mall
+    "Mall Grand Wing": {  # Uptown Mall legacy key
+        "weekday": [0, 0, 0, 0, 0, 0, 0, 8, 18, 32, 52, 68, 62, 58, 64, 72, 84, 94, 95, 88, 68, 42, 18, 0],
+        "friday":  [0, 0, 0, 0, 0, 0, 0, 8, 20, 38, 58, 75, 70, 68, 75, 86, 96, 100, 99, 94, 85, 60, 28, 5],
+        "weekend": [0, 0, 0, 0, 0, 0, 0, 10, 25, 50, 75, 92, 90, 88, 94, 98, 100, 99, 95, 88, 72, 45, 20, 0],
+    },
+    "Eastwood Mall Retail Deck": {
+        "weekday": [0, 0, 0, 0, 0, 0, 0, 6, 15, 28, 48, 65, 58, 54, 60, 70, 82, 90, 91, 84, 62, 38, 15, 0],
+        "friday":  [0, 0, 0, 0, 0, 0, 0, 6, 18, 35, 55, 72, 65, 62, 70, 82, 94, 98, 97, 90, 78, 52, 22, 5],
+        "weekend": [0, 0, 0, 0, 0, 0, 0, 8, 22, 46, 72, 89, 86, 84, 90, 96, 98, 97, 92, 85, 68, 40, 18, 0],
+    },
+    "Mall Main Plaza": {  # Eastwood Mall legacy key
         "weekday": [0, 0, 0, 0, 0, 0, 0, 6, 15, 28, 48, 65, 58, 54, 60, 70, 82, 90, 91, 84, 62, 38, 15, 0],
         "friday":  [0, 0, 0, 0, 0, 0, 0, 6, 18, 35, 55, 72, 65, 62, 70, 82, 94, 98, 97, 90, 78, 52, 22, 5],
         "weekend": [0, 0, 0, 0, 0, 0, 0, 8, 22, 46, 72, 89, 86, 84, 90, 96, 98, 97, 92, 85, 68, 40, 18, 0],
@@ -49,7 +61,7 @@ GOOGLE_POPULAR_TIMES_DATA = {
 MEGAWORLD_EVENTS_REGISTRY = [
     {
         "site": "McKinley Hill",
-        "mall": "Venice Grand Canal Mall",
+        "mall": "Venice Grand Canal Mall Deck",
         "title": "Venice Gondola Fest & Grand Weekend Sale",
         "start_date": "2026-08-28",
         "end_date": "2026-08-31",
@@ -59,7 +71,7 @@ MEGAWORLD_EVENTS_REGISTRY = [
     },
     {
         "site": "Uptown Bonifacio",
-        "mall": "Mall Grand Wing",
+        "mall": "Uptown Mall Retail Deck",
         "title": "Uptown BGC Payday Midnight Madness",
         "start_date": "2026-08-29",
         "end_date": "2026-08-30",
@@ -69,7 +81,7 @@ MEGAWORLD_EVENTS_REGISTRY = [
     },
     {
         "site": "Eastwood City",
-        "mall": "Mall Main Plaza",
+        "mall": "Eastwood Mall Retail Deck",
         "title": "Eastwood Citywalk Food & Beer Festival",
         "start_date": "2026-08-28",
         "end_date": "2026-08-30",
@@ -148,8 +160,16 @@ def get_google_busyness_index(mall_label: str, target_dt: datetime) -> int:
 
     mall_profile = GOOGLE_POPULAR_TIMES_DATA.get(mall_label)
     if not mall_profile:
+        if "Uptown" in mall_label:
+            mall_profile = GOOGLE_POPULAR_TIMES_DATA.get("Uptown Mall Retail Deck")
+        elif "Eastwood" in mall_label:
+            mall_profile = GOOGLE_POPULAR_TIMES_DATA.get("Eastwood Mall Retail Deck")
+        elif "Venice" in mall_label or "McKinley" in mall_label:
+            mall_profile = GOOGLE_POPULAR_TIMES_DATA.get("Venice Grand Canal Mall Deck")
+
+    if not mall_profile:
         # Default commercial fallback profile
-        mall_profile = GOOGLE_POPULAR_TIMES_DATA["Venice Grand Canal Mall"]
+        mall_profile = GOOGLE_POPULAR_TIMES_DATA["Venice Grand Canal Mall Deck"]
 
     if dow == 4:  # Friday
         curve = mall_profile.get("friday", mall_profile["weekday"])
